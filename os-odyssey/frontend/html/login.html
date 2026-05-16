@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey - Log In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body class="auth-page">
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span class="sun">☀</span>
+        <span class="moon">☾</span>
+      </button>
+    </div>
+  </nav>
+
+  <section class="auth-section">
+    <div class="auth-card">
+      <a href="index.html" class="auth-back" aria-label="Back to home">← Back</a>
+      <div class="auth-penguin">
+        <img src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin" />
+      </div>
+      <p class="auth-headline">Welcome back to your OS Odyssey :)</p>
+
+      <button class="btn btn-google">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" alt="Google" />
+        Continue with Google
+      </button>
+
+      <div class="auth-divider"><span>OR</span></div>
+
+      <form class="auth-form">
+        <input type="email" class="auth-input" placeholder="Email" autocomplete="email" />
+        <input type="password" class="auth-input" placeholder="Password" autocomplete="current-password" />
+        <button class="btn btn-cta auth-submit" data-auth-mode="login" data-loading-text="Logging in..." data-redirect="dashboard.html" type="submit">Log in</button>
+        <p class="auth-login">
+          Need an account? <a href="signup.html">Sign up</a>
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <script src="../js/main.js"></script>
+</body>
+
+</html>

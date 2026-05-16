@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey - Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body class="app-page dashboard-page">
+  <nav class="app-nav">
+    <a href="index.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="app-nav-links">
+      <a href="index.html">Home</a>
+      <a href="#modules">Learn</a>
+      <a href="#practice">Practice</a>
+      <a href="character-select.html">Change Avatar</a>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="dashboard-shell">
+    <section class="welcome-row">
+      <div class="mentor-avatar computer-avatar" aria-hidden="true">
+        <span class="screen-face"></span>
+      </div>
+      <div class="speech-bubble">
+        Hii kernel cadet. Your process table is ready, and today we are booting into Operating Systems.
+      </div>
+    </section>
+
+    <section class="dashboard-layout">
+      <div class="dashboard-main">
+        <p class="section-kicker">JUMP BACK IN</p>
+        <article class="course-hero">
+          <div class="course-progress">
+            <span style="width: 18%"></span>
+            <strong>18%</strong>
+          </div>
+          <p>COURSE</p>
+          <h1>Operating Systems</h1>
+          <span>Next lesson: Process Scheduling</span>
+          <div class="course-actions">
+            <a href="#modules" class="btn btn-cta">Continue Learning</a>
+            <a href="#modules" class="course-link">View course</a>
+          </div>
+        </article>
+
+        <section class="explore-section" id="practice">
+          <h2>Explore more</h2>
+          <div class="explore-grid">
+            <article class="explore-card">
+              <span class="card-icon">CPU</span>
+              <div>
+                <h3>Scheduling Challenges</h3>
+                <p>Practice FCFS, SJF, priority, and round-robin scheduling.</p>
+              </div>
+            </article>
+            <article class="explore-card">
+              <span class="card-icon">RAM</span>
+              <div>
+                <h3>Memory Labs</h3>
+                <p>Trace paging, fragmentation, virtual memory, and page faults.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="module-roadmap" id="modules">
+          <h2>OS roadmap</h2>
+          <div class="roadmap-card">
+            <h3>Module 1: Operating System Basics</h3>
+            <ol>
+              <li class="complete">1.1 What an OS does</li>
+              <li>1.2 Kernel vs user mode</li>
+              <li>1.3 System calls</li>
+            </ol>
+            <h3>Module 2: Process Management</h3>
+            <ol>
+              <li>2.1 Process states</li>
+              <li>2.2 Scheduling algorithms</li>
+              <li>2.3 Context switching</li>
+            </ol>
+          </div>
+        </section>
+      </div>
+
+      <aside class="dashboard-side">
+        <section class="profile-card">
+          <div class="profile-top">
+            <span class="profile-avatar" id="profileAvatar">
+              <img src="../../assets/penguin-flower-removebg-preview.png" alt="Selected avatar" />
+            </span>
+            <div>
+              <h2 id="profileName">Kernel Penguin</h2>
+              <p id="profileLevel">Level 1</p>
+              <a href="character-select.html">Edit</a>
+            </div>
+          </div>
+          <div class="profile-stats">
+            <span><img src="../../assets/b395bfdc79935252b271cfa35cb47df9-removebg-preview.png" alt="" /> <strong id="profileXp">20</strong><br>Total XP</span>
+            <span><img src="../../assets/7be792a4792ca368f8b31fb65619a557-removebg-preview.png" alt="" /> <strong id="profileRank">Bronze</strong><br>Rank</span>
+            <span><img src="../../assets/7957f4cc59fbb19cdf57f1ea600429e6-removebg-preview.png" alt="" /> <strong id="profileBadges">0</strong><br>Badges</span>
+            <span><img src="../../assets/fa784620ccaa028479b214b4718041af-removebg-preview.png" alt="" /> <strong id="profileStreak">1</strong><br>Day streak</span>
+          </div>
+          <a href="character-select.html" class="profile-button">View Profile</a>
+        </section>
+
+        <section class="club-card">
+          <button type="button" aria-label="Dismiss">x</button>
+          <p class="section-kicker">SYSTEM LAB</p>
+          <h2>Unlock kernel mode</h2>
+          <p>Finish lessons to open simulations for interrupts, filesystems, and deadlock recovery.</p>
+          <a href="#modules" class="profile-button">Learn More</a>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <script src="../js/main.js"></script>
+</body>
+
+</html>

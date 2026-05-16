@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey - Choose Your Character</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body class="app-page character-page">
+  <nav class="app-nav">
+    <a href="index.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="app-nav-links">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="character-shell">
+    <section class="speech-row">
+      <div class="mentor-avatar computer-avatar" aria-hidden="true">
+        <span class="screen-face"></span>
+      </div>
+      <div class="speech-bubble">
+        New account detected. Pick the operator who will guide your operating system missions.
+      </div>
+    </section>
+
+    <section class="character-panel">
+      <p class="section-kicker">PROFILE SETUP</p>
+      <h1>Choose your OS avatar</h1>
+      <p class="character-copy">Your character appears on your dashboard, XP panel, and module progress cards.</p>
+
+      <div class="character-grid" role="list">
+        <button class="character-card selected" type="button" data-character="Kernel Penguin" data-avatar="../../assets/penguin-flower-removebg-preview.png">
+          <span class="character-art image-art">
+            <img src="../../assets/penguin-flower-removebg-preview.png" alt="Kernel Penguin" />
+          </span>
+          <span class="character-name">Kernel Penguin</span>
+          <span class="character-role">Boots systems and keeps the shell calm.</span>
+        </button>
+
+        <button class="character-card" type="button" data-character="Scheduler Scout" data-avatar="../../assets/cf4398bf4806df55e6ca1d6753bad0f7.gif">
+          <span class="character-art image-art">
+            <img src="../../assets/cf4398bf4806df55e6ca1d6753bad0f7.gif" alt="Scheduler Scout" />
+          </span>
+          <span class="character-name">Scheduler Scout</span>
+          <span class="character-role">Tracks processes, queues, and CPU turns.</span>
+        </button>
+
+        <button class="character-card" type="button" data-character="Memory Monitor" data-avatar="computer">
+          <span class="character-art computer-avatar large" aria-hidden="true">
+            <span class="screen-face"></span>
+          </span>
+          <span class="character-name">Memory Monitor</span>
+          <span class="character-role">Watches RAM, pages, and stack space.</span>
+        </button>
+      </div>
+
+      <a href="dashboard.html" class="btn btn-cta character-continue" id="characterContinue">Enter Dashboard</a>
+    </section>
+  </main>
+
+  <script src="../js/main.js"></script>
+</body>
+
+</html>

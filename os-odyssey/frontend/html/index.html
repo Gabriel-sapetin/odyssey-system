@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey — Begin Your Journey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Fredoka+One&family=Luckiest+Guy&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span class="sun">☀️</span>
+        <span class="moon">🌙</span>
+      </button>
+      <a href="signup.html" class="btn btn-primary" data-auth-action="guest">Get Started</a>
+      <a href="dashboard.html" class="nav-profile" data-auth-action="user" hidden>
+        <span class="nav-profile-avatar" data-user-avatar></span>
+        <span class="nav-profile-text">
+          <strong data-user-name>Player</strong>
+          <small>Dashboard</small>
+        </span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ===== HERO SECTION =====
+    ASSETS USED:
+    - Light mode bg: ../../assets/hero-bg-day.jpg
+      (pixel art daytime snowy mountains + penguin walking, full scene)
+    - Dark mode bg: ../../assets/hero-bg-night.jpg
+      (pixel art nighttime scene + crescent moon + penguin, swapped via CSS)
+    Both images already contain the penguin character in them.
+  -->
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <p class="hero-eyebrow">BEGIN YOUR</p>
+      <h1 class="hero-title">
+        <span class="title-os">OS</span>
+        <span class="title-odyssey">Odyssey</span>
+      </h1>
+      <p class="hero-subtitle">
+        An Operating System Simulator where you train like a coder and think like a kernel.
+      </p>
+      <a href="signup.html" class="btn btn-cta" data-auth-action="guest">GET STARTED</a>
+      <a href="dashboard.html" class="btn btn-cta" data-auth-action="user" hidden>OPEN DASHBOARD</a>
+    </div>
+  </section>
+
+  <!-- ===== STATS BAND ===== -->
+  <section class="stats-band">
+    <div class="stat">
+      <span class="stat-number accent-green">100+</span>
+      <span class="stat-label">LEARNERS</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-number accent-blue">6</span>
+      <span class="stat-label">MODULES</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-number accent-orange">87</span>
+      <span class="stat-label">TOPICS</span>
+    </div>
+  </section>
+
+  <!-- ===== MODULES SECTION =====
+    ASSETS USED:
+    - ../../assets/penguin-flower.png  → pixel penguin mascot holding pink flower (header)
+    - Module card thumbnails (each uses a different background image):
+        Ch1: bg-forest-lantern.jpg   (snowy pixel forest, warm lantern glow)
+        Ch2: bg-mountains-purple.jpg (purple/magenta night pixel mountains)
+        Ch3: bg-mountains-sunrise.jpg (soft pixel sunrise mountain landscape)
+        Ch4: bg-mountains-day.jpg    (bright daytime snowy pixel mountains)
+        Ch5: bg-forest-lantern-2.jpg (forest lantern, second copy)
+        Ch6: hero-bg-night.jpg       (night mountain scene, top-cropped)
+  -->
+  <section class="modules" id="modules">
+    <div class="modules-header">
+      <div class="penguin-icon">
+        <img src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      </div>
+      <p class="modules-tagline">
+        DIVE INTO FUN, INTERACTIVE LEARNING MODULES THAT BUILD REAL OPERATING SYSTEM PROBLEM-SOLVING SKILLS.
+      </p>
+    </div>
+
+    <div class="modules-grid">
+
+      <div class="module-card">
+        <div class="module-thumb" style="background-image:url('../../assets/bg-forest-lantern.jpg')"></div>
+        <div class="module-body">
+          <span class="module-chapter">CHAPTER 1</span>
+          <h3 class="module-title">OPERATING SYSTEM</h3>
+          <p class="module-desc">Learn what an OS actually does under the hood — from booting to resource management.
+          </p>
+          <a href="#" class="btn btn-module">START</a>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-thumb" style="background-image:url('../../assets/bg-mountains-purple.jpg')"></div>
+        <div class="module-body">
+          <span class="module-chapter">CHAPTER 2</span>
+          <h3 class="module-title">PROCESS MANAGEMENT</h3>
+          <p class="module-desc">Explore how the OS juggles multiple processes, scheduling, and CPU time-sharing.</p>
+          <a href="#" class="btn btn-module">START</a>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-thumb" style="background-image:url('../../assets/bg-mountains-sunrise.jpg')"></div>
+        <div class="module-body">
+          <span class="module-chapter">CHAPTER 3</span>
+          <h3 class="module-title">PROCESS SYNCHRONIZATION</h3>
+          <p class="module-desc">Master mutexes, semaphores, deadlocks, and keeping processes in sync.</p>
+          <a href="#" class="btn btn-module">START</a>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-thumb" style="background-image:url('../../assets/bg-mountains-day.jpg')"></div>
+        <div class="module-body">
+          <span class="module-chapter">CHAPTER 4</span>
+          <h3 class="module-title">MEMORY MANAGEMENT</h3>
+          <p class="module-desc">Understand paging, segmentation, virtual memory, and how the OS owns RAM.</p>
+          <a href="#" class="btn btn-module">START</a>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-thumb" style="background-image:url('../../assets/bg-forest-lantern-2.jpg')"></div>
+        <div class="module-body">
+          <span class="module-chapter">CHAPTER 5</span>
+          <h3 class="module-title">FILE SYSTEMS</h3>
+          <p class="module-desc">Dive into file systems, I/O scheduling, and how data is stored and retrieved.</p>
+          <a href="#" class="btn btn-module">START</a>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-thumb"
+          style="background-image:url('../../assets/hero-bg-night.jpg');background-position:top center"></div>
+        <div class="module-body">
+          <span class="module-chapter">CHAPTER 6</span>
+          <h3 class="module-title">NETWORKING</h3>
+          <p class="module-desc">Explore networking fundamentals and how the OS handles communication protocols.</p>
+          <a href="#" class="btn btn-module">START</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== CTA SECTION =====
+    ASSET USED:
+    - ../../assets/bg-mountains-day.jpg as parallax background
+  -->
+  <section class="cta-section">
+    <div class="cta-content">
+      <h2 class="cta-title">Ready to think like a kernel?</h2>
+      <p class="cta-sub">Join 100+ learners already on their OS Odyssey.</p>
+      <a href="signup.html" class="btn btn-cta">START FOR FREE</a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="footer-logo">OS ODYSSEY</div>
+    <p class="footer-copy">© 2026 OS Odyssey. All rights reserved.</p>
+  </footer>
+
+  <script src="../js/main.js"></script>
+</body>
+
+</html>
