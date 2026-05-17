@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: os-odyssey-api
+    runtime: python
+    region: singapore
+    plan: free
+    rootDir: os-odyssey/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: RATE_LIMIT_GLOBAL
+        value: "100/minute"
+      - key: RATE_LIMIT_AUTH
+        value: "10/minute"
+      - key: WORKER_THREADS
+        value: "2"

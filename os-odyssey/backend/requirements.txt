@@ -1,0 +1,26 @@
+# ─── Core ───────────────────────────────────────────────
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+
+# ─── Security & Auth ────────────────────────────────────
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+pydantic[email]==2.11.3
+
+# ─── Rate Limiting ──────────────────────────────────────
+slowapi==0.1.9
+
+# ─── Supabase ───────────────────────────────────────────
+supabase==2.15.2
+
+# ─── CORS / HTTP ────────────────────────────────────────
+httpx==0.28.1
+
+# ─── Environment ────────────────────────────────────────
+python-dotenv==1.1.0
+
+# ─── Logging ────────────────────────────────────────────
+python-json-logger==3.3.0
+
+# ─── Input Validation / Sanitization ────────────────────
+bleach==6.2.0
