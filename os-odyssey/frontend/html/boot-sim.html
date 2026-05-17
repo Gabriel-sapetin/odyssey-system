@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey - Boot Sequence & Interrupt Simulator</title>
+  <meta name="description" content="Interactive boot sequence simulator. Watch the POST, bootstrap, kernel load, and trigger hardware interrupts in real time." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/sim.css" />
+</head>
+
+<body class="app-page dashboard-page">
+  <nav class="app-nav">
+    <a href="dashboard.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="app-nav-links">
+      <a href="dashboard.html">← Dashboard</a>
+      <a href="scheduling-sim.html">CPU Scheduling</a>
+      <a href="memory-sim.html">Memory Labs</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+        <span class="toggle-icon sun-icon">☀️</span>
+        <span class="toggle-icon moon-icon">🌙</span>
+      </button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="sim-shell">
+    <!-- Header -->
+    <div class="sim-header">
+      <div class="sim-header-text">
+        <p class="section-kicker">INTERACTIVE LAB · MODULE 1</p>
+        <h1>Boot Sequence & Interrupt Simulator</h1>
+        <p class="sim-subtitle">Watch the computer power up step-by-step, then trigger hardware interrupts and see how the CPU routes them through the interrupt vector table.</p>
+      </div>
+      <div class="sim-header-icon">
+        <span class="sim-icon-cpu" style="background:#7c3aed;border-color:#c4b5fd;box-shadow:6px 6px 0 #3b0764, inset 0 0 20px rgba(196,181,253,0.15);">PWR</span>
+      </div>
+    </div>
+
+    <!-- Boot Controls -->
+    <section class="sim-controls" id="bootControls">
+      <div class="sim-control-row">
+        <div class="sim-field sim-field-wide">
+          <label>Boot Speed</label>
+          <select id="bootSpeed">
+            <option value="fast">Fast (demo)</option>
+            <option value="normal" selected>Normal</option>
+            <option value="slow">Slow (detailed)</option>
+          </select>
+        </div>
+        <button class="sim-btn sim-btn-run" type="button" id="startBoot">⚡ Power On</button>
+        <button class="sim-btn sim-btn-reset" type="button" id="resetBoot">↺ Reset</button>
+      </div>
+    </section>
+
+    <!-- Boot Terminal -->
+    <section class="sim-panel" id="bootTerminal">
+      <div class="sim-panel-header">
+        <h2>System Console</h2>
+        <span class="sim-speed-label" id="bootStatusLabel">● System OFF</span>
+      </div>
+      <div class="boot-console" id="bootConsole">
+        <div class="boot-line boot-dim">OS ODYSSEY BIOS v2.1 — Ready to boot</div>
+      </div>
+    </section>
+
+    <!-- Storage Hierarchy -->
+    <section class="sim-panel" id="storagePanel" style="display:none;">
+      <h2>Storage Hierarchy (Active)</h2>
+      <div class="storage-hierarchy" id="storageHierarchy">
+        <div class="storage-level" data-level="registers">
+          <div class="storage-bar"><span class="storage-fill" style="width:0%"></span></div>
+          <div class="storage-info">
+            <strong>Registers</strong>
+            <span class="storage-speed">~1 ns</span>
+          </div>
+        </div>
+        <div class="storage-level" data-level="cache">
+          <div class="storage-bar"><span class="storage-fill" style="width:0%"></span></div>
+          <div class="storage-info">
+            <strong>Cache (L1/L2)</strong>
+            <span class="storage-speed">~5-10 ns</span>
+          </div>
+        </div>
+        <div class="storage-level" data-level="ram">
+          <div class="storage-bar"><span class="storage-fill" style="width:0%"></span></div>
+          <div class="storage-info">
+            <strong>Main Memory (RAM)</strong>
+            <span class="storage-speed">~100 ns</span>
+          </div>
+        </div>
+        <div class="storage-level" data-level="disk">
+          <div class="storage-bar"><span class="storage-fill" style="width:0%"></span></div>
+          <div class="storage-info">
+            <strong>Secondary Storage (SSD)</strong>
+            <span class="storage-speed">~100 μs</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interrupt Simulator -->
+    <section class="sim-panel" id="interruptPanel" style="display:none;">
+      <h2>Interrupt Handler</h2>
+      <p class="sim-subtitle" style="margin-bottom:20px;">Trigger hardware interrupts and watch the CPU switch to the appropriate Interrupt Service Routine (ISR) via the interrupt vector table.</p>
+      <div class="sim-control-row" style="margin-bottom:20px;">
+        <button class="sim-btn sim-btn-add" type="button" data-irq="keyboard">⌨️ Keyboard IRQ</button>
+        <button class="sim-btn sim-btn-preset" type="button" data-irq="disk">💾 Disk I/O IRQ</button>
+        <button class="sim-btn sim-btn-run" type="button" data-irq="timer">⏱️ Timer IRQ</button>
+        <button class="sim-btn sim-btn-reset" type="button" data-irq="network">🌐 Network IRQ</button>
+      </div>
+      
+      <!-- Interrupt Vector Table -->
+      <div class="sim-table-wrap">
+        <table class="sim-table" id="ivtTable">
+          <thead>
+            <tr>
+              <th>IRQ #</th>
+              <th>Device</th>
+              <th>ISR Address</th>
+              <th>Status</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody id="ivtBody"></tbody>
+        </table>
+      </div>
+
+      <!-- CPU Mode Display -->
+      <div class="cpu-mode-display" id="cpuModeDisplay">
+        <div class="cpu-mode-box" id="cpuModeBox">
+          <span class="cpu-mode-label">CPU MODE</span>
+          <span class="cpu-mode-value" id="cpuModeValue">User</span>
+        </div>
+        <div class="cpu-mode-arrow">↔</div>
+        <div class="cpu-mode-box kernel" id="kernelModeBox">
+          <span class="cpu-mode-label">ACTIVE ISR</span>
+          <span class="cpu-mode-value" id="activeISR">—</span>
+        </div>
+      </div>
+
+      <!-- Interrupt Log -->
+      <div class="boot-console" id="interruptLog" style="max-height:180px;">
+        <div class="boot-line boot-dim">Interrupt subsystem ready. Click a button above to trigger an IRQ.</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/boot-sim.js"></script>
+</body>
+
+</html>

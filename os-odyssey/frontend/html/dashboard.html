@@ -23,17 +23,23 @@
       <a href="#modules">Learn</a>
       <a href="#practice">Practice</a>
       <a href="character-select.html">Change Avatar</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+        <span class="toggle-icon sun-icon">☀️</span>
+        <span class="toggle-icon moon-icon">🌙</span>
+      </button>
       <button class="app-link-button" type="button" data-logout>Log out</button>
     </div>
   </nav>
 
   <main class="dashboard-shell">
     <section class="welcome-row">
-      <div class="mentor-avatar computer-avatar" aria-hidden="true">
-        <span class="screen-face"></span>
-      </div>
-      <div class="speech-bubble">
-        Hii kernel cadet. Your process table is ready, and today we are booting into Operating Systems.
+      <button class="mentor-avatar penguin-mentor" type="button" aria-label="Penguin mentor">
+        <img src="../../assets/penguin-flower-removebg-preview.png" alt="" />
+        <span class="penguin-sparkle sparkle-one" aria-hidden="true"></span>
+        <span class="penguin-sparkle sparkle-two" aria-hidden="true"></span>
+      </button>
+      <div class="speech-bubble" id="welcomeBubble">
+        <span class="typewriter-text" id="typewriterText" data-full-text=""></span><span class="typewriter-cursor" id="typewriterCursor">▌</span>
       </div>
     </section>
 
@@ -41,10 +47,6 @@
       <div class="dashboard-main">
         <p class="section-kicker">JUMP BACK IN</p>
         <article class="course-hero">
-          <div class="course-progress">
-            <span style="width: 18%"></span>
-            <strong>18%</strong>
-          </div>
           <p>COURSE</p>
           <h1>Operating Systems</h1>
           <span>Next lesson: Process Scheduling</span>
@@ -52,45 +54,66 @@
             <a href="#modules" class="btn btn-cta">Continue Learning</a>
             <a href="#modules" class="course-link">View course</a>
           </div>
+          <div class="course-progress">
+            <span id="progressBar" style="width: 0%"></span>
+            <strong id="progressText">0%</strong>
+          </div>
         </article>
 
         <section class="explore-section" id="practice">
           <h2>Explore more</h2>
           <div class="explore-grid">
-            <article class="explore-card">
+            <a href="boot-sim.html" class="explore-card explore-card-link">
+              <span class="card-icon" style="background:#7c3aed;border-color:#c4b5fd;box-shadow:3px 3px 0 #3b0764;">PWR</span>
+              <div>
+                <h3>Boot & Interrupts</h3>
+                <p>Watch the boot sequence and trigger hardware IRQs in real time.</p>
+              </div>
+              <span class="explore-arrow">→</span>
+            </a>
+            <a href="syscall-sim.html" class="explore-card explore-card-link">
+              <span class="card-icon" style="background:#0891b2;border-color:#67e8f9;box-shadow:3px 3px 0 #164e63;">SYS</span>
+              <div>
+                <h3>System Call Tracer</h3>
+                <p>Trace system calls and watch user ↔ kernel mode transitions.</p>
+              </div>
+              <span class="explore-arrow">→</span>
+            </a>
+            <a href="scheduling-sim.html" class="explore-card explore-card-link">
               <span class="card-icon">CPU</span>
               <div>
                 <h3>Scheduling Challenges</h3>
                 <p>Practice FCFS, SJF, priority, and round-robin scheduling.</p>
               </div>
-            </article>
-            <article class="explore-card">
+              <span class="explore-arrow">→</span>
+            </a>
+            <a href="memory-sim.html" class="explore-card explore-card-link">
               <span class="card-icon">RAM</span>
               <div>
                 <h3>Memory Labs</h3>
                 <p>Trace paging, fragmentation, virtual memory, and page faults.</p>
               </div>
-            </article>
+              <span class="explore-arrow">→</span>
+            </a>
+            <a href="process-sim.html" class="explore-card explore-card-link">
+              <span class="card-icon" style="background:#059669;border-color:#6ee7b7;box-shadow:3px 3px 0 #064e3b;">PCB</span>
+              <div>
+                <h3>Process States</h3>
+                <p>Drive processes through the 5-state lifecycle and inspect PCBs.</p>
+              </div>
+              <span class="explore-arrow">→</span>
+            </a>
+            <a href="thread-sim.html" class="explore-card explore-card-link">
+              <span class="card-icon" style="background:#dc2626;border-color:#fca5a5;box-shadow:3px 3px 0 #7f1d1d;">THR</span>
+              <div>
+                <h3>Thread Visualizer</h3>
+                <p>Visualize parallelism vs concurrency and threading models.</p>
+              </div>
+              <span class="explore-arrow">→</span>
+            </a>
           </div>
         </section>
 
-        <section class="module-roadmap" id="modules">
-          <h2>OS roadmap</h2>
-          <div class="roadmap-card">
-            <h3>Module 1: Operating System Basics</h3>
-            <ol>
-              <li class="complete">1.1 What an OS does</li>
-              <li>1.2 Kernel vs user mode</li>
-              <li>1.3 System calls</li>
-            </ol>
-            <h3>Module 2: Process Management</h3>
-            <ol>
-              <li>2.1 Process states</li>
-              <li>2.2 Scheduling algorithms</li>
-              <li>2.3 Context switching</li>
-            </ol>
-          </div>
-        </section>
       </div>
 
       <aside class="dashboard-side">
@@ -111,7 +134,7 @@
             <span><img src="../../assets/7957f4cc59fbb19cdf57f1ea600429e6-removebg-preview.png" alt="" /> <strong id="profileBadges">0</strong><br>Badges</span>
             <span><img src="../../assets/fa784620ccaa028479b214b4718041af-removebg-preview.png" alt="" /> <strong id="profileStreak">1</strong><br>Day streak</span>
           </div>
-          <a href="character-select.html" class="profile-button">View Profile</a>
+          <a href="profile.html" class="profile-button">View Profile</a>
         </section>
 
         <section class="club-card">
@@ -123,8 +146,84 @@
         </section>
       </aside>
     </section>
+
+    <section class="module-roadmap" id="modules">
+      <div class="module-heading-row">
+        <div>
+          <p class="section-kicker">LEARNING PATH</p>
+          <h2>OS modules</h2>
+        </div>
+        <span class="module-status-pill">Focus Mode Ready</span>
+      </div>
+
+      <div class="module-launch-grid">
+        <article class="module-launch-card">
+          <span class="module-chip">Module 1</span>
+          <h3>Introduction to Operating Systems</h3>
+          <p>Review OS basics, kernels, interrupts, storage hierarchy, processes, and dual-mode operation.</p>
+          <button class="profile-button lesson-button primary" type="button" data-start-module="module1">Start Module</button>
+        </article>
+
+        <article class="module-launch-card">
+          <span class="module-chip">Module 2</span>
+          <h3>Operating-System Structures</h3>
+          <p>Practice OS services, system calls, structure types, boot loaders, debugging, and design trade-offs.</p>
+          <button class="profile-button lesson-button primary" type="button" data-start-module="module2">Start Module</button>
+        </article>
+
+        <article class="module-launch-card">
+          <span class="module-chip">Module 3</span>
+          <h3>Processes</h3>
+          <p>Master process states, PCBs, scheduling queues, context switches, IPC, buffers, and client-server communication.</p>
+          <button class="profile-button lesson-button primary" type="button" data-start-module="module3">Start Module</button>
+        </article>
+
+        <article class="module-launch-card">
+          <span class="module-chip">Module 4</span>
+          <h3>Threads</h3>
+          <p>Learn multithreading concepts, threading models, implicit threading, TLS, and practical Pthreads, Java, OpenMP, and Windows code.</p>
+          <button class="profile-button lesson-button primary" type="button" data-start-module="module4">Start Module</button>
+        </article>
+      </div>
+    </section>
   </main>
 
+  <section class="lesson-overlay" data-module-overlay hidden>
+    <div class="lesson-backdrop" data-close-module></div>
+    <article class="lesson-card lesson-modal" id="moduleTutor" role="dialog" aria-modal="true" aria-labelledby="lessonModuleTitle">
+      <button class="lesson-close" type="button" aria-label="Close module" data-close-module>x</button>
+
+      <div class="lesson-heading">
+        <div>
+          <p class="section-kicker" id="lessonModuleKicker">MODULE</p>
+          <h2 id="lessonModuleTitle">Operating Systems</h2>
+        </div>
+        <span class="module-status-pill" id="moduleStatus">Review Mode</span>
+      </div>
+
+      <div class="lesson-topline">
+        <span id="lessonProgress">Statement 1 of 5</span>
+        <span id="lessonPhase">Review Phase</span>
+      </div>
+
+      <div class="lesson-body" id="lessonBody" aria-live="polite"></div>
+      <div class="answer-grid" id="answerGrid" hidden></div>
+      <div class="fill-answer" id="fillAnswer" hidden>
+        <label for="fillAnswerInput">Type your answer in the blank.</label>
+        <input id="fillAnswerInput" type="text" autocomplete="off" />
+      </div>
+      <p class="lesson-feedback" id="lessonFeedback" aria-live="polite"></p>
+
+      <div class="lesson-actions">
+        <button class="profile-button lesson-button primary" type="button" id="lessonPrimaryAction">Next</button>
+        <button class="profile-button lesson-button secondary" type="button" id="lessonSecondaryAction" hidden>Review Again</button>
+      </div>
+    </article>
+  </section>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
   <script src="../js/main.js"></script>
 </body>
 

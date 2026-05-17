@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey — Confirming Account</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body class="auth-page">
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span class="sun">☀️</span>
+        <span class="moon">🌙</span>
+      </button>
+    </div>
+  </nav>
+
+  <section class="auth-section">
+    <div class="auth-card">
+      <div class="auth-penguin">
+        <img src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin" />
+      </div>
+      <p class="auth-headline" id="confirmMessage">Verifying your account...</p>
+      <div class="auth-form">
+        <div class="auth-success" id="confirmStatus" style="display: none;">
+          Account confirmed! Redirecting to your dashboard...
+        </div>
+        <div class="auth-error" id="confirmError" style="display: none;">
+          Something went wrong. Please try logging in.
+        </div>
+        <a href="login.html" class="btn btn-cta" id="confirmAction" style="display: none;">Go to Login</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script>
+    // This page handles the redirect from the Supabase email confirmation link.
+    // Supabase appends auth tokens to the URL hash — the client picks them up automatically.
+    (async function () {
+      const savedTheme = localStorage.getItem('os-odyssey-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+
+      const message = document.getElementById('confirmMessage');
+      const status = document.getElementById('confirmStatus');
+      const error = document.getElementById('confirmError');
+      const action = document.getElementById('confirmAction');
+
+      // Listen for the auth state change triggered by the URL tokens
+      supa.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          message.textContent = 'Account confirmed! 🎉';
+          status.style.display = 'block';
+          status.textContent = 'Redirecting to character select...';
+
+          setTimeout(() => {
+            window.location.href = 'character-select.html';
+          }, 1500);
+        }
+      });
+
+      // Fallback: if after 5 seconds nothing happened, show error
+      setTimeout(async () => {
+        const { data: { session } } = await supa.auth.getSession();
+        if (session) {
+          // Already signed in, just redirect
+          window.location.href = 'character-select.html';
+        } else {
+          message.textContent = 'Confirmation failed';
+          error.style.display = 'block';
+          error.textContent = 'The link may have expired. Please try signing up again or log in.';
+          action.style.display = 'inline-flex';
+        }
+      }, 5000);
+    })();
+  </script>
+</body>
+
+</html>

@@ -54,10 +54,14 @@
       <div class="auth-form">
         <input type="email" class="auth-input" placeholder="Email" autocomplete="email" />
         <input type="password" class="auth-input" placeholder="Password" autocomplete="new-password" />
+        <label class="auth-terms-check">
+          <input type="checkbox" id="termsAccepted" />
+          <span>
+            I have read and accept the
+            <a href="terms.html">OS Odyssey Terms of Use</a>.
+          </span>
+        </label>
         <button class="btn btn-cta auth-submit" data-auth-mode="signup" data-loading-text="Creating account..." data-redirect="character-select.html" type="submit">Sign up for free</button>
-        <p class="auth-terms">
-          By signing up, I agree to Odyssey <a href="#">Terms</a>.
-        </p>
         <p class="auth-login">
           Already have an account? <a href="login.html">Log in</a>
         </p>
@@ -66,6 +70,9 @@
 
   </section>
 
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
   <script src="../js/main.js"></script>
 </body>
 

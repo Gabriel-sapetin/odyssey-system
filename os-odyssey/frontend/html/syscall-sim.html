@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey - System Call Tracer</title>
+  <meta name="description" content="Interactive system call tracer. Watch user-mode programs invoke system calls, transition to kernel mode, and return results." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/sim.css" />
+</head>
+
+<body class="app-page dashboard-page">
+  <nav class="app-nav">
+    <a href="dashboard.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="app-nav-links">
+      <a href="dashboard.html">← Dashboard</a>
+      <a href="scheduling-sim.html">CPU Scheduling</a>
+      <a href="memory-sim.html">Memory Labs</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+        <span class="toggle-icon sun-icon">☀️</span>
+        <span class="toggle-icon moon-icon">🌙</span>
+      </button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="sim-shell">
+    <!-- Header -->
+    <div class="sim-header">
+      <div class="sim-header-text">
+        <p class="section-kicker">INTERACTIVE LAB · MODULE 2</p>
+        <h1>System Call Tracer</h1>
+        <p class="sim-subtitle">Execute programs and watch every system call as it transitions from user mode → kernel mode → back. Trace file I/O, process creation, and more.</p>
+      </div>
+      <div class="sim-header-icon">
+        <span class="sim-icon-cpu" style="background:#0891b2;border-color:#67e8f9;box-shadow:6px 6px 0 #164e63, inset 0 0 20px rgba(103,232,249,0.15);">SYS</span>
+      </div>
+    </div>
+
+    <!-- Program Selector -->
+    <section class="sim-controls" id="syscallControls">
+      <div class="sim-control-row">
+        <div class="sim-field sim-field-wide">
+          <label>Select Program</label>
+          <select id="programSelect">
+            <option value="fileRead">📄 File Read (open → read → close)</option>
+            <option value="fileWrite">✏️ File Write (open → write → close)</option>
+            <option value="processCreate">🔄 Fork Process (fork → exec → wait)</option>
+            <option value="networkIO">🌐 Network Socket (socket → connect → send → recv)</option>
+            <option value="memAlloc">🧠 Memory Alloc (mmap → access → munmap)</option>
+          </select>
+        </div>
+        <button class="sim-btn sim-btn-run" type="button" id="runSyscall">▶ Execute Program</button>
+        <button class="sim-btn sim-btn-reset" type="button" id="resetSyscall">↺ Clear</button>
+      </div>
+    </section>
+
+    <!-- Mode Transition Visualizer -->
+    <section class="sim-panel" id="modePanel">
+      <h2>CPU Mode Transition</h2>
+      <div class="syscall-mode-vis" id="modeVisualizer">
+        <div class="mode-column user-mode" id="userModeCol">
+          <div class="mode-header">USER MODE</div>
+          <div class="mode-indicator" id="userIndicator">
+            <span class="mode-dot active"></span>
+            <span>Application Running</span>
+          </div>
+        </div>
+        <div class="mode-transition-col" id="transitionCol">
+          <div class="transition-arrow" id="transitionArrow">
+            <div class="arrow-line"></div>
+            <div class="arrow-label" id="transitionLabel">System Call</div>
+            <div class="arrow-line"></div>
+          </div>
+        </div>
+        <div class="mode-column kernel-mode" id="kernelModeCol">
+          <div class="mode-header">KERNEL MODE</div>
+          <div class="mode-indicator" id="kernelIndicator">
+            <span class="mode-dot"></span>
+            <span>OS Kernel</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Syscall Trace Timeline -->
+    <section class="sim-panel" id="tracePanel" style="display:none;">
+      <div class="sim-panel-header">
+        <h2>System Call Trace</h2>
+        <span class="sim-speed-label" id="traceCounter">0 system calls traced</span>
+      </div>
+      <div class="syscall-timeline" id="syscallTimeline"></div>
+    </section>
+
+    <!-- Syscall Table -->
+    <section class="sim-panel" id="syscallTablePanel" style="display:none;">
+      <h2>System Call Log</h2>
+      <div class="sim-table-wrap">
+        <table class="sim-table" id="syscallTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>System Call</th>
+              <th>Category</th>
+              <th>Arguments</th>
+              <th>Return Value</th>
+              <th>Mode</th>
+            </tr>
+          </thead>
+          <tbody id="syscallBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- OS Structure Info -->
+    <section class="sim-panel" id="structurePanel">
+      <h2>OS Structure Reference</h2>
+      <div class="os-structure-grid" id="osStructureGrid">
+        <div class="os-struct-card">
+          <div class="os-struct-icon">📂</div>
+          <h3>File Management</h3>
+          <p>open(), read(), write(), close(), lseek()</p>
+        </div>
+        <div class="os-struct-card">
+          <div class="os-struct-icon">⚙️</div>
+          <h3>Process Control</h3>
+          <p>fork(), exec(), wait(), exit(), kill()</p>
+        </div>
+        <div class="os-struct-card">
+          <div class="os-struct-icon">🧠</div>
+          <h3>Memory Management</h3>
+          <p>mmap(), munmap(), brk(), mprotect()</p>
+        </div>
+        <div class="os-struct-card">
+          <div class="os-struct-icon">🌐</div>
+          <h3>Networking</h3>
+          <p>socket(), bind(), connect(), send(), recv()</p>
+        </div>
+        <div class="os-struct-card">
+          <div class="os-struct-icon">📡</div>
+          <h3>Device I/O</h3>
+          <p>ioctl(), read(), write(), poll(), select()</p>
+        </div>
+        <div class="os-struct-card">
+          <div class="os-struct-icon">🔒</div>
+          <h3>Security</h3>
+          <p>setuid(), chmod(), chown(), getuid()</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/syscall-sim.js"></script>
+</body>
+
+</html>

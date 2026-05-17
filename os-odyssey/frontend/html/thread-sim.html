@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey - Thread Concurrency Visualizer</title>
+  <meta name="description" content="Interactive thread concurrency visualizer. Compare parallelism vs concurrency, explore threading models, and watch thread pool execution." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/sim.css" />
+</head>
+
+<body class="app-page dashboard-page">
+  <nav class="app-nav">
+    <a href="dashboard.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="app-nav-links">
+      <a href="dashboard.html">← Dashboard</a>
+      <a href="scheduling-sim.html">CPU Scheduling</a>
+      <a href="memory-sim.html">Memory Labs</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+        <span class="toggle-icon sun-icon">☀️</span>
+        <span class="toggle-icon moon-icon">🌙</span>
+      </button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="sim-shell">
+    <!-- Header -->
+    <div class="sim-header">
+      <div class="sim-header-text">
+        <p class="section-kicker">INTERACTIVE LAB · MODULE 4</p>
+        <h1>Thread Concurrency Visualizer</h1>
+        <p class="sim-subtitle">Visualize parallelism vs. concurrency, explore threading models (Many-to-One, One-to-One, Many-to-Many), and watch thread pools execute tasks in real time.</p>
+      </div>
+      <div class="sim-header-icon">
+        <span class="sim-icon-cpu" style="background:#dc2626;border-color:#fca5a5;box-shadow:6px 6px 0 #7f1d1d, inset 0 0 20px rgba(252,165,165,0.15);">THR</span>
+      </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="mem-tabs" id="threadTabs">
+      <button class="mem-tab active" data-tab="parallel">Parallelism vs Concurrency</button>
+      <button class="mem-tab" data-tab="models">Threading Models</button>
+      <button class="mem-tab" data-tab="pool">Thread Pool</button>
+    </div>
+
+    <!-- Tab: Parallelism vs Concurrency -->
+    <div class="mem-tab-content active" id="tab-parallel">
+      <section class="sim-controls">
+        <div class="sim-control-row">
+          <div class="sim-field">
+            <label>CPU Cores</label>
+            <select id="coreCount">
+              <option value="1">1 Core (Concurrency only)</option>
+              <option value="2" selected>2 Cores</option>
+              <option value="4">4 Cores</option>
+            </select>
+          </div>
+          <div class="sim-field">
+            <label>Tasks</label>
+            <input type="number" id="taskCount" min="2" max="8" value="4" />
+          </div>
+          <button class="sim-btn sim-btn-run" type="button" id="runParallel">▶ Simulate</button>
+          <button class="sim-btn sim-btn-reset" type="button" id="resetParallel">↺ Reset</button>
+        </div>
+      </section>
+
+      <section class="sim-panel" id="parallelPanel">
+        <h2>Execution Timeline</h2>
+        <div class="thread-cores" id="threadCores"></div>
+        <div class="thread-timeline-wrap" id="threadTimeline"></div>
+        <div class="thread-stats" id="parallelStats" style="display:none;"></div>
+      </section>
+    </div>
+
+    <!-- Tab: Threading Models -->
+    <div class="mem-tab-content" id="tab-models">
+      <section class="sim-controls">
+        <div class="sim-control-row">
+          <div class="sim-field sim-field-wide">
+            <label>Threading Model</label>
+            <select id="modelSelect">
+              <option value="many-to-one">Many-to-One (e.g., Solaris Green Threads)</option>
+              <option value="one-to-one">One-to-One (e.g., Windows, Linux)</option>
+              <option value="many-to-many">Many-to-Many (e.g., Solaris pre-9)</option>
+            </select>
+          </div>
+          <div class="sim-field">
+            <label>User Threads</label>
+            <input type="number" id="userThreadCount" min="2" max="6" value="4" />
+          </div>
+          <button class="sim-btn sim-btn-run" type="button" id="runModel">▶ Visualize</button>
+        </div>
+      </section>
+
+      <section class="sim-panel" id="modelPanel">
+        <h2>Thread Mapping</h2>
+        <div class="model-vis" id="modelVis">
+          <div class="model-info" id="modelInfo">Select a model and click Visualize to see the thread mapping.</div>
+        </div>
+      </section>
+
+      <section class="sim-panel" id="modelDescPanel">
+        <h2>Model Details</h2>
+        <div class="model-desc" id="modelDesc">
+          <p>Choose a threading model above to see its characteristics, advantages, and disadvantages.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tab: Thread Pool -->
+    <div class="mem-tab-content" id="tab-pool">
+      <section class="sim-controls">
+        <div class="sim-control-row">
+          <div class="sim-field">
+            <label>Pool Size</label>
+            <input type="number" id="poolSize" min="1" max="6" value="3" />
+          </div>
+          <div class="sim-field">
+            <label>Task Queue</label>
+            <input type="number" id="taskQueueSize" min="3" max="12" value="8" />
+          </div>
+          <button class="sim-btn sim-btn-run" type="button" id="runPool">▶ Execute Tasks</button>
+          <button class="sim-btn sim-btn-reset" type="button" id="resetPool">↺ Reset</button>
+        </div>
+      </section>
+
+      <section class="sim-panel" id="poolPanel">
+        <h2>Thread Pool Execution</h2>
+        <div class="pool-vis" id="poolVis">
+          <div class="pool-queue-section">
+            <h3 class="pool-section-title">Task Queue</h3>
+            <div class="pool-queue" id="poolQueue"></div>
+          </div>
+          <div class="pool-arrow-section">
+            <div class="rq-arrow" style="font-size:28px;">▶</div>
+          </div>
+          <div class="pool-threads-section">
+            <h3 class="pool-section-title">Worker Threads</h3>
+            <div class="pool-threads" id="poolThreads"></div>
+          </div>
+        </div>
+        <div class="pool-stats" id="poolStats" style="display:none;"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/thread-sim.js"></script>
+</body>
+
+</html>

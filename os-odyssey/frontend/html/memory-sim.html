@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey - Memory Labs</title>
+  <meta name="description" content="Interactive memory management simulator. Explore paging, page faults, virtual memory, and fragmentation with visual simulations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/sim.css" />
+</head>
+
+<body class="app-page dashboard-page">
+  <nav class="app-nav">
+    <a href="dashboard.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="app-nav-links">
+      <a href="dashboard.html">← Dashboard</a>
+      <a href="scheduling-sim.html">Scheduling Lab</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+        <span class="toggle-icon sun-icon">☀️</span>
+        <span class="toggle-icon moon-icon">🌙</span>
+      </button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="sim-shell">
+    <!-- Header -->
+    <div class="sim-header">
+      <div class="sim-header-text">
+        <p class="section-kicker">INTERACTIVE LAB</p>
+        <h1>Memory Labs</h1>
+        <p class="sim-subtitle">Explore page replacement algorithms, trace page faults, and visualize virtual memory in action.</p>
+      </div>
+      <div class="sim-header-icon">
+        <span class="sim-icon-ram">RAM</span>
+      </div>
+    </div>
+
+    <!-- Tab Switcher -->
+    <div class="mem-tabs" id="memTabs">
+      <button class="mem-tab active" data-tab="paging">Page Replacement</button>
+      <button class="mem-tab" data-tab="fragmentation">Fragmentation</button>
+    </div>
+
+    <!-- ===== TAB 1: Page Replacement ===== -->
+    <div class="mem-tab-content active" id="tab-paging">
+      <section class="sim-controls">
+        <div class="sim-control-row">
+          <div class="sim-field sim-field-wide">
+            <label for="refString">Reference String</label>
+            <input type="text" id="refString" placeholder="7 0 1 2 0 3 0 4 2 3 0 3 2" />
+          </div>
+          <div class="sim-field">
+            <label for="frameCount">Frames</label>
+            <input type="number" id="frameCount" placeholder="3" min="1" max="10" value="3" />
+          </div>
+        </div>
+        <div class="sim-control-row sim-algo-row">
+          <div class="sim-field">
+            <label for="pageAlgo">Algorithm</label>
+            <select id="pageAlgo">
+              <option value="fifo">FIFO (First In, First Out)</option>
+              <option value="lru">LRU (Least Recently Used)</option>
+              <option value="optimal">Optimal (Bélády)</option>
+            </select>
+          </div>
+          <button class="sim-btn sim-btn-run" type="button" id="runPaging">▶ Run Simulation</button>
+          <button class="sim-btn sim-btn-reset" type="button" id="resetPaging">↺ Reset</button>
+          <button class="sim-btn sim-btn-preset" type="button" id="loadPagePreset">Load Example</button>
+        </div>
+      </section>
+
+      <!-- Page Replacement Visualization -->
+      <section class="sim-panel" id="pagingResult" style="display:none;">
+        <div class="sim-panel-header">
+          <h2>Page Replacement Trace</h2>
+          <div class="paging-stats">
+            <span class="stat-chip fault">Faults: <strong id="pageFaults">0</strong></span>
+            <span class="stat-chip hit">Hits: <strong id="pageHits">0</strong></span>
+            <span class="stat-chip rate">Rate: <strong id="pageFaultRate">0%</strong></span>
+          </div>
+        </div>
+
+        <!-- Memory Frames Visual -->
+        <div class="mem-frames-vis" id="memFramesVis"></div>
+
+        <!-- Step-by-step table -->
+        <div class="sim-table-wrap">
+          <table class="sim-table mem-trace-table" id="pageTraceTable">
+            <thead id="pageTraceHead"></thead>
+            <tbody id="pageTraceBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===== TAB 2: Fragmentation ===== -->
+    <div class="mem-tab-content" id="tab-fragmentation">
+      <section class="sim-controls">
+        <div class="sim-control-row">
+          <div class="sim-field">
+            <label for="memSize">Memory Size (KB)</label>
+            <input type="number" id="memSize" placeholder="1024" min="64" max="4096" value="1024" />
+          </div>
+          <div class="sim-field">
+            <label for="fragAlgo">Allocation</label>
+            <select id="fragAlgo">
+              <option value="first-fit">First Fit</option>
+              <option value="best-fit">Best Fit</option>
+              <option value="worst-fit">Worst Fit</option>
+            </select>
+          </div>
+        </div>
+        <div class="sim-control-row">
+          <div class="sim-field">
+            <label for="fragProcName">Process</label>
+            <input type="text" id="fragProcName" placeholder="P1" maxlength="6" />
+          </div>
+          <div class="sim-field">
+            <label for="fragProcSize">Size (KB)</label>
+            <input type="number" id="fragProcSize" placeholder="200" min="1" max="4096" value="200" />
+          </div>
+          <button class="sim-btn sim-btn-add" type="button" id="allocateProc">+ Allocate</button>
+          <button class="sim-btn sim-btn-reset" type="button" id="resetFrag">↺ Reset</button>
+          <button class="sim-btn sim-btn-preset" type="button" id="loadFragPreset">Load Example</button>
+        </div>
+      </section>
+
+      <!-- Memory Map -->
+      <section class="sim-panel" id="fragPanel">
+        <div class="sim-panel-header">
+          <h2>Memory Map</h2>
+          <div class="paging-stats">
+            <span class="stat-chip" id="fragUsed">Used: 0 KB</span>
+            <span class="stat-chip" id="fragFree">Free: 1024 KB</span>
+            <span class="stat-chip fault" id="fragExtFrag">Ext. Frag: 0 KB</span>
+          </div>
+        </div>
+        <div class="frag-memory-bar" id="fragMemoryBar">
+          <div class="frag-block frag-free" style="width:100%;" data-label="Free: 1024 KB"></div>
+        </div>
+        <div class="frag-process-list" id="fragProcessList">
+          <p class="sim-empty-msg">No processes allocated. Use the controls above to allocate memory.</p>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/memory-sim.js"></script>
+</body>
+
+</html>

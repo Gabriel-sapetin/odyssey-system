@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey - CPU Scheduling Simulator</title>
+  <meta name="description" content="Interactive CPU scheduling simulator. Practice FCFS, SJF, Priority, and Round-Robin algorithms with visual Gantt charts." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/sim.css" />
+</head>
+
+<body class="app-page dashboard-page">
+  <nav class="app-nav">
+    <a href="dashboard.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="app-nav-links">
+      <a href="dashboard.html">← Dashboard</a>
+      <a href="memory-sim.html">Memory Labs</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+        <span class="toggle-icon sun-icon">☀️</span>
+        <span class="toggle-icon moon-icon">🌙</span>
+      </button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="sim-shell">
+    <!-- Header -->
+    <div class="sim-header">
+      <div class="sim-header-text">
+        <p class="section-kicker">INTERACTIVE LAB</p>
+        <h1>CPU Scheduling Simulator</h1>
+        <p class="sim-subtitle">Add processes, pick an algorithm, and watch the CPU schedule them in real time.</p>
+      </div>
+      <div class="sim-header-icon">
+        <span class="sim-icon-cpu">CPU</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <section class="sim-controls" id="schedControls">
+      <div class="sim-control-row">
+        <div class="sim-field">
+          <label for="procName">Process</label>
+          <input type="text" id="procName" placeholder="P1" maxlength="6" />
+        </div>
+        <div class="sim-field">
+          <label for="procArrival">Arrival</label>
+          <input type="number" id="procArrival" placeholder="0" min="0" max="99" value="0" />
+        </div>
+        <div class="sim-field">
+          <label for="procBurst">Burst</label>
+          <input type="number" id="procBurst" placeholder="5" min="1" max="99" value="5" />
+        </div>
+        <div class="sim-field">
+          <label for="procPriority">Priority</label>
+          <input type="number" id="procPriority" placeholder="1" min="1" max="99" value="1" />
+        </div>
+        <button class="sim-btn sim-btn-add" type="button" id="addProcess">+ Add</button>
+      </div>
+
+      <div class="sim-control-row sim-algo-row">
+        <div class="sim-field">
+          <label for="algoSelect">Algorithm</label>
+          <select id="algoSelect">
+            <option value="fcfs">FCFS (First Come, First Served)</option>
+            <option value="sjf">SJF (Shortest Job First)</option>
+            <option value="priority">Priority (Non-Preemptive)</option>
+            <option value="rr">Round-Robin</option>
+          </select>
+        </div>
+        <div class="sim-field" id="quantumField" style="display:none;">
+          <label for="quantumInput">Quantum</label>
+          <input type="number" id="quantumInput" placeholder="2" min="1" max="20" value="2" />
+        </div>
+        <button class="sim-btn sim-btn-run" type="button" id="runSim">▶ Run Simulation</button>
+        <button class="sim-btn sim-btn-reset" type="button" id="resetSim">↺ Reset</button>
+        <button class="sim-btn sim-btn-preset" type="button" id="loadPreset">Load Example</button>
+      </div>
+    </section>
+
+    <!-- Process Table -->
+    <section class="sim-panel" id="processPanel">
+      <h2>Process Table</h2>
+      <div class="sim-table-wrap">
+        <table class="sim-table" id="processTable">
+          <thead>
+            <tr>
+              <th>Process</th>
+              <th>Arrival</th>
+              <th>Burst</th>
+              <th>Priority</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="processBody">
+            <tr class="sim-empty-row">
+              <td colspan="5">No processes added yet. Add some above!</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Gantt Chart -->
+    <section class="sim-panel" id="ganttPanel" style="display:none;">
+      <div class="sim-panel-header">
+        <h2>Gantt Chart</h2>
+        <span class="sim-speed-label" id="speedLabel">Speed: 1×</span>
+      </div>
+      <div class="gantt-viewport" id="ganttViewport">
+        <div class="gantt-track" id="ganttTrack"></div>
+        <div class="gantt-timeline" id="ganttTimeline"></div>
+      </div>
+      <div class="gantt-legend" id="ganttLegend"></div>
+    </section>
+
+    <!-- Results -->
+    <section class="sim-panel" id="resultsPanel" style="display:none;">
+      <h2>Results</h2>
+      <div class="sim-table-wrap">
+        <table class="sim-table" id="resultsTable">
+          <thead>
+            <tr>
+              <th>Process</th>
+              <th>Arrival</th>
+              <th>Burst</th>
+              <th>Completion</th>
+              <th>Turnaround</th>
+              <th>Waiting</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+      <div class="sim-averages" id="simAverages"></div>
+    </section>
+
+    <!-- Ready Queue Visualization -->
+    <section class="sim-panel" id="readyQueuePanel" style="display:none;">
+      <h2>Ready Queue (Live)</h2>
+      <div class="ready-queue-vis" id="readyQueueVis">
+        <div class="rq-cpu-box" id="rqCpuBox">
+          <span class="rq-label">CPU</span>
+          <span class="rq-process" id="rqCurrent">—</span>
+        </div>
+        <div class="rq-arrow">◀</div>
+        <div class="rq-queue" id="rqQueue"></div>
+      </div>
+      <p class="sim-time-display">Time: <strong id="simTimeDisplay">0</strong></p>
+    </section>
+
+  </main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/scheduling-sim.js"></script>
+</body>
+
+</html>

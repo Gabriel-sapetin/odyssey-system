@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey - Profile</title>
+  <meta name="description" content="View your OS Odyssey learner profile, stats, and module progress." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/profile.css" />
+</head>
+
+<body class="app-page dashboard-page">
+  <nav class="app-nav">
+    <a href="index.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png"
+        alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="app-nav-links">
+      <a href="dashboard.html">← Dashboard</a>
+      <a href="dashboard.html#modules">Learn</a>
+      <a href="character-select.html">Change Avatar</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+        <span class="toggle-icon sun-icon">☀️</span>
+        <span class="toggle-icon moon-icon">🌙</span>
+      </button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="profile-shell">
+
+    <!-- ===== Banner ===== -->
+    <section class="prof-banner">
+      <div class="prof-banner-bg" id="profBannerBg"></div>
+      <button class="prof-banner-change-btn" type="button" id="changeBannerBtn">Change Banner</button>
+      <div class="prof-banner-content">
+        <div class="prof-avatar-wrap" id="profAvatarWrap">
+          <img src="../../assets/penguin-flower-removebg-preview.png" alt="Profile avatar" id="profAvatarImg" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Profile Info Row ===== -->
+    <section class="prof-info-row">
+      <div class="prof-info-left">
+        <div class="prof-username-row">
+          <h1 id="profUsername">Kernel Penguin</h1>
+          <button class="prof-rename-btn" type="button" id="profRenameBtn" title="Edit username">✎</button>
+        </div>
+        <p class="prof-level" id="profLevel">Level 1</p>
+        <p class="prof-join-date" id="profJoinDate">Joined recently</p>
+      </div>
+      <div class="prof-info-right">
+        <a href="character-select.html" class="prof-edit-btn">Edit Profile</a>
+      </div>
+    </section>
+
+    <!-- ===== Stats Card (sidebar-style) ===== -->
+    <section class="prof-layout">
+      <aside class="prof-sidebar">
+        <div class="prof-stats-card">
+          <div class="prof-stat-item">
+            <img src="../../assets/b395bfdc79935252b271cfa35cb47df9-removebg-preview.png" alt="XP" />
+            <div>
+              <strong id="profXp">0</strong>
+              <span>Total XP</span>
+            </div>
+          </div>
+          <div class="prof-stat-item">
+            <img src="../../assets/7be792a4792ca368f8b31fb65619a557-removebg-preview.png" alt="Rank" />
+            <div>
+              <strong id="profRank">Bronze</strong>
+              <span>Rank</span>
+            </div>
+          </div>
+          <div class="prof-stat-item">
+            <img src="../../assets/7957f4cc59fbb19cdf57f1ea600429e6-removebg-preview.png" alt="Badges" />
+            <div>
+              <strong id="profBadges">0</strong>
+              <span>Badges</span>
+            </div>
+          </div>
+          <div class="prof-stat-item">
+            <img src="../../assets/fa784620ccaa028479b214b4718041af-removebg-preview.png" alt="Streak" />
+            <div>
+              <strong id="profStreak">0</strong>
+              <span>Day streak</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- XP Level Progress -->
+        <div class="prof-xp-progress">
+          <div class="prof-xp-bar-label">
+            <span>Level <strong id="profLevelNum">1</strong></span>
+            <span>Next: Level <strong id="profNextLevel">2</strong></span>
+          </div>
+          <div class="prof-xp-bar">
+            <span class="prof-xp-fill" id="profXpFill" style="width:0%"></span>
+          </div>
+          <p class="prof-xp-detail"><span id="profXpCurrent">0</span> / <span id="profXpNeeded">20</span> XP</p>
+        </div>
+      </aside>
+
+      <!-- ===== Main Content with Tabs ===== -->
+      <div class="prof-main">
+        <!-- Tab Bar -->
+        <div class="prof-tabs">
+          <button class="prof-tab active" data-prof-tab="overview">Overview</button>
+          <button class="prof-tab" data-prof-tab="badges">Badges</button>
+          <button class="prof-tab" data-prof-tab="modules">Modules</button>
+        </div>
+
+        <!-- Tab: Overview -->
+        <div class="prof-tab-content active" id="profTab-overview">
+          <!-- Overall Progress -->
+          <div class="prof-section">
+            <h2>Course Progress</h2>
+            <div class="prof-overview-progress">
+              <div class="prof-progress-ring-wrap">
+                <svg class="prof-progress-ring" viewBox="0 0 120 120">
+                  <circle class="ring-bg" cx="60" cy="60" r="52" />
+                  <circle class="ring-fill" cx="60" cy="60" r="52" id="profRingFill"
+                    stroke-dasharray="326.73" stroke-dashoffset="326.73" />
+                </svg>
+                <div class="prof-ring-label">
+                  <strong id="profCompletedPct">0%</strong>
+                  <span>Complete</span>
+                </div>
+              </div>
+              <div class="prof-progress-details">
+                <div class="prof-progress-stat">
+                  <span class="ppstat-num" id="profModulesCompleted">0</span>
+                  <span class="ppstat-label">Modules Completed</span>
+                </div>
+                <div class="prof-progress-stat">
+                  <span class="ppstat-num" id="profTotalModules">—</span>
+                  <span class="ppstat-label">Total Modules</span>
+                </div>
+                <div class="prof-progress-stat">
+                  <span class="ppstat-num" id="profTotalTopics">—</span>
+                  <span class="ppstat-label">Total Topics</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Module Progress Cards -->
+          <div class="prof-section">
+            <h2>Module Statistics</h2>
+            <div class="prof-module-grid" id="profModuleGrid">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Badges -->
+        <div class="prof-tab-content" id="profTab-badges">
+          <div class="prof-section">
+            <h2>Earned Badges</h2>
+            <p class="prof-badges-sub">Complete modules and interact with simulations to earn badges.</p>
+            <div class="prof-badges-grid" id="profBadgesGrid">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Modules -->
+        <div class="prof-tab-content" id="profTab-modules">
+          <div class="prof-section">
+            <h2>All Modules</h2>
+            <div class="prof-modules-list" id="profModulesList">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/profile.js"></script>
+</body>
+
+</html>

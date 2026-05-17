@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey - Process State Simulator</title>
+  <meta name="description" content="Interactive process lifecycle simulator. Visualize process state transitions from New to Terminated with PCB inspection." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/sim.css" />
+</head>
+
+<body class="app-page dashboard-page">
+  <nav class="app-nav">
+    <a href="dashboard.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="app-nav-links">
+      <a href="dashboard.html">← Dashboard</a>
+      <a href="scheduling-sim.html">CPU Scheduling</a>
+      <a href="memory-sim.html">Memory Labs</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+        <span class="toggle-icon sun-icon">☀️</span>
+        <span class="toggle-icon moon-icon">🌙</span>
+      </button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="sim-shell">
+    <!-- Header -->
+    <div class="sim-header">
+      <div class="sim-header-text">
+        <p class="section-kicker">INTERACTIVE LAB · MODULE 3</p>
+        <h1>Process State Simulator</h1>
+        <p class="sim-subtitle">Create processes and drive them through the 5-state lifecycle. Watch context switches, inspect PCBs, and understand scheduling queues.</p>
+      </div>
+      <div class="sim-header-icon">
+        <span class="sim-icon-cpu" style="background:#059669;border-color:#6ee7b7;box-shadow:6px 6px 0 #064e3b, inset 0 0 20px rgba(110,231,183,0.15);">PCB</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <section class="sim-controls" id="processControls">
+      <div class="sim-control-row">
+        <div class="sim-field">
+          <label>Process Name</label>
+          <input type="text" id="psProcName" placeholder="P1" maxlength="6" />
+        </div>
+        <div class="sim-field">
+          <label>CPU Burst (ms)</label>
+          <input type="number" id="psBurst" placeholder="500" min="100" max="5000" value="500" />
+        </div>
+        <div class="sim-field">
+          <label>I/O Wait (ms)</label>
+          <input type="number" id="psIO" placeholder="300" min="0" max="3000" value="300" />
+        </div>
+        <button class="sim-btn sim-btn-add" type="button" id="psAddProcess">+ Create Process</button>
+      </div>
+      <div class="sim-control-row">
+        <button class="sim-btn sim-btn-run" type="button" id="psRunSim">▶ Start Scheduler</button>
+        <button class="sim-btn sim-btn-preset" type="button" id="psStepSim">⏭ Step</button>
+        <button class="sim-btn sim-btn-reset" type="button" id="psResetSim">↺ Reset All</button>
+        <button class="sim-btn sim-btn-preset" type="button" id="psLoadPreset">Load Example</button>
+      </div>
+    </section>
+
+    <!-- State Diagram -->
+    <section class="sim-panel" id="stateDiagramPanel">
+      <h2>Process State Diagram</h2>
+      <div class="state-diagram" id="stateDiagram">
+        <div class="state-node" data-state="new" id="stateNew">
+          <span class="state-label">New</span>
+          <div class="state-queue" id="queueNew"></div>
+        </div>
+        <div class="state-arrow" data-from="new" data-to="ready">admitted →</div>
+        <div class="state-node" data-state="ready" id="stateReady">
+          <span class="state-label">Ready</span>
+          <div class="state-queue" id="queueReady"></div>
+        </div>
+        <div class="state-arrow" data-from="ready" data-to="running">dispatch →</div>
+        <div class="state-node active-state" data-state="running" id="stateRunning">
+          <span class="state-label">Running</span>
+          <div class="state-queue" id="queueRunning"></div>
+        </div>
+        <div class="state-exits">
+          <div class="state-arrow" data-from="running" data-to="waiting">↓ I/O wait</div>
+          <div class="state-arrow" data-from="running" data-to="terminated">→ exit</div>
+        </div>
+        <div class="state-node" data-state="waiting" id="stateWaiting">
+          <span class="state-label">Waiting</span>
+          <div class="state-queue" id="queueWaiting"></div>
+        </div>
+        <div class="state-arrow" data-from="waiting" data-to="ready">↑ I/O done</div>
+        <div class="state-node" data-state="terminated" id="stateTerminated">
+          <span class="state-label">Terminated</span>
+          <div class="state-queue" id="queueTerminated"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PCB Inspector -->
+    <section class="sim-panel" id="pcbPanel" style="display:none;">
+      <h2>Process Control Block (PCB) Inspector</h2>
+      <div class="pcb-grid" id="pcbGrid"></div>
+    </section>
+
+    <!-- Context Switch Log -->
+    <section class="sim-panel" id="csLogPanel" style="display:none;">
+      <div class="sim-panel-header">
+        <h2>Context Switch Log</h2>
+        <span class="sim-speed-label" id="csCounter">0 context switches</span>
+      </div>
+      <div class="boot-console" id="csLog" style="max-height:200px;">
+        <div class="boot-line boot-dim">Scheduler not started yet.</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/process-sim.js"></script>
+</body>
+
+</html>
