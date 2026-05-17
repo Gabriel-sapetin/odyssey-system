@@ -951,15 +951,36 @@
     });
   }
 
-  /* ---- Handle email confirmation callback ---- */
-  // When a user clicks the confirmation link in their email, Supabase redirects
-  // them back with tokens in the URL hash. This listener detects that and redirects.
-  supa.auth.onAuthStateChange((event, session) => {
+  /* ---- Handle auth callback (email confirm + Google OAuth) ---- */
+  // When Supabase redirects back (email confirmation, Google OAuth, etc.),
+  // tokens appear in the URL hash. This listener detects the SIGNED_IN event
+  // and redirects appropriately.
+  supa.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session) {
-      // If we're on the auth callback page or a login/signup page, redirect to character-select
       const path = window.location.pathname;
-      if (path.includes('confirm') || path.includes('login') || path.includes('signup')) {
+      const isAuthPage = path.includes('confirm') || path.includes('login') || path.includes('signup');
+      const isCharacterPage = path.includes('character-select');
+
+      if (isAuthPage) {
+        // Coming from login/signup/confirm — go to character select for new users
         window.location.href = 'character-select.html';
+      } else if (isCharacterPage) {
+        // Google OAuth callback lands on character-select — check if returning user
+        try {
+          const { data: profile } = await supa
+            .from('profiles')
+            .select('character')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profile && profile.character) {
+            // Returning user with a character already — go to dashboard
+            window.location.href = 'dashboard.html';
+          }
+          // Otherwise, stay on character-select (new user flow)
+        } catch {
+          // Profile doesn't exist yet — stay on character-select
+        }
       }
     }
   });
@@ -982,13 +1003,32 @@
         return;
       }
 
-      const { error } = await supa.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin + '/frontend/html/character-select.html'
+      // Show loading state on the button
+      const originalContent = btn.innerHTML;
+      btn.innerHTML = '<img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" alt="Google" /> Connecting...';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+
+      try {
+        const { error } = await supa.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + '/os-odyssey/frontend/html/character-select.html'
+          }
+        });
+        if (error) {
+          showAuthError(error.message);
+          btn.innerHTML = originalContent;
+          btn.disabled = false;
+          btn.style.opacity = '';
         }
-      });
-      if (error) showAuthError(error.message);
+        // If no error, the browser will redirect to Google — no need to reset button
+      } catch (err) {
+        showAuthError('Failed to connect to Google. Please try again.');
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+        btn.style.opacity = '';
+      }
     });
   });
 
