@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>OS Odyssey - Course Player</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../../assets/favicon.png" />
+  <link rel="stylesheet" href="../css/styles.css?v=3" />
+  <style>
+    /* Full-page lesson: force dark text on white background */
+    .lesson-fullpage {
+      color: #202833 !important;
+    }
+    .lesson-fullpage .lesson-body h3 { color: #05070a !important; }
+    .lesson-fullpage .lesson-body p { color: #202833 !important; }
+    .lesson-fullpage .lesson-body strong { color: #05070a !important; }
+    .lesson-fullpage .lesson-body li { color: #202833 !important; }
+    .lesson-fullpage .lesson-prompt { color: #2f7d32 !important; }
+    .lesson-fullpage .lesson-heading h2 { color: #05070a !important; }
+    .lesson-fullpage .lesson-topline { color: #4b5563 !important; }
+    .lesson-fullpage .lesson-code { color: #d7f7ff !important; background: #060a16 !important; }
+    .lesson-fullpage .lesson-feedback.correct { color: #16a34a !important; }
+    .lesson-fullpage .lesson-feedback.incorrect { color: #dc2626 !important; }
+
+    /* Custom text selection color */
+    ::selection {
+      background: rgba(32, 167, 255, 0.25);
+      color: inherit;
+    }
+    ::-moz-selection {
+      background: rgba(32, 167, 255, 0.25);
+      color: inherit;
+    }
+  </style>
+</head>
+
+<body class="app-page course-page">
+  <nav class="app-nav">
+    <a href="dashboard.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <div class="app-nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="course.html">Course</a>
+      <a href="dashboard.html#practice">Practice</a>
+      <a href="profile.html">Profile</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+        <span class="toggle-icon sun-icon">☀️</span>
+        <span class="toggle-icon moon-icon">🌙</span>
+      </button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="course-shell">
+    <section class="netacad-course standalone" id="modules" aria-labelledby="courseTitle">
+      <header class="netacad-shell-header">
+        <div class="netacad-brand-lockup">
+          <span class="netacad-brand-mark">OS</span>
+          <div>
+            <strong>OS Odyssey Academy</strong>
+            <span>Operating Systems (CS222)</span>
+          </div>
+        </div>
+        <nav class="netacad-tools" aria-label="Course tools">
+          <span class="netacad-tool active">Outline</span>
+        </nav>
+      </header>
+
+      <div class="netacad-workspace">
+        <aside class="netacad-sidebar" aria-label="Course outline">
+          <div class="netacad-tabs">
+            <button class="active" type="button">Course Outline</button>
+            <button type="button">Resources</button>
+          </div>
+          <label class="netacad-search">
+            <span>Search course outline</span>
+            <input type="search" placeholder="Search course outline" />
+          </label>
+
+          <div class="course-outline-list">
+            <button class="course-outline-module active" type="button" data-start-module="module1">
+              <span class="outline-check">1</span>
+              <span>
+                <strong>Module 1: Introduction to Operating Systems</strong>
+                <em>Kernel, interrupts, storage, protection</em>
+              </span>
+              <small>15 pages</small>
+            </button>
+            <button class="course-outline-module" type="button" data-start-module="module2">
+              <span class="outline-check">2</span>
+              <span>
+                <strong>Module 2: Operating-System Structures</strong>
+                <em>Services, calls, design and boot</em>
+              </span>
+              <small>15 pages</small>
+            </button>
+            <button class="course-outline-module" type="button" data-start-module="module3">
+              <span class="outline-check">3</span>
+              <span>
+                <strong>Module 3: Processes</strong>
+                <em>Scheduling, creation, IPC, client-server</em>
+              </span>
+              <small>15 pages</small>
+            </button>
+            <button class="course-outline-module" type="button" data-start-module="module4">
+              <span class="outline-check">4</span>
+              <span>
+                <strong>Module 4: Threads</strong>
+                <em>Thread models, libraries, issues and code</em>
+              </span>
+              <small>25 pages</small>
+            </button>
+          </div>
+        </aside>
+
+        <article class="netacad-reader-preview">
+          <div class="reader-topline">
+            <span>Course Outline</span>
+            <span>Review + Quiz</span>
+          </div>
+          <div class="reader-progress-strip" aria-hidden="true"><span style="width: 0%"></span></div>
+          <div class="reader-content-split">
+            <div>
+              <p class="section-kicker">LEARNING PATH</p>
+              <h1 id="courseTitle">Operating Systems Modules</h1>
+              <p>
+                This course covers fundamental operating system concepts aligned with CS222. Each module
+                presents key topics for review, followed by a graded quiz to assess comprehension before
+                advancing to the next chapter.
+              </p>
+              <div class="reader-actions">
+                <button class="profile-button lesson-button secondary" type="button" data-start-module="module1">Start Module 1</button>
+                <button class="profile-button lesson-button secondary" type="button" data-start-module="module2">Start Module 2</button>
+                <button class="profile-button lesson-button secondary" type="button" data-start-module="module3">Start Module 3</button>
+                <button class="profile-button lesson-button secondary" type="button" data-start-module="module4">Start Module 4</button>
+              </div>
+            </div>
+            <div class="reader-topic-stack" id="courseProgressPanel" aria-label="Module progress">
+              <!-- Populated dynamically by main.js -->
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <section class="lesson-fullpage" data-module-overlay hidden>
+    <article class="netacad-player fullpage-player" id="moduleTutor" aria-labelledby="lessonModuleTitle">
+
+      <div class="netacad-player-bar">
+        <div class="netacad-brand-lockup">
+          <span class="netacad-brand-mark">OS</span>
+          <div>
+            <strong>OS Odyssey Academy</strong>
+            <span id="lessonModuleKicker">MODULE</span>
+          </div>
+        </div>
+        <div class="player-bar-right">
+          <a href="course.html" class="player-course-btn" id="backToCourseBtn" title="Back to Course">
+            <span class="player-course-btn-icon">←</span>
+            <span>Course</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="netacad-player-grid">
+        <aside class="lesson-outline-panel" aria-label="Module outline">
+          <div class="netacad-tabs">
+            <button class="active" type="button">Course Outline</button>
+            <button type="button">Resources</button>
+          </div>
+          <div class="lesson-outline-list" id="lessonOutline"></div>
+        </aside>
+
+        <section class="lesson-reader">
+          <div class="lesson-topline">
+            <span id="lessonProgress">Statement 1 of 5</span>
+            <span id="lessonPhase">Review Phase</span>
+          </div>
+
+          <div class="reader-progress-strip" aria-hidden="true"><span id="lessonReaderProgress" style="width: 0%"></span></div>
+
+          <div class="lesson-heading">
+            <div>
+              <h2 id="lessonModuleTitle">Operating Systems</h2>
+            </div>
+            <span class="module-status-pill" id="moduleStatus">Review Mode</span>
+          </div>
+
+          <div class="lesson-body" id="lessonBody" aria-live="polite"></div>
+          <div class="answer-grid" id="answerGrid" hidden></div>
+          <div class="fill-answer" id="fillAnswer" hidden>
+            <label for="fillAnswerInput">Type your answer in the blank.</label>
+            <input id="fillAnswerInput" type="text" autocomplete="off" />
+          </div>
+          <p class="lesson-feedback" id="lessonFeedback" aria-live="polite"></p>
+
+          <div class="lesson-actions">
+            <button class="profile-button lesson-button secondary" type="button" id="lessonBackAction">Back</button>
+            <button class="profile-button lesson-button secondary" type="button" id="lessonSecondaryAction" hidden>Review Again</button>
+            <button class="profile-button lesson-button primary" type="button" id="lessonPrimaryAction">Next</button>
+          </div>
+        </section>
+      </div>
+    </article>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/module-content.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+
+</html>

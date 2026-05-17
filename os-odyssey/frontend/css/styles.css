@@ -1847,44 +1847,47 @@ a {
   padding: clamp(22px, 4vw, 34px);
 }
 
-.lesson-overlay {
+.lesson-fullpage {
   position: fixed;
   inset: 0;
   z-index: 300;
-  display: grid;
-  place-items: center;
-  padding: clamp(16px, 4vw, 42px);
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  color: #202833;
+
+  /* Force dark-theme variable overrides for white background */
+  --app-text: #1a1f36;
+  --app-muted: #4b5563;
+  --app-line: #d9e1ea;
+  --app-blue: #0b6fb3;
 }
 
-/* --- Fade-in when module overlay opens --- */
-.lesson-overlay.fade-in .lesson-backdrop {
-  animation: overlayBackdropIn 0.35s ease forwards;
+/* Force dark text colors inside lesson fullpage */
+.lesson-fullpage .lesson-body h3 { color: #05070a; }
+.lesson-fullpage .lesson-body p { color: #202833; }
+.lesson-fullpage .lesson-body strong { color: #05070a; }
+.lesson-fullpage .lesson-prompt { color: #2f7d32 !important; }
+.lesson-fullpage .lesson-topline { color: #4b5563; }
+.lesson-fullpage .lesson-heading h2 { color: #05070a; }
+.lesson-fullpage .lesson-feedback { color: #4b5563; }
+.lesson-fullpage .lesson-feedback.correct { color: #16a34a; }
+.lesson-fullpage .lesson-feedback.incorrect { color: #dc2626; }
+.lesson-fullpage .lesson-banner { background: rgba(105, 184, 79, 0.08); border-color: rgba(105, 184, 79, 0.3); }
+.lesson-fullpage .lesson-banner h3 { color: #05070a; }
+.lesson-fullpage .lesson-banner p { color: #202833; }
+.lesson-fullpage .blank-sentence { color: #202833; background: #f8fafc; border-color: #d9e1ea; }
+.lesson-fullpage .fill-answer input { color: #202833; background: #f8fafc; border-color: #d9e1ea; }
+.lesson-fullpage .fill-answer label { color: #0b6fb3; }
+
+/* --- Fade-in when full-page lesson opens --- */
+.lesson-fullpage.fade-in {
+  animation: fullpageFadeIn 0.3s ease both;
 }
 
-.lesson-overlay.fade-in .lesson-modal {
-  animation: overlayModalIn 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
-}
-
-@keyframes overlayBackdropIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes overlayModalIn {
-  from {
-    opacity: 0;
-    transform: scale(0.92) translateY(18px);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+@keyframes fullpageFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* --- Content fade-out / fade-in for statement & quiz transitions --- */
@@ -1920,19 +1923,24 @@ a {
   }
 }
 
-.lesson-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(3, 7, 18, 0.66);
+.fullpage-player {
+  flex: 1;
+  width: 100%;
+  height: 100vh;
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  background: #ffffff;
+  color: #202833;
+  display: flex;
+  flex-direction: column;
 }
 
-.lesson-modal {
-  position: relative;
-  z-index: 1;
-  width: min(880px, 100%);
-  max-height: min(820px, calc(100vh - 42px));
-  overflow-y: auto;
-  background: rgba(8, 13, 27, 0.97);
+.fullpage-player .netacad-player-grid {
+  flex: 1;
+  min-height: 0;
 }
 
 .lesson-heading {
@@ -1975,10 +1983,8 @@ body.lesson-open {
 }
 
 body.lesson-open .app-nav,
-body.lesson-open .dashboard-shell {
-  filter: blur(5px);
-  pointer-events: none;
-  user-select: none;
+body.lesson-open .course-shell {
+  display: none;
 }
 
 .lesson-topline {
@@ -2407,6 +2413,740 @@ body.lesson-open .dashboard-shell {
   min-width: 220px;
 }
 
+.course-launch-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: center;
+  margin-top: 54px;
+  padding: 28px;
+  border: 2px solid var(--app-line);
+  border-radius: 6px;
+  background: var(--app-panel);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.28);
+}
+
+.course-launch-section h2 {
+  margin: 10px 0 12px;
+  color: var(--app-text);
+  font-family: var(--font-pixel);
+  font-size: clamp(16px, 2.4vw, 24px);
+  line-height: 1.5;
+}
+
+.course-launch-section p {
+  max-width: 72ch;
+  color: var(--app-muted);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.7;
+}
+
+.course-launch-button {
+  min-width: 240px;
+  border-color: var(--orange);
+  color: #ffffff;
+  background: rgba(245, 166, 35, 0.18);
+}
+
+.course-shell {
+  width: min(100% - 32px, 1480px);
+  min-height: calc(100vh - 88px);
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 42px) 0 48px;
+}
+
+/* ---- Cisco-inspired course player ---- */
+.netacad-course {
+  margin-top: 54px;
+  overflow: hidden;
+  border: 1px solid #d9e1ea;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1f2933;
+  box-shadow: 0 18px 48px rgba(7, 16, 32, 0.28);
+}
+
+.dashboard-page .netacad-course {
+  width: min(100vw - 28px, 1440px);
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+.netacad-course.standalone {
+  min-height: calc(100vh - 152px);
+  margin-top: 0;
+}
+
+.netacad-course.standalone .netacad-workspace {
+  min-height: calc(100vh - 214px);
+}
+
+.netacad-shell-header,
+.netacad-player-bar {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 0 20px;
+  border-bottom: 1px solid #d9e1ea;
+  background:
+    repeating-linear-gradient(135deg, rgba(31, 117, 191, 0.035) 0 1px, transparent 1px 16px),
+    #ffffff;
+}
+
+.netacad-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  color: #202833;
+}
+
+.netacad-brand-mark {
+  width: 48px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #cdd6df;
+  color: #0b6fb3;
+  font-family: Arial, sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.netacad-brand-lockup strong,
+.netacad-brand-lockup span {
+  display: block;
+  line-height: 1.25;
+}
+
+.netacad-brand-lockup strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.netacad-brand-lockup span {
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.netacad-tools,
+.player-icons {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  align-self: stretch;
+}
+
+.netacad-tool,
+.player-icons span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 3px solid transparent;
+  color: #1f2933;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.netacad-tool.active,
+.player-icons span.active {
+  border-bottom-color: #69b84f;
+  color: #2f7d32;
+}
+
+.netacad-workspace {
+  display: grid;
+  grid-template-columns: 304px minmax(0, 1fr);
+  min-height: 520px;
+}
+
+.netacad-sidebar,
+.lesson-outline-panel {
+  border-right: 1px solid #d9e1ea;
+  background: #f8fafc;
+}
+
+.netacad-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 54px;
+  border-bottom: 1px solid #d9e1ea;
+}
+
+.netacad-tabs button {
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #4b5563;
+  font: 800 12px var(--font-body);
+  cursor: pointer;
+}
+
+.netacad-tabs button.active {
+  border-bottom-color: #69b84f;
+  color: #2f7d32;
+  background: #ffffff;
+}
+
+.netacad-search {
+  display: block;
+  padding: 16px;
+  border-bottom: 1px solid #e5ebf1;
+}
+
+.netacad-search span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.netacad-search input {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #d9e1ea;
+  border-radius: 2px;
+  color: #202833;
+  font: 700 13px var(--font-body);
+}
+
+.course-outline-list,
+.lesson-outline-list {
+  display: grid;
+  gap: 0;
+}
+
+.course-outline-module,
+.lesson-outline-item {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-height: 72px;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid #e5ebf1;
+  background: transparent;
+  color: #202833;
+  text-align: left;
+  cursor: pointer;
+}
+
+.course-outline-module:hover,
+.course-outline-module.active,
+.lesson-outline-item:hover,
+.lesson-outline-item.active {
+  background: #e9f8e4;
+}
+
+.outline-check,
+.outline-dot {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #69b84f;
+  border-radius: 999px;
+  color: #2f7d32;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.course-outline-module strong,
+.lesson-outline-item strong {
+  display: block;
+  color: #202833;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.course-outline-module em,
+.lesson-outline-item em {
+  display: block;
+  margin-top: 4px;
+  color: #667085;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.course-outline-module small {
+  color: #4b5563;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.netacad-reader-preview {
+  min-width: 0;
+  background: #ffffff;
+}
+
+.reader-topline {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 0 22px;
+  border-bottom: 1px solid #e5ebf1;
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.reader-progress-strip {
+  height: 4px;
+  background: #eef2f6;
+}
+
+.reader-progress-strip span {
+  display: block;
+  height: 100%;
+  background: #69b84f;
+  transition: width 0.25s ease;
+}
+
+.reader-content-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+  gap: 44px;
+  align-items: start;
+  padding: clamp(30px, 5vw, 72px);
+}
+
+.reader-content-split .section-kicker {
+  color: #0b6fb3;
+}
+
+.reader-content-split h1,
+.reader-content-split h2 {
+  margin: 12px 0 18px;
+  color: #05070a;
+  font-family: var(--font-body);
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.reader-content-split p {
+  max-width: 68ch;
+  color: #202833;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.reader-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.reader-topic-stack {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #d9e1ea;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  min-width: 280px;
+}
+
+/* -- Progress panel header -- */
+.progress-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+}
+
+.progress-panel-title {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 10px;
+  color: #1a1f36;
+  letter-spacing: 0.04em;
+}
+
+.progress-panel-overall {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 800;
+  color: #16a34a;
+}
+
+/* -- Overall progress bar -- */
+.progress-panel-bar-wrap {
+  height: 6px;
+  background: #e5ebf1;
+  border-radius: 3px;
+  margin: 4px 16px 12px;
+  overflow: hidden;
+}
+
+.progress-panel-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+/* -- Stats row -- */
+.progress-panel-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  padding: 0 8px 12px;
+  border-bottom: 1px solid #e5ebf1;
+}
+
+.progress-stat-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+}
+
+.progress-stat-num {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 14px;
+  color: #1a1f36;
+}
+
+.progress-stat-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  color: #667085;
+  text-align: center;
+}
+
+/* -- Per-module progress rows -- */
+.progress-module-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 56px;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 1px solid #f0f3f7;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-body);
+  transition: background 0.15s ease;
+}
+
+.progress-module-row:last-child {
+  border-bottom: 0;
+}
+
+.progress-module-row:hover {
+  background: #f8fafc;
+}
+
+.progress-module-row.completed {
+  background: #f0fdf4;
+}
+
+.progress-module-row.in-progress {
+  background: #fffbeb;
+}
+
+.progress-module-icon {
+  display: none;
+}
+
+.progress-module-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.progress-module-info strong {
+  font-size: 12px;
+  font-weight: 800;
+  color: #1a1f36;
+}
+
+.progress-module-info em {
+  font-size: 11px;
+  font-weight: 600;
+  color: #667085;
+  font-style: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* -- Per-module mini bar -- */
+.progress-module-bar-wrap {
+  height: 4px;
+  background: #e5ebf1;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.progress-module-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.progress-module-status {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+
+.netacad-player.fullpage-player {
+  /* Override dark-theme app variables for white background */
+  --app-text: #1a1f36;
+  --app-muted: #4b5563;
+  --app-line: #d9e1ea;
+  --app-blue: #0b6fb3;
+
+  width: 100%;
+  height: 100vh;
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  background: #ffffff;
+  color: #202833;
+  box-shadow: none;
+}
+
+.player-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.player-course-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border: 1px solid #69b84f;
+  border-radius: 4px;
+  background: #69b84f;
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.player-course-btn:hover {
+  background: #5aa842;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(90, 168, 66, 0.35);
+}
+
+.player-course-btn-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.netacad-player-grid {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  height: calc(100% - 62px);
+}
+
+.lesson-reader {
+  min-width: 0;
+  overflow-y: auto;
+  padding: 0 clamp(26px, 5vw, 72px) 34px;
+  background: #ffffff;
+}
+
+.netacad-player .lesson-topline {
+  min-height: 50px;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid #e5ebf1;
+  color: #4b5563;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.netacad-player .lesson-heading {
+  align-items: flex-start;
+  margin: clamp(34px, 5vw, 58px) 0 32px;
+}
+
+.netacad-player .lesson-heading h2 {
+  color: #05070a;
+  font-family: var(--font-body);
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.netacad-player .module-status-pill {
+  border: 1px solid #69b84f;
+  background: #e9f8e4;
+  color: #2f7d32;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.netacad-player .lesson-body {
+  min-height: 260px;
+}
+
+.netacad-player .lesson-body h3 {
+  color: #05070a;
+  font-family: var(--font-body);
+  font-size: clamp(22px, 2.5vw, 32px);
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.netacad-player .lesson-body p {
+  max-width: 82ch;
+  color: #202833;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.78;
+}
+
+.netacad-player .lesson-topic-label {
+  width: fit-content;
+  margin-bottom: 18px;
+  padding: 7px 11px;
+  border-left: 4px solid #69b84f;
+  background: #f1f8ee;
+  color: #2f7d32 !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1.35 !important;
+}
+
+.netacad-player .lesson-body strong {
+  color: #05070a;
+}
+
+.netacad-player .lesson-prompt {
+  color: #2f7d32 !important;
+}
+
+.lesson-outline-section {
+  padding: 14px 16px 8px;
+  border-bottom: 1px solid #e5ebf1;
+  color: #0b6fb3;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.lesson-outline-item {
+  grid-template-columns: 40px minmax(0, 1fr);
+  min-height: 62px;
+}
+
+.lesson-outline-item.complete .outline-dot {
+  background: #69b84f;
+  color: #ffffff;
+}
+
+.lesson-outline-item.locked {
+  opacity: 0.64;
+  cursor: default;
+}
+
+.netacad-player .answer-option {
+  border: 1px solid #d9e1ea;
+  background: #f8fafc;
+  color: #202833;
+}
+
+.netacad-player .answer-option strong {
+  color: #0b6fb3;
+}
+
+.netacad-player .blank-sentence,
+.netacad-player .fill-answer input {
+  border-color: #d9e1ea;
+  background: #f8fafc;
+  color: #202833;
+}
+
+.netacad-player .fill-answer label {
+  color: #0b6fb3;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.netacad-player .lesson-actions {
+  justify-content: flex-end;
+  padding-top: 18px;
+  border-top: 1px solid #e5ebf1;
+}
+
+.netacad-player .lesson-button {
+  min-width: 146px;
+  border: 1px solid #aebdcc;
+  box-shadow: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.netacad-player .lesson-button.primary {
+  border-color: #69b84f;
+  background: #69b84f;
+  color: #ffffff;
+}
+
+.netacad-player .lesson-button.secondary {
+  background: #ffffff;
+  color: #202833;
+}
+
+.netacad-player .lesson-button:disabled {
+  border-color: #d9e1ea;
+  background: #f8fafc;
+  color: #9aa6b2;
+}
+
+.netacad-player .lesson-close {
+  top: 14px;
+  right: 14px;
+  z-index: 4;
+  border: 0;
+  background: transparent;
+  color: #202833;
+  box-shadow: none;
+}
+
 /* ---- Entrance Animations ---- */
 @keyframes fadeInUp {
   from {
@@ -2492,8 +3232,34 @@ body.lesson-open .dashboard-shell {
     gap: 36px;
   }
 
+  .course-launch-section {
+    grid-template-columns: 1fr;
+  }
+
   .module-launch-grid {
     grid-template-columns: 1fr;
+  }
+
+  .netacad-workspace,
+  .netacad-player-grid,
+  .reader-content-split {
+    grid-template-columns: 1fr;
+  }
+
+  .netacad-sidebar,
+  .lesson-outline-panel {
+    border-right: 0;
+    border-bottom: 1px solid #d9e1ea;
+  }
+
+  .lesson-outline-panel {
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .netacad-player.fullpage-player {
+    height: 100vh;
+    border-radius: 0;
   }
 
   .dashboard-side {
@@ -2550,7 +3316,8 @@ body.lesson-open .dashboard-shell {
   }
 
   .dashboard-shell,
-  .character-shell {
+  .character-shell,
+  .course-shell {
     width: min(100% - 24px, 1152px);
     padding-top: 34px;
   }
@@ -2604,5 +3371,40 @@ body.lesson-open .dashboard-shell {
 
   .profile-stats {
     grid-template-columns: 1fr;
+  }
+
+  .netacad-shell-header,
+  .netacad-player-bar {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 14px;
+  }
+
+  .netacad-tools,
+  .player-icons {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .course-outline-module {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .course-outline-module small {
+    grid-column: 2;
+  }
+
+  .reader-content-split,
+  .lesson-reader {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .topic-row {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .topic-row em {
+    grid-column: 2;
   }
 }

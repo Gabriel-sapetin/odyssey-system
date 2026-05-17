@@ -120,8 +120,8 @@
 
   /* ---- Module stats metadata (update as new modules are built) ---- */
   const MODULE_META = [
-    { id: 'module1', statements: 5 },
-    { id: 'module2', statements: 5 },
+    { id: 'module1', statements: 15 },
+    { id: 'module2', statements: 15 },
     { id: 'module3', statements: 15 },
     { id: 'module4', statements: 25 }
   ];
@@ -134,14 +134,18 @@
     return MODULE_META.reduce((sum, m) => sum + m.statements, 0);
   }
 
-  /* ============================================================
-     BADGE SYSTEM
-     ============================================================ */
+  function isModuleTopicsDone(moduleId) {
+    return localStorage.getItem('os-odyssey-topics-done-' + moduleId) === 'true';
+  }
+
+  function markModuleTopicsDone(moduleId) {
+    localStorage.setItem('os-odyssey-topics-done-' + moduleId, 'true');
+  }
+
   const BADGE_DEFS = [
-    // Module completion badges
-    { id: 'badge_module1', name: 'OS Pioneer', icon: '🏅', color: '#f5a623', desc: 'Completed Module 1: Introduction to Operating Systems', trigger: 'module1' },
-    { id: 'badge_module2', name: 'Arch Crafter', icon: '🛡️', color: '#20a7ff', desc: 'Completed Module 2: Operating-System Structures', trigger: 'module2' },
-    { id: 'badge_module3', name: 'Process Master', icon: '⚙️', color: '#22c55e', desc: 'Completed Module 3: Processes', trigger: 'module3' },
+    { id: 'badge_module1', name: 'OS Pioneer', icon: '🖥️', color: '#22c55e', desc: 'Completed Module 1: Introduction to Operating Systems', trigger: 'module1' },
+    { id: 'badge_module2', name: 'System Architect', icon: '🏗️', color: '#3b82f6', desc: 'Completed Module 2: Operating-System Structures', trigger: 'module2' },
+    { id: 'badge_module3', name: 'Process Master', icon: '⚙️', color: '#f59e0b', desc: 'Completed Module 3: Processes', trigger: 'module3' },
     { id: 'badge_module4', name: 'Thread Weaver', icon: '🧵', color: '#e879f9', desc: 'Completed Module 4: Threads', trigger: 'module4' },
     // Simulation interaction badges
     { id: 'badge_sim_boot', name: 'Boot Commander', icon: '⚡', color: '#7c3aed', desc: 'Interacted with the Boot & Interrupts simulator', trigger: 'sim_boot' },
@@ -447,6 +451,7 @@
     if (saved) {
       activeProfile = { ...activeProfile, ...saved };
       updateProgressDisplay(activeProfile);
+      renderCourseProgressPanel();
     }
   }
 
@@ -520,7 +525,7 @@
 
     if (!user) {
       // Redirect away from dashboard if not logged in
-      if (document.body.classList.contains('dashboard-page')) {
+      if (document.body.classList.contains('dashboard-page') || document.body.classList.contains('course-page')) {
         window.location.href = 'login.html';
       }
       return;
@@ -560,6 +565,9 @@
 
     // Update streak on each session
     updateStreak();
+
+    // Update course progress panel (if on course page)
+    renderCourseProgressPanel();
 
     // Set personalized welcome text for typewriter
     const typewriterEl = document.getElementById('typewriterText');
@@ -778,12 +786,80 @@
   renderSessionUI();
   loadPlatformStats();
 
+  /* ---- Course page: Live progress panel (right side) ---- */
+  function renderCourseProgressPanel() {
+    const panel = document.getElementById('courseProgressPanel');
+    if (!panel) return;
+
+    const MODULE_LABELS = {
+      module1: { num: '1', title: 'Introduction to Operating Systems', color: '#22c55e' },
+      module2: { num: '2', title: 'Operating-System Structures', color: '#3b82f6' },
+      module3: { num: '3', title: 'Processes', icon: '⚙️', color: '#f59e0b' },
+      module4: { num: '4', title: 'Threads', icon: '🧵', color: '#e879f9' }
+    };
+
+    const completedModules = (activeProfile && activeProfile.completed_modules) ? activeProfile.completed_modules : [];
+    const totalModules = MODULE_META.length;
+    const completedCount = completedModules.length;
+    const overallPct = Math.round((completedCount / totalModules) * 100);
+
+    let html = `
+      <div class="progress-panel-header">
+        <span class="progress-panel-title">Your Progress</span>
+        <span class="progress-panel-overall">${overallPct}% Complete</span>
+      </div>
+      <div class="progress-panel-bar-wrap">
+        <div class="progress-panel-bar" style="width: ${overallPct}%"></div>
+      </div>
+      <div class="progress-panel-stats-row">
+        <div class="progress-stat-mini">
+          <span class="progress-stat-num">${completedCount}</span>
+          <span class="progress-stat-label">Modules Done</span>
+        </div>
+        <div class="progress-stat-mini">
+          <span class="progress-stat-num">${totalModules}</span>
+          <span class="progress-stat-label">Total Modules</span>
+        </div>
+        <div class="progress-stat-mini">
+          <span class="progress-stat-num">${getTotalTopics()}</span>
+          <span class="progress-stat-label">Total Topics</span>
+        </div>
+      </div>
+    `;
+
+    MODULE_META.forEach(meta => {
+      const label = MODULE_LABELS[meta.id] || { num: '?', title: meta.id, color: '#94a3b8' };
+      const isDone = completedModules.includes(meta.id);
+      const topicsDone = isModuleTopicsDone(meta.id);
+      const statusClass = isDone ? 'completed' : 'in-progress';
+      const statusText = isDone ? '✓ Completed' : 'In Progress';
+      const topicPct = isDone ? 100 : 15;
+
+      html += `
+        <button class="progress-module-row ${statusClass}" type="button" data-start-module="${meta.id}">
+
+          <span class="progress-module-info">
+            <strong>Module ${label.num}</strong>
+            <em>${label.title}</em>
+            <span class="progress-module-bar-wrap">
+              <span class="progress-module-bar" style="width: ${topicPct}%; background: ${label.color}"></span>
+            </span>
+          </span>
+          <span class="progress-module-status" style="color: ${isDone ? '#16a34a' : '#f59e0b'}">${statusText}</span>
+        </button>
+      `;
+    });
+
+    panel.innerHTML = html;
+  }
+
+  renderCourseProgressPanel();
+
   /* ---- Typewriter animation for welcome speech bubble ---- */
   function startTypewriter() {
     const textEl = document.getElementById('typewriterText');
     const cursorEl = document.getElementById('typewriterCursor');
     if (!textEl || !cursorEl) return;
-
     const fullText = textEl.getAttribute('data-full-text') || '';
     if (!fullText) return;
 
@@ -1475,6 +1551,22 @@
     }
   };
 
+  const importedCiscoModules = window.OS_ODYSSEY_CISCO_MODULES || {};
+  ['module1', 'module2'].forEach((moduleId) => {
+    const imported = importedCiscoModules[moduleId];
+    if (!imported || !Array.isArray(imported.review) || !Array.isArray(imported.quiz)) return;
+
+    const review = imported.review.length === 16 ? imported.review.slice(1) : imported.review;
+    if (review.length !== 15 || imported.quiz.length !== 20) return;
+
+    modules[moduleId] = {
+      ...modules[moduleId],
+      ...imported,
+      review,
+      quizType: 'multiple-choice'
+    };
+  });
+
   // Expose full module content globally for profile.js to derive stats dynamically
   window.OS_ODYSSEY_MODULES = modules;
 
@@ -1486,11 +1578,14 @@
       phase: document.getElementById('lessonPhase'),
       status: document.getElementById('moduleStatus'),
       body: document.getElementById('lessonBody'),
+      outline: document.getElementById('lessonOutline'),
+      readerProgress: document.getElementById('lessonReaderProgress'),
       answerGrid: document.getElementById('answerGrid'),
       fillWrap: document.getElementById('fillAnswer'),
       fillInput: document.getElementById('fillAnswerInput'),
       feedback: document.getElementById('lessonFeedback'),
       primaryAction: document.getElementById('lessonPrimaryAction'),
+      backAction: document.getElementById('lessonBackAction'),
       secondaryAction: document.getElementById('lessonSecondaryAction')
     };
 
@@ -1502,11 +1597,112 @@
       correct: 0,
       correctConcept: 0,
       correctCoding: 0,
-      answered: false
+      answered: false,
+      topicsCompleted: false
+    };
+
+    const MODULE_OUTLINES = {
+      module1: [
+        { code: '1.1', title: 'What is an Operating System?', pages: 3 },
+        { code: '1.2', title: 'Computer System Structure', pages: 3 },
+        { code: '1.3', title: 'Interrupts & Computer Startup', pages: 3 },
+        { code: '1.4', title: 'Storage Hierarchy & Caching', pages: 3 },
+        { code: '1.5', title: 'Processes, Multiprogramming & Protection', pages: 3 }
+      ],
+      module2: [
+        { code: '2.1', title: 'OS Services', pages: 3 },
+        { code: '2.2', title: 'System Calls & Parameter Passing', pages: 3 },
+        { code: '2.3', title: 'Types of System Calls', pages: 3 },
+        { code: '2.4', title: 'OS Design Principles & Structure Types', pages: 3 },
+        { code: '2.5', title: 'System Programs, Debugging & Boot', pages: 3 }
+      ],
+      module3: [
+        { code: '3.1', title: 'What is a Process?', pages: 3 },
+        { code: '3.2', title: 'Process Scheduling', pages: 3 },
+        { code: '3.3', title: 'Process Creation & Termination', pages: 3 },
+        { code: '3.4', title: 'Interprocess Communication (IPC)', pages: 3 },
+        { code: '3.5', title: 'Client-Server Communication', pages: 3 }
+      ],
+      module4: [
+        { code: 'Section A', title: 'Concepts', pages: 0, heading: true },
+        { code: '4.1', title: 'Thread Basics & Benefits', pages: 5 },
+        { code: '4.2', title: "Multicore Programming & Amdahl's Law", pages: 4 },
+        { code: '4.3', title: 'Multithreading Models & Thread Libraries', pages: 5 },
+        { code: '4.4', title: 'Implicit Threading & Threading Issues', pages: 6 },
+        { code: 'Section B', title: 'Coding', pages: 0, heading: true },
+        { code: '4.5', title: 'Threading Code Walkthroughs', pages: 5 }
+      ]
     };
 
     function currentModule() {
       return modules[state.activeModuleId];
+    }
+
+    function outlineRows(moduleId) {
+      return MODULE_OUTLINES[moduleId] || [];
+    }
+
+    function outlineProgress(index, rows) {
+      let cursor = 0;
+      return rows.map(row => {
+        if (row.heading) return { ...row, start: cursor, end: cursor };
+        const start = cursor;
+        cursor += row.pages;
+        return { ...row, start, end: cursor };
+      });
+    }
+
+    function syncCourseButtons(moduleId) {
+      document.querySelectorAll('.course-outline-module').forEach(button => {
+        button.classList.toggle('active', button.dataset.startModule === moduleId);
+      });
+    }
+
+    function updateLessonOutline() {
+      if (!elements.outline) return;
+      const module = currentModule();
+      if (!module) return;
+
+      const rows = outlineProgress(state.activeModuleId, outlineRows(state.activeModuleId));
+      const totalPages = module.review.length;
+      const completedPages = state.mode === 'review' ? state.reviewIndex : totalPages;
+      const activeReviewIndex = state.mode === 'review' ? state.reviewIndex : -1;
+      const percent = state.mode === 'review'
+        ? Math.round((state.reviewIndex / totalPages) * 100)
+        : 100;
+
+      if (elements.readerProgress) elements.readerProgress.style.width = `${percent}%`;
+
+      const outlineHtml = rows.map(row => {
+        if (row.heading) {
+          return `<div class="lesson-outline-section">${row.code} - ${row.title}</div>`;
+        }
+
+        const done = Math.max(0, Math.min(row.pages, completedPages - row.start));
+        const active = activeReviewIndex >= row.start && activeReviewIndex < row.end;
+        const complete = done === row.pages;
+        return `
+          <button class="lesson-outline-item ${active ? 'active' : ''} ${complete ? 'complete' : ''}" type="button" data-outline-start="${row.start}">
+            <span class="outline-dot">${complete ? 'OK' : row.code}</span>
+            <span>
+              <strong>${row.code} ${row.title}</strong>
+              <em>${done} / ${row.pages}</em>
+            </span>
+          </button>
+        `;
+      }).join('');
+
+      const quizUnlocked = state.mode !== 'review' || state.topicsCompleted;
+      elements.outline.innerHTML = `
+        ${outlineHtml}
+        <button class="lesson-outline-item quiz ${quizUnlocked ? 'complete active' : 'locked'}" type="button" ${quizUnlocked ? '' : 'disabled'}>
+          <span class="outline-dot">Q</span>
+          <span>
+            <strong>Module Quiz</strong>
+            <em>${quizUnlocked ? 'Unlocked' : 'Locked'}</em>
+          </span>
+        </button>
+      `;
     }
 
     function questionType(module, item) {
@@ -1533,6 +1729,19 @@
       return code ? `<pre class="lesson-code"><code>${escapeHtml(code)}</code></pre>` : '';
     }
 
+    function renderLessonCopy(body) {
+      return String(body || '').trim().startsWith('<')
+        ? body
+        : `<p>${body}</p>`;
+    }
+
+    function updateBackAction() {
+      if (!elements.backAction) return;
+      const canGoBack = (state.mode === 'review' && state.reviewIndex > 0)
+        || (state.mode === 'quiz' && !state.answered && state.quizIndex > 0);
+      elements.backAction.disabled = !canGoBack;
+    }
+
     function openModule(moduleId) {
       if (!modules[moduleId]) return;
 
@@ -1544,6 +1753,8 @@
       state.correctConcept = 0;
       state.correctCoding = 0;
       state.answered = false;
+      state.topicsCompleted = isModuleTopicsDone(moduleId);
+      syncCourseButtons(moduleId);
 
       // Fade-in the overlay on open
       moduleOverlay.classList.remove('fade-in');
@@ -1573,6 +1784,8 @@
       elements.feedback.className = 'lesson-feedback';
       elements.feedback.textContent = '';
       elements.secondaryAction.hidden = true;
+      if (elements.backAction) elements.backAction.hidden = false;
+      updateBackAction();
     }
 
     /* -- Content fade helpers -- */
@@ -1624,6 +1837,7 @@
       elements.progress.textContent = `Statement ${state.reviewIndex + 1} of ${module.review.length} [${itemSectionLabel('review', state.reviewIndex, statement)}]`;
       elements.phase.textContent = 'Review Phase';
       elements.status.textContent = 'Review Mode';
+      updateLessonOutline();
       elements.primaryAction.textContent = isLastReview ? 'Start Quiz' : 'Next';
       elements.primaryAction.disabled = false;
       const intro = state.reviewIndex === 0 && module.intro ? module.intro : '';
@@ -1632,7 +1846,7 @@
         ${intro}
         ${transition}
         <h3>${statement.title}</h3>
-        <p>${statement.body}</p>
+        ${renderLessonCopy(statement.body)}
         ${renderCodeBlock(statement.code)}
         <p class="lesson-prompt">${isLastReview
           ? `🎉 You've completed all ${module.review.length} review statements! The quiz is now unlocked. Press <strong>[Start Quiz]</strong> to begin.`
@@ -1651,6 +1865,7 @@
       elements.progress.textContent = `Question ${state.quizIndex + 1} of ${module.quiz.length} [${itemSectionLabel('quiz', state.quizIndex, item)}]`;
       elements.phase.textContent = 'Quiz Phase';
       elements.status.textContent = 'Quiz Mode';
+      updateLessonOutline();
       elements.primaryAction.disabled = type === 'multiple-choice';
       elements.primaryAction.textContent = type === 'multiple-choice' ? 'Choose an answer' : 'Submit Answer';
       const intro = state.quizIndex === 0 && module.quizIntro ? module.quizIntro : '';
@@ -1686,10 +1901,18 @@
     }
 
     function scoreMessage(module, score) {
+      if (state.activeModuleId === 'module1') {
+        if (score >= 18) return "Outstanding! You've fully mastered the OS foundations.";
+        if (score >= 14) return "Great work! Review the questions you missed and reinforce those concepts.";
+        if (score >= 10) return 'Good effort - re-read the relevant pages and try again.';
+        return "Re-read all Module 1 sections carefully and retake the quiz. You've got this!";
+      }
+
       if (state.activeModuleId === 'module2') {
-        if (score === 3) return "Perfect score! You've mastered Module 2.";
-        if (score === 2) return "Great job! Review the one you missed and you'll have it down.";
-        return "Keep going - re-reading the review statements will help a lot. You've got this!";
+        if (score >= 18) return "Outstanding! You've fully mastered OS Structures.";
+        if (score >= 14) return 'Great work! Review the questions you missed and reinforce those concepts.';
+        if (score >= 10) return 'Good effort - re-read the relevant pages and try again.';
+        return "Re-read all Module 2 sections carefully and retake the quiz. You've got this!";
       }
 
       if (state.activeModuleId === 'module3') {
@@ -1717,9 +1940,11 @@
       elements.progress.textContent = 'Quiz Complete';
       elements.phase.textContent = 'Summary';
       elements.status.textContent = 'Complete';
+      updateLessonOutline();
       elements.primaryAction.textContent = 'Retry Quiz';
       elements.primaryAction.disabled = false;
       elements.secondaryAction.hidden = false;
+      if (elements.backAction) elements.backAction.hidden = true;
       if (state.activeModuleId === 'module4') {
         elements.body.innerHTML = `
           <h3>Your Score: ${state.correct} / ${module.quiz.length}</h3>
@@ -1829,6 +2054,7 @@
       elements.feedback.textContent = feedbackText;
       elements.primaryAction.disabled = false;
       elements.primaryAction.textContent = state.quizIndex === currentModule().quiz.length - 1 ? 'See Summary' : 'Next Question';
+      updateBackAction();
     }
 
     function handlePrimaryAction() {
@@ -1842,6 +2068,9 @@
           return;
         }
 
+        // Persist that all topics have been reviewed
+        markModuleTopicsDone(state.activeModuleId);
+        state.topicsCompleted = true;
         state.quizIndex = 0;
         state.correct = 0;
         state.correctConcept = 0;
@@ -1884,6 +2113,22 @@
       }
     }
 
+    function handleBackAction() {
+      const module = currentModule();
+      if (!module) return;
+
+      if (state.mode === 'review' && state.reviewIndex > 0) {
+        state.reviewIndex -= 1;
+        transitionContent(() => renderReview());
+        return;
+      }
+
+      if (state.mode === 'quiz' && !state.answered && state.quizIndex > 0) {
+        state.quizIndex -= 1;
+        transitionContent(() => renderQuestion());
+      }
+    }
+
     function handleMultipleChoice(optionButton) {
       const module = currentModule();
       const item = module.quiz[state.quizIndex];
@@ -1915,7 +2160,22 @@
       button.addEventListener('click', closeModule);
     });
 
+    // Course button — exit learning/quiz mode without page reload
+    const courseBtn = document.getElementById('backToCourseBtn');
+    if (courseBtn) {
+      courseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeModule();
+        if (window.location.hash) {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      });
+    }
+
     elements.primaryAction.addEventListener('click', handlePrimaryAction);
+    if (elements.backAction) {
+      elements.backAction.addEventListener('click', handleBackAction);
+    }
     elements.secondaryAction.addEventListener('click', () => {
       state.reviewIndex = 0;
       state.quizIndex = 0;
@@ -1929,6 +2189,30 @@
       const optionButton = event.target.closest('[data-answer-index]');
       if (optionButton) handleMultipleChoice(optionButton);
     });
+
+    if (elements.outline) {
+      elements.outline.addEventListener('click', (event) => {
+        // Handle topic outline clicks — always accessible
+        const outlineButton = event.target.closest('[data-outline-start]');
+        if (outlineButton) {
+          state.mode = 'review';
+          state.reviewIndex = Number(outlineButton.dataset.outlineStart);
+          state.answered = false;
+          transitionContent(() => renderReview());
+          return;
+        }
+
+        // Handle quiz button click (when unlocked)
+        const quizButton = event.target.closest('.lesson-outline-item.quiz');
+        if (quizButton && !quizButton.disabled) {
+          state.quizIndex = 0;
+          state.correct = 0;
+          state.correctConcept = 0;
+          state.correctCoding = 0;
+          transitionContent(() => renderQuestion());
+        }
+      });
+    }
 
     document.addEventListener('keydown', (event) => {
       if (moduleOverlay.hidden || state.mode !== 'quiz' || state.answered) return;
