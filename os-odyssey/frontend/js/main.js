@@ -4,6 +4,9 @@
 
   const DEFAULT_AVATAR = '../../assets/penguin-flower-removebg-preview.png';
   const DEFAULT_CHARACTER = 'Kernel Penguin';
+  const SIGNUP_REQUIRED_CHARACTER = '__signup_required__';
+  const GOOGLE_AUTH_MODE_KEY = 'os-odyssey-google-auth-mode';
+  const AUTH_MESSAGE_KEY = 'os-odyssey-auth-message';
   let activeProfile = null;
 
   /* ---- Global Background Music ---- */
@@ -591,7 +594,7 @@
   }
 
   function showAuthError(message) {
-    const form = document.querySelector('.auth-form');
+    const form = document.querySelector('.auth-form') || document.querySelector('.character-panel');
     if (!form) return;
 
     let error = form.querySelector('.auth-error');
@@ -620,6 +623,12 @@
     }
 
     success.textContent = message;
+  }
+
+  const pendingAuthMessage = sessionStorage.getItem(AUTH_MESSAGE_KEY);
+  if (pendingAuthMessage) {
+    sessionStorage.removeItem(AUTH_MESSAGE_KEY);
+    showAuthError(pendingAuthMessage);
   }
 
   /* ---- Theme Toggle (landing page) ---- */
@@ -951,36 +960,68 @@
     });
   }
 
-  /* ---- Handle auth callback (email confirm + Google OAuth) ---- */
-  // When Supabase redirects back (email confirmation, Google OAuth, etc.),
-  // tokens appear in the URL hash. This listener detects the SIGNED_IN event
-  // and redirects appropriately.
+  function isRecentlyCreatedUser(user) {
+    if (!user?.created_at) return false;
+
+    const createdAt = new Date(user.created_at).getTime();
+    if (Number.isNaN(createdAt)) return false;
+
+    return Date.now() - createdAt < 120000;
+  }
+
+  /* ---- Handle auth callback (Google OAuth) ---- */
+  // Google signup stays on character-select. Google login either moves a
+  // known user to the dashboard or rejects an account that OAuth just created.
   supa.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session) {
       const path = window.location.pathname;
-      const isAuthPage = path.includes('confirm') || path.includes('login') || path.includes('signup');
       const isCharacterPage = path.includes('character-select');
+      const googleAuthMode = sessionStorage.getItem(GOOGLE_AUTH_MODE_KEY);
 
-      if (isAuthPage) {
-        // Coming from login/signup/confirm — go to character select for new users
-        window.location.href = 'character-select.html';
-      } else if (isCharacterPage) {
-        // Google OAuth callback lands on character-select — check if returning user
-        try {
-          const { data: profile } = await supa
-            .from('profiles')
-            .select('character')
-            .eq('id', session.user.id)
-            .single();
+      if (!isCharacterPage || !googleAuthMode) {
+        return;
+      }
 
-          if (profile && profile.character) {
-            // Returning user with a character already — go to dashboard
-            window.location.href = 'dashboard.html';
-          }
-          // Otherwise, stay on character-select (new user flow)
-        } catch {
-          // Profile doesn't exist yet — stay on character-select
-        }
+      sessionStorage.removeItem(GOOGLE_AUTH_MODE_KEY);
+
+      let profile = null;
+      if (googleAuthMode === 'login') {
+        const { data } = await supa
+          .from('profiles')
+          .select('character')
+          .eq('id', session.user.id)
+          .single();
+        profile = data;
+      }
+
+      const needsSignup = profile?.character === SIGNUP_REQUIRED_CHARACTER;
+      const justCreatedByGoogleLogin = googleAuthMode === 'login' && isRecentlyCreatedUser(session.user);
+
+      if (justCreatedByGoogleLogin) {
+        await supa
+          .from('profiles')
+          .update({
+            character: SIGNUP_REQUIRED_CHARACTER,
+            avatar: DEFAULT_AVATAR
+          })
+          .eq('id', session.user.id);
+      }
+
+      if (googleAuthMode === 'login' && (needsSignup || justCreatedByGoogleLogin)) {
+        await supa.auth.signOut();
+        sessionStorage.setItem(
+          AUTH_MESSAGE_KEY,
+          'Please sign up first. Your account is not signed up yet.'
+        );
+        window.location.href = 'login.html';
+        return;
+      }
+
+      if (googleAuthMode === 'login') {
+        window.location.href = 'dashboard.html';
+        return;
+      } else if (googleAuthMode === 'signup') {
+        return;
       }
     }
   });
@@ -1010,6 +1051,9 @@
       btn.style.opacity = '0.7';
 
       try {
+        const authMode = btn.id === 'googleLoginBtn' ? 'login' : 'signup';
+        sessionStorage.setItem(GOOGLE_AUTH_MODE_KEY, authMode);
+
         const { error } = await supa.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -1017,6 +1061,7 @@
           }
         });
         if (error) {
+          sessionStorage.removeItem(GOOGLE_AUTH_MODE_KEY);
           showAuthError(error.message);
           btn.innerHTML = originalContent;
           btn.disabled = false;
@@ -1024,6 +1069,7 @@
         }
         // If no error, the browser will redirect to Google — no need to reset button
       } catch (err) {
+        sessionStorage.removeItem(GOOGLE_AUTH_MODE_KEY);
         showAuthError('Failed to connect to Google. Please try again.');
         btn.innerHTML = originalContent;
         btn.disabled = false;
@@ -1045,8 +1091,9 @@
   (async () => {
     const user = await getCurrentUser();
     if (user) {
+      const savedCharacter = user.character === SIGNUP_REQUIRED_CHARACTER ? DEFAULT_CHARACTER : user.character;
       selectedCharacter = {
-        name: user.character || DEFAULT_CHARACTER,
+        name: savedCharacter || DEFAULT_CHARACTER,
         avatar: user.avatar || DEFAULT_AVATAR
       };
 
@@ -1074,6 +1121,10 @@
 
   if (characterContinue) {
     characterContinue.addEventListener('click', async (e) => {
+      e.preventDefault();
+      characterContinue.textContent = 'Saving...';
+      characterContinue.style.pointerEvents = 'none';
+
       // Save character choice to Supabase database
       const updated = await updateUserProfile({
         character: selectedCharacter.name,
@@ -1081,9 +1132,13 @@
       });
 
       if (!updated) {
-        e.preventDefault();
+        characterContinue.textContent = 'Enter Dashboard';
+        characterContinue.style.pointerEvents = '';
         showAuthError('Failed to save character. Please try again.');
+        return;
       }
+
+      window.location.href = 'dashboard.html';
     });
   }
 
