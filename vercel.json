@@ -1,6 +1,6 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/os-odyssey/frontend/html/index.html" }
+  "redirects": [
+    { "source": "/", "destination": "/os-odyssey/frontend/html/index.html", "statusCode": 302 }
   ],
   "headers": [
     {
