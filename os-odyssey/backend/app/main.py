@@ -12,10 +12,13 @@ Production-hardened server with:
  • Graceful shutdown
 """
 
+import asyncio
 import logging
+import os
 import uuid
 from contextlib import asynccontextmanager
 
+import httpx
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -38,6 +41,34 @@ logging.basicConfig(
 )
 logger = logging.getLogger("os-odyssey")
 
+# ─── Keep-Alive Interval (13 min — under Render's 15 min sleep threshold)
+KEEPALIVE_INTERVAL = 13 * 60  # seconds
+
+
+async def _keepalive_ping(stop_event: asyncio.Event):
+    """Background task that pings our own /api/health/ping endpoint
+    every 13 minutes to prevent Render free-tier from sleeping."""
+    external_url = os.getenv("RENDER_EXTERNAL_URL", "").rstrip("/")
+    if not external_url:
+        logger.warning("RENDER_EXTERNAL_URL not set — keepalive ping disabled")
+        return
+
+    ping_url = f"{external_url}/api/health/ping"
+    logger.info("🏓  Keepalive ping enabled → %s (every %ds)", ping_url, KEEPALIVE_INTERVAL)
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        while not stop_event.is_set():
+            try:
+                await asyncio.sleep(KEEPALIVE_INTERVAL)
+                if stop_event.is_set():
+                    break
+                resp = await client.get(ping_url)
+                logger.info("🏓  Keepalive ping → %d", resp.status_code)
+            except asyncio.CancelledError:
+                break
+            except Exception as exc:
+                logger.warning("🏓  Keepalive ping failed: %s", exc)
+
 
 # ─── Lifespan (startup / shutdown) ──────────────────────
 @asynccontextmanager
@@ -46,8 +77,23 @@ async def lifespan(app: FastAPI):
     logger.info("   Environment : %s", settings.ENV)
     logger.info("   CORS origins: %s", ", ".join(settings.CORS_ORIGINS) or "(all)")
     logger.info("   Thread pool : %d workers", settings.WORKER_THREADS)
+
+    # Start keepalive ping in production (Render free tier)
+    stop_event = asyncio.Event()
+    keepalive_task = None
+    if not settings.DEBUG:
+        keepalive_task = asyncio.create_task(_keepalive_ping(stop_event))
+
     yield
+
     # Shutdown
+    stop_event.set()
+    if keepalive_task:
+        keepalive_task.cancel()
+        try:
+            await keepalive_task
+        except asyncio.CancelledError:
+            pass
     pool.shutdown(wait=True)
     logger.info("🛑  OS Odyssey API shut down gracefully")
 
