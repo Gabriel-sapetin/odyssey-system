@@ -2017,6 +2017,8 @@ body.lesson-open .course-shell {
   color: var(--app-muted);
   font-size: 16px;
   line-height: 1.75;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .lesson-body strong {
@@ -2821,6 +2823,8 @@ body.lesson-open .course-shell {
   font-size: 17px;
   font-weight: 700;
   line-height: 1.7;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .reader-actions {
@@ -3113,6 +3117,8 @@ body.lesson-open .course-shell {
   font-size: 17px;
   font-weight: 700;
   line-height: 1.78;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .netacad-player .lesson-topic-label {
