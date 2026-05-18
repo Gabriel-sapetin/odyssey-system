@@ -13,6 +13,8 @@
     rel="stylesheet" />
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
   <link rel="stylesheet" href="../css/styles.css" />
+  <!-- Cloudflare Turnstile (bot protection) -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 
 <body class="auth-page">
@@ -20,7 +22,8 @@
   <!-- ===== NAVBAR ===== -->
   <nav class="navbar">
     <a href="index.html" class="nav-logo">
-      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png"
+        alt="OS Odyssey penguin mascot" />
       OS ODYSSEY
     </a>
     <div class="nav-right">
@@ -64,7 +67,10 @@
             <a href="terms.html">OS Odyssey Terms of Use</a>.
           </span>
         </label>
-        <button class="btn btn-cta auth-submit" data-auth-mode="signup" data-loading-text="Creating account..." data-redirect="character-select.html" type="submit">Sign up for free</button>
+        <!-- Cloudflare Turnstile widget (managed mode — invisible when possible) -->
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAADRz9Gh8vifnrdDN" data-theme="dark" data-size="flexible"></div>
+        <button class="btn btn-cta auth-submit" data-auth-mode="signup" data-loading-text="Creating account..."
+          data-redirect="character-select.html" type="submit">Sign up for free</button>
         <p class="auth-login">
           Already have an account? <a href="login.html">Log in</a>
         </p>

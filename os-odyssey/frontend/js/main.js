@@ -1014,6 +1014,17 @@
         return;
       }
 
+      // ── Cloudflare Turnstile verification ──
+      const turnstileWidget = document.querySelector('.cf-turnstile');
+      let turnstileToken = null;
+      if (turnstileWidget && typeof turnstile !== 'undefined') {
+        turnstileToken = turnstile.getResponse(turnstileWidget);
+        if (!turnstileToken) {
+          showAuthError('Please complete the security check.');
+          return;
+        }
+      }
+
       // Show loading state
       const defaultText = authSubmit.textContent;
       authSubmit.textContent = authSubmit.dataset.loadingText || 'Submitting...';
@@ -1032,6 +1043,10 @@
           showAuthError(result.error.message);
           authSubmit.textContent = defaultText;
           authSubmit.disabled = false;
+          // Reset Turnstile widget so user can retry
+          if (turnstileWidget && typeof turnstile !== 'undefined') {
+            turnstile.reset(turnstileWidget);
+          }
           return;
         }
 
@@ -1040,6 +1055,9 @@
           showAuthSuccess('Check your email! Click the confirmation link to activate your account.');
           authSubmit.textContent = defaultText;
           authSubmit.disabled = false;
+          if (turnstileWidget && typeof turnstile !== 'undefined') {
+            turnstile.reset(turnstileWidget);
+          }
           return;
         }
 
@@ -1052,6 +1070,10 @@
         showAuthError(err.message || 'Something went wrong. Please try again.');
         authSubmit.textContent = defaultText;
         authSubmit.disabled = false;
+        // Reset Turnstile widget so user can retry
+        if (turnstileWidget && typeof turnstile !== 'undefined') {
+          turnstile.reset(turnstileWidget);
+        }
       }
     });
   }

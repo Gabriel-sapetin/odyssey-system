@@ -11,12 +11,15 @@ Auth is delegated to Supabase Auth — this layer adds:
 """
 
 import logging
+import os
+from typing import Optional
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, EmailStr, field_validator
 
 from app.middleware.rate_limiter import limiter, AUTH_LIMIT
 from app.middleware.sanitize import clean
 from app.services.supabase_client import get_admin_client
+from app.services.turnstile import verify_turnstile_token
 
 logger = logging.getLogger("os-odyssey.auth")
 
@@ -28,6 +31,7 @@ router = APIRouter()
 class SignUpRequest(BaseModel):
     email: EmailStr
     password: str
+    turnstile_token: Optional[str] = None
 
     @field_validator("password")
     @classmethod
@@ -42,6 +46,7 @@ class SignUpRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    turnstile_token: Optional[str] = None
 
 
 class PasswordResetRequest(BaseModel):
@@ -58,6 +63,14 @@ async def signup(request: Request, body: SignUpRequest):
     Returns the user object (email confirmation may be required).
     """
     logger.info("Signup attempt: %s", body.email)
+
+    # Verify Cloudflare Turnstile token (if configured)
+    client_ip = request.client.host if request.client else None
+    if not await verify_turnstile_token(body.turnstile_token or "", client_ip):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Security verification failed. Please try again.",
+        )
 
     try:
         admin = get_admin_client()
@@ -107,6 +120,14 @@ async def login(request: Request, body: LoginRequest):
     Returns access_token and refresh_token on success.
     """
     logger.info("Login attempt: %s", body.email)
+
+    # Verify Cloudflare Turnstile token (if configured)
+    client_ip = request.client.host if request.client else None
+    if not await verify_turnstile_token(body.turnstile_token or "", client_ip):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Security verification failed. Please try again.",
+        )
 
     try:
         admin = get_admin_client()
