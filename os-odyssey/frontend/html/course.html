@@ -42,35 +42,32 @@
 </head>
 
 <body class="app-page course-page">
-  <nav class="app-nav">
-    <a href="dashboard.html" class="app-brand">
-      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
-      OS ODYSSEY
-    </a>
-    <div class="app-nav-links">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="course.html">Course</a>
-      <a href="dashboard.html#practice">Practice</a>
-      <a href="profile.html">Profile</a>
-      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
-        <span class="toggle-icon sun-icon">☀️</span>
-        <span class="toggle-icon moon-icon">🌙</span>
-      </button>
-      <button class="app-link-button" type="button" data-logout>Log out</button>
-    </div>
-  </nav>
-
   <main class="course-shell">
     <section class="netacad-course standalone" id="modules" aria-labelledby="courseTitle">
       <header class="netacad-shell-header">
-        <div class="netacad-brand-lockup">
-          <span class="netacad-brand-mark">OS</span>
-          <div>
-            <strong>OS Odyssey Academy</strong>
-            <span>Operating Systems (CS222)</span>
+        <div class="course-shell-brand">
+          <a href="dashboard.html" class="course-app-brand" aria-label="OS Odyssey dashboard">
+            <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+            <span>OS ODYSSEY</span>
+          </a>
+          <div class="netacad-brand-lockup">
+            <span class="netacad-brand-mark">OS</span>
+            <div>
+              <strong>OS Odyssey Academy</strong>
+              <span>Operating Systems (CS222)</span>
+            </div>
           </div>
         </div>
-        <nav class="netacad-tools" aria-label="Course tools">
+        <nav class="course-shell-nav" aria-label="Course navigation">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="course.html" aria-current="page">Course</a>
+          <a href="dashboard.html#practice">Practice</a>
+          <a href="profile.html">Profile</a>
+          <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+            <span class="toggle-icon sun-icon">&#9728;</span>
+            <span class="toggle-icon moon-icon">&#9790;</span>
+          </button>
+          <button class="app-link-button" type="button" data-logout>Log out</button>
           <span class="netacad-tool active">Outline</span>
         </nav>
       </header>

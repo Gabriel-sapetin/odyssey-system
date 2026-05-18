@@ -2456,6 +2456,27 @@ body.lesson-open .course-shell {
   padding: clamp(24px, 4vw, 42px) 0 48px;
 }
 
+.course-page {
+  background: #ffffff;
+}
+
+.course-page .course-shell {
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.course-page .netacad-course.standalone {
+  min-height: 100vh;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.course-page .netacad-course.standalone .netacad-workspace {
+  min-height: calc(100vh - 76px);
+}
+
 /* ---- Cisco-inspired course player ---- */
 .netacad-course {
   margin-top: 54px;
@@ -2494,6 +2515,63 @@ body.lesson-open .course-shell {
   background:
     repeating-linear-gradient(135deg, rgba(31, 117, 191, 0.035) 0 1px, transparent 1px 16px),
     #ffffff;
+}
+
+.course-page .netacad-shell-header {
+  min-height: 76px;
+  padding: 0 clamp(16px, 3vw, 36px);
+}
+
+.course-shell-brand {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 3vw, 34px);
+  min-width: 0;
+}
+
+.course-app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  color: #172033;
+  font-family: var(--font-pixel);
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.course-shell-nav {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  gap: clamp(14px, 2vw, 26px);
+  color: #202833;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.course-shell-nav a,
+.course-shell-nav .app-link-button {
+  color: #202833;
+}
+
+.course-shell-nav a:hover,
+.course-shell-nav a[aria-current="page"],
+.course-shell-nav .app-link-button:hover {
+  color: #0b6fb3;
+}
+
+.course-shell-nav .app-theme-toggle {
+  --app-line: #cdd6df;
+  --app-panel-2: #f8fafc;
+  flex-shrink: 0;
+}
+
+.course-shell-nav .netacad-tool {
+  align-self: stretch;
+  padding: 0 0 0 4px;
 }
 
 .netacad-brand-lockup {
@@ -3147,6 +3225,106 @@ body.lesson-open .course-shell {
   box-shadow: none;
 }
 
+/* ---- Module Locking System ---- */
+
+/* -- Locked progress panel rows (right-side panel) -- */
+.progress-module-row.locked {
+  background: #f8f9fb;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.progress-module-row.locked:hover {
+  background: #f8f9fb;
+}
+
+.progress-module-row.locked .progress-module-info strong {
+  color: #9aa6b2;
+}
+
+.progress-module-row.locked .progress-module-info em {
+  color: #b0b8c4;
+}
+
+.progress-module-row:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* -- Locked sidebar outline buttons -- */
+.course-outline-module.module-locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #f3f5f8;
+}
+
+.course-outline-module.module-locked:hover {
+  background: #f3f5f8;
+}
+
+.course-outline-module.module-locked .outline-check {
+  border-color: #c4cdd6;
+  color: #9aa6b2;
+  background: #eef1f5;
+  font-size: 10px;
+}
+
+.course-outline-module.module-locked strong {
+  color: #9aa6b2;
+}
+
+.course-outline-module.module-locked em {
+  color: #b8c1cc;
+}
+
+.course-outline-module.module-locked small {
+  color: #b8c1cc;
+}
+
+/* -- Completed sidebar outline buttons -- */
+.course-outline-module.module-completed .outline-check {
+  background: #69b84f;
+  border-color: #69b84f;
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.course-outline-module.module-completed strong {
+  color: #2f7d32;
+}
+
+/* -- Locked action buttons (Start Module X) -- */
+.lesson-button.module-locked,
+.reader-actions .lesson-button.module-locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  border-color: #c4cdd6 !important;
+  background: #eef1f5 !important;
+  color: #9aa6b2 !important;
+  box-shadow: none !important;
+}
+
+.lesson-button.module-locked:hover {
+  transform: none;
+  border-color: #c4cdd6 !important;
+  color: #9aa6b2 !important;
+}
+
+/* -- Completed action buttons (Review Module X) -- */
+.lesson-button.module-completed {
+  border-color: #69b84f !important;
+  color: #2f7d32 !important;
+  background: rgba(105, 184, 79, 0.08) !important;
+}
+
+.lesson-button.module-completed:hover {
+  border-color: #5aa842 !important;
+  color: #1e6b1e !important;
+  background: rgba(105, 184, 79, 0.14) !important;
+}
+
 /* ---- Entrance Animations ---- */
 @keyframes fadeInUp {
   from {
@@ -3246,6 +3424,24 @@ body.lesson-open .course-shell {
     grid-template-columns: 1fr;
   }
 
+  .course-page .netacad-shell-header {
+    min-height: auto;
+    flex-wrap: wrap;
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .course-shell-brand,
+  .course-shell-nav {
+    width: 100%;
+  }
+
+  .course-shell-nav {
+    min-height: 42px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
   .netacad-sidebar,
   .lesson-outline-panel {
     border-right: 0;
@@ -3322,6 +3518,11 @@ body.lesson-open .course-shell {
     padding-top: 34px;
   }
 
+  .course-page .course-shell {
+    width: 100%;
+    padding-top: 0;
+  }
+
   .welcome-row,
   .speech-row {
     grid-template-columns: 1fr;
@@ -3384,6 +3585,17 @@ body.lesson-open .course-shell {
   .player-icons {
     width: 100%;
     overflow-x: auto;
+  }
+
+  .course-shell-brand {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .course-shell-nav {
+    gap: 16px;
+    font-size: 9px;
   }
 
   .course-outline-module {

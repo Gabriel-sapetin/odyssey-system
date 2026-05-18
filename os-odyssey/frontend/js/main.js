@@ -142,6 +142,20 @@
     localStorage.setItem('os-odyssey-topics-done-' + moduleId, 'true');
   }
 
+  /**
+   * Module unlock logic:
+   * - Module 1 is always unlocked.
+   * - Module N (N>1) is unlocked when Module N-1 has been completed.
+   * - A module is "completed" once the user finishes its quiz (any score).
+   */
+  function isModuleUnlocked(moduleId) {
+    const idx = MODULE_META.findIndex(m => m.id === moduleId);
+    if (idx <= 0) return true; // Module 1 or unknown → always open
+    const prevModuleId = MODULE_META[idx - 1].id;
+    const completedModules = (activeProfile && activeProfile.completed_modules) ? activeProfile.completed_modules : [];
+    return completedModules.includes(prevModuleId);
+  }
+
   const BADGE_DEFS = [
     { id: 'badge_module1', name: 'OS Pioneer', icon: '🖥️', color: '#22c55e', desc: 'Completed Module 1: Introduction to Operating Systems', trigger: 'module1' },
     { id: 'badge_module2', name: 'System Architect', icon: '🏗️', color: '#3b82f6', desc: 'Completed Module 2: Operating-System Structures', trigger: 'module2' },
@@ -452,6 +466,8 @@
       activeProfile = { ...activeProfile, ...saved };
       updateProgressDisplay(activeProfile);
       renderCourseProgressPanel();
+      // Refresh lock state so the next module is now visually unlocked
+      if (typeof applyModuleLockState === 'function') applyModuleLockState();
     }
   }
 
@@ -568,6 +584,9 @@
 
     // Update course progress panel (if on course page)
     renderCourseProgressPanel();
+
+    // Refresh lock/unlock state for sidebar & action buttons now that profile is loaded
+    applyModuleLockState();
 
     // Set personalized welcome text for typewriter
     const typewriterEl = document.getElementById('typewriterText');
@@ -830,22 +849,23 @@
     MODULE_META.forEach(meta => {
       const label = MODULE_LABELS[meta.id] || { num: '?', title: meta.id, color: '#94a3b8' };
       const isDone = completedModules.includes(meta.id);
-      const topicsDone = isModuleTopicsDone(meta.id);
-      const statusClass = isDone ? 'completed' : 'in-progress';
-      const statusText = isDone ? '✓ Completed' : 'In Progress';
-      const topicPct = isDone ? 100 : 15;
+      const unlocked = isModuleUnlocked(meta.id);
+      const statusClass = isDone ? 'completed' : (unlocked ? 'in-progress' : 'locked');
+      const statusText = isDone ? '✓ Completed' : (unlocked ? 'In Progress' : '🔒 Locked');
+      const statusColor = isDone ? '#16a34a' : (unlocked ? '#f59e0b' : '#64748b');
+      const topicPct = isDone ? 100 : (unlocked ? 15 : 0);
 
       html += `
-        <button class="progress-module-row ${statusClass}" type="button" data-start-module="${meta.id}">
+        <button class="progress-module-row ${statusClass}" type="button" data-start-module="${meta.id}" ${unlocked ? '' : 'disabled'}>
 
           <span class="progress-module-info">
             <strong>Module ${label.num}</strong>
             <em>${label.title}</em>
             <span class="progress-module-bar-wrap">
-              <span class="progress-module-bar" style="width: ${topicPct}%; background: ${label.color}"></span>
+              <span class="progress-module-bar" style="width: ${topicPct}%; background: ${unlocked ? label.color : '#475569'}"></span>
             </span>
           </span>
-          <span class="progress-module-status" style="color: ${isDone ? '#16a34a' : '#f59e0b'}">${statusText}</span>
+          <span class="progress-module-status" style="color: ${statusColor}">${statusText}</span>
         </button>
       `;
     });
@@ -1570,6 +1590,57 @@
   // Expose full module content globally for profile.js to derive stats dynamically
   window.OS_ODYSSEY_MODULES = modules;
 
+  /**
+   * Apply lock/unlock visual state to all module buttons
+   * (sidebar outline + main "Start Module" action buttons).
+   * Called on page load and after a module is completed.
+   * Defined at IIFE scope so renderSessionUI & markModuleCompleted can reach it.
+   */
+  function applyModuleLockState() {
+    document.querySelectorAll('[data-start-module]').forEach(button => {
+      const mid = button.dataset.startModule;
+      const unlocked = isModuleUnlocked(mid);
+      const completedModules = (activeProfile && activeProfile.completed_modules) ? activeProfile.completed_modules : [];
+      const isDone = completedModules.includes(mid);
+
+      // Toggle locked class
+      button.classList.toggle('module-locked', !unlocked);
+      button.classList.toggle('module-completed', isDone);
+      button.disabled = !unlocked;
+
+      // For main action buttons (Start Module X), update label
+      if (button.classList.contains('lesson-button')) {
+        const num = mid.replace('module', '');
+        if (!unlocked) {
+          button.textContent = '\ud83d\udd12 Module ' + num + ' Locked';
+        } else if (isDone) {
+          button.textContent = '\u2713 Review Module ' + num;
+          button.disabled = false;
+        } else {
+          button.textContent = 'Start Module ' + num;
+        }
+      }
+
+      // For sidebar outline buttons, add/remove lock indicator
+      if (button.classList.contains('course-outline-module')) {
+        const checkEl = button.querySelector('.outline-check');
+        if (checkEl) {
+          const num = mid.replace('module', '');
+          if (!unlocked) {
+            checkEl.textContent = '\ud83d\udd12';
+          } else if (isDone) {
+            checkEl.textContent = '\u2713';
+          } else {
+            checkEl.textContent = num;
+          }
+        }
+      }
+    });
+  }
+
+  // Apply lock state immediately (before profile loads — locks everything by default)
+  applyModuleLockState();
+
   if (moduleOverlay) {
     const elements = {
       kicker: document.getElementById('lessonModuleKicker'),
@@ -1658,6 +1729,7 @@
       });
     }
 
+
     function updateLessonOutline() {
       if (!elements.outline) return;
       const module = currentModule();
@@ -1744,6 +1816,14 @@
 
     function openModule(moduleId) {
       if (!modules[moduleId]) return;
+
+      // Block opening locked modules
+      if (!isModuleUnlocked(moduleId)) {
+        const idx = MODULE_META.findIndex(m => m.id === moduleId);
+        const prevNum = idx > 0 ? idx : 1;
+        alert(`Module ${idx + 1} is locked. Complete Module ${prevNum} first to unlock it.`);
+        return;
+      }
 
       state.activeModuleId = moduleId;
       state.mode = 'review';
@@ -1970,10 +2050,8 @@
         `;
       }
 
-      // Perfect score → mark module as completed
-      if (state.correct === module.quiz.length) {
-        markModuleCompleted(state.activeModuleId);
-      }
+      // Mark module as completed once the user finishes the quiz (any score)
+      markModuleCompleted(state.activeModuleId);
     }
 
     async function awardQuestionXp() {
@@ -2155,6 +2233,7 @@
     document.querySelectorAll('[data-start-module]').forEach(button => {
       button.addEventListener('click', () => openModule(button.dataset.startModule));
     });
+
 
     document.querySelectorAll('[data-close-module]').forEach(button => {
       button.addEventListener('click', closeModule);
