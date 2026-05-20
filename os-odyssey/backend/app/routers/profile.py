@@ -13,6 +13,7 @@ from pydantic import BaseModel, field_validator
 from app.middleware.rate_limiter import limiter, API_LIMIT
 from app.middleware.sanitize import clean
 from app.services.auth import get_current_user
+from app.services.audit_logger import log_audit_event
 from app.services.supabase_client import get_admin_client
 
 logger = logging.getLogger("os-odyssey.profile")
@@ -125,6 +126,14 @@ async def update_my_profile(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Profile not found.",
             )
+
+        # Audit trail for profile changes
+        log_audit_event(
+            user_id=user["id"],
+            action="profile_update",
+            detail={"fields_updated": list(updates.keys())},
+            request=request,
+        )
 
         return {"profile": result.data[0] if result.data else None}
 

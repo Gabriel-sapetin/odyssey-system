@@ -14,8 +14,13 @@ from pydantic import BaseModel
 
 from app.middleware.rate_limiter import limiter, API_LIMIT
 from app.services.auth import get_current_user
+from app.services.audit_logger import log_audit_event
 from app.services.supabase_client import get_admin_client
 from app.services.thread_pool import run_in_pool
+
+# Stricter rate limit for gameplay mutations (XP, badges, streaks)
+# Prevents automated farming even if an attacker has valid credentials
+MUTATION_LIMIT = "10/minute"
 
 logger = logging.getLogger("os-odyssey.progress")
 
@@ -115,7 +120,7 @@ async def get_progress(request: Request, user=Depends(get_current_user)):
 
 
 @router.post("/complete-module")
-@limiter.limit(API_LIMIT)
+@limiter.limit(MUTATION_LIMIT)
 async def complete_module(
     request: Request,
     body: CompleteModuleRequest,
@@ -181,6 +186,20 @@ async def complete_module(
             body.module_id, user["id"], profile.get("xp", 0), xp_update["xp"],
         )
 
+        # Audit trail — records who earned XP, how much, and from where
+        log_audit_event(
+            user_id=user["id"],
+            action="complete_module",
+            detail={
+                "module_id": body.module_id,
+                "xp_before": profile.get("xp", 0),
+                "xp_after": xp_update["xp"],
+                "level": xp_update["level"],
+                "rank": xp_update["rank"],
+            },
+            request=request,
+        )
+
         return {
             "message": f"Module {body.module_id} completed!",
             "already_completed": False,
@@ -197,7 +216,7 @@ async def complete_module(
 
 
 @router.post("/streak")
-@limiter.limit(API_LIMIT)
+@limiter.limit(MUTATION_LIMIT)
 async def update_streak(
     request: Request,
     user=Depends(get_current_user),
@@ -247,6 +266,19 @@ async def update_streak(
 
         logger.info("Streak updated for user %s: %d", user["id"], new_streak)
 
+        # Audit trail
+        log_audit_event(
+            user_id=user["id"],
+            action="update_streak",
+            detail={
+                "streak_before": profile.get("streak", 0),
+                "streak_after": new_streak,
+                "last_active_before": str(last_active),
+                "last_active_after": today,
+            },
+            request=request,
+        )
+
         return {"message": "Streak updated.", "streak": new_streak}
 
     except HTTPException:
@@ -257,7 +289,7 @@ async def update_streak(
 
 
 @router.post("/award-badge")
-@limiter.limit(API_LIMIT)
+@limiter.limit(MUTATION_LIMIT)
 async def award_badge(
     request: Request,
     body: AwardBadgeRequest,
@@ -302,6 +334,17 @@ async def award_badge(
         }).eq("id", user["id"]).execute()
 
         logger.info("Badge %s awarded to user %s", body.badge_id, user["id"])
+
+        # Audit trail
+        log_audit_event(
+            user_id=user["id"],
+            action="award_badge",
+            detail={
+                "badge_id": body.badge_id,
+                "total_badges": len(earned),
+            },
+            request=request,
+        )
 
         return {"message": "Badge awarded!", "new": True, "badge_id": body.badge_id}
 

@@ -16,12 +16,23 @@ _admin_client: Client | None = None
 
 
 def get_admin_client() -> Client:
-    """Return a singleton Supabase admin client (service-role key)."""
+    """Return a singleton Supabase admin client (service-role key).
+    
+    SECURITY: Never falls back to anon key. The service-role key bypasses
+    RLS, which is required for backend gameplay mutations. Using the anon
+    key here would silently lose elevated privileges.
+    """
     global _admin_client
     if _admin_client is None:
-        key = settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_ANON_KEY
+        key = settings.SUPABASE_SERVICE_ROLE_KEY
+        if not key:
+            raise RuntimeError(
+                "SUPABASE_SERVICE_ROLE_KEY is not set. "
+                "The backend MUST use the service-role key for admin operations. "
+                "Never fall back to the anon key."
+            )
         _admin_client = create_client(settings.SUPABASE_URL, key)
-        logger.info("Supabase admin client initialised")
+        logger.info("Supabase admin client initialised (service-role)")
     return _admin_client
 
 

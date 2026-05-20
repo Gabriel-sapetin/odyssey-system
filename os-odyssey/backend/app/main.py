@@ -133,18 +133,25 @@ app.add_middleware(
 )
 
 
-# ─── Request / Response Logging ─────────────────────────
+# ─── Request / Response Logging (with IP capture) ───────
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     rid = request.state.request_id if hasattr(request.state, "request_id") else "?"
-    logger.info("%s %s [%s]", request.method, request.url.path, rid)
+    # Extract real client IP (behind reverse proxies like Render/Vercel)
+    client_ip = (
+        request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+        or request.headers.get("x-real-ip", "")
+        or (request.client.host if request.client else "unknown")
+    )
+    logger.info("%s %s [%s] ip=%s", request.method, request.url.path, rid, client_ip)
     response = await call_next(request)
     logger.info(
-        "%s %s → %d [%s]",
+        "%s %s → %d [%s] ip=%s",
         request.method,
         request.url.path,
         response.status_code,
         rid,
+        client_ip,
     )
     return response
 
