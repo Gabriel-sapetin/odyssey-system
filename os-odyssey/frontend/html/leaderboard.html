@@ -7,7 +7,7 @@
   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>OS Odyssey - Leaderboard</title>
-  <meta name="description" content="View the OS Odyssey learner leaderboard ranked by total XP." />
+  <meta name="description" content="View the OS Odyssey learner leaderboard ranked by total XP or badges." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
@@ -51,7 +51,10 @@
           <p class="section-kicker">TOP LEARNERS</p>
           <h2 id="leaderboardTitle">Ranked by Total XP</h2>
         </div>
-        <span class="leaderboard-pill">All</span>
+        <div class="leaderboard-sort" aria-label="Choose leaderboard ranking">
+          <button class="active" type="button" data-rank-mode="xp">XP</button>
+          <button type="button" data-rank-mode="badges">Badges</button>
+        </div>
       </div>
 
       <div class="leaderboard-table-head" aria-hidden="true">
@@ -59,7 +62,7 @@
         <span>Learner</span>
         <span>Level</span>
         <span>Tier</span>
-        <span>Total XP</span>
+        <span id="leaderboardMetricHead">Total XP</span>
       </div>
 
       <div class="leaderboard-list" id="leaderboardList">

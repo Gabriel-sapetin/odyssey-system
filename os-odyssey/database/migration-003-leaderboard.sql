@@ -29,8 +29,7 @@ AS $$
     COALESCE(p.avatar, '../../assets/penguin-flower-removebg-preview.png') AS avatar,
     COALESCE(array_length(p.earned_badges, 1), 0)::INT AS badge_count
   FROM public.profiles p
-  ORDER BY COALESCE(p.xp, 0) DESC, p.username ASC
-  LIMIT 25;
+  ORDER BY COALESCE(p.xp, 0) DESC, p.username ASC;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_leaderboard() TO anon, authenticated;

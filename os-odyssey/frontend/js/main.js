@@ -628,6 +628,11 @@
     return Number(value || 0).toLocaleString();
   }
 
+  function formatBadgeCount(value) {
+    const count = Number(value || 0);
+    return `${count.toLocaleString()} ${count === 1 ? 'Badge' : 'Badges'}`;
+  }
+
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({
       '&': '&amp;',
@@ -652,24 +657,35 @@
     const list = document.getElementById('leaderboardList');
     if (!list) return;
 
-    list.innerHTML = '<div class="leaderboard-state">Loading leaderboard...</div>';
+    const title = document.getElementById('leaderboardTitle');
+    const metricHead = document.getElementById('leaderboardMetricHead');
+    const sortButtons = document.querySelectorAll('[data-rank-mode]');
+    let rankMode = 'xp';
 
-    try {
-      const { data, error } = await supa.rpc('get_leaderboard');
-      if (error) throw error;
+    const renderLeaderboard = entries => {
+      const rankedEntries = [...entries].sort((a, b) => {
+        if (rankMode === 'badges') {
+          return Number(b.badge_count || 0) - Number(a.badge_count || 0)
+            || Number(b.xp || 0) - Number(a.xp || 0)
+            || String(a.username || '').localeCompare(String(b.username || ''));
+        }
 
-      const entries = Array.isArray(data) ? data : [];
-      if (!entries.length) {
-        list.innerHTML = '<div class="leaderboard-state">No leaderboard data yet.</div>';
-        return;
-      }
+        return Number(b.xp || 0) - Number(a.xp || 0)
+          || Number(b.badge_count || 0) - Number(a.badge_count || 0)
+          || String(a.username || '').localeCompare(String(b.username || ''));
+      });
 
-      list.innerHTML = entries.map((entry, index) => {
-        const position = Number(entry.position || index + 1);
+      if (title) title.textContent = rankMode === 'badges' ? 'Ranked by Badges' : 'Ranked by Total XP';
+      if (metricHead) metricHead.textContent = rankMode === 'badges' ? 'Badges' : 'Total XP';
+
+      list.innerHTML = rankedEntries.map((entry, index) => {
+        const position = index + 1;
         const isCurrentUser = currentUser && entry.username === currentUser.username;
         const medalClass = position <= 3 ? ` top-${position}` : '';
         const currentClass = isCurrentUser ? ' is-current-user' : '';
         const rank = entry.rank || calculateRank(entry.level || 1);
+        const metricClass = rankMode === 'badges' ? 'leaderboard-badges' : 'leaderboard-xp';
+        const metricText = rankMode === 'badges' ? formatBadgeCount(entry.badge_count) : `${formatXp(entry.xp)} XP`;
 
         return `
           <article class="leaderboard-row${medalClass}${currentClass}">
@@ -683,10 +699,33 @@
             </span>
             <span class="leaderboard-stat"><strong>${Number(entry.level || 1)}</strong><small>Level</small></span>
             <span class="leaderboard-rank">${escapeHtml(rank)}</span>
-            <span class="leaderboard-xp">${formatXp(entry.xp)} XP</span>
+            <span class="${metricClass}">${escapeHtml(metricText)}</span>
           </article>
         `;
       }).join('');
+    };
+
+    list.innerHTML = '<div class="leaderboard-state">Loading leaderboard...</div>';
+
+    try {
+      const { data, error } = await supa.rpc('get_leaderboard');
+      if (error) throw error;
+
+      const entries = Array.isArray(data) ? data : [];
+      if (!entries.length) {
+        list.innerHTML = '<div class="leaderboard-state">No leaderboard data yet.</div>';
+        return;
+      }
+
+      sortButtons.forEach(button => {
+        button.onclick = () => {
+          rankMode = button.dataset.rankMode === 'badges' ? 'badges' : 'xp';
+          sortButtons.forEach(item => item.classList.toggle('active', item === button));
+          renderLeaderboard(entries);
+        };
+      });
+
+      renderLeaderboard(entries);
     } catch (error) {
       console.error('Failed to load leaderboard:', error);
       list.innerHTML = '<div class="leaderboard-state">Leaderboard is not ready yet. Apply the latest database migration and reload.</div>';

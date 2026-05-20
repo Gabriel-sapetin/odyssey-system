@@ -2360,6 +2360,34 @@ body.lesson-open .course-shell {
   font-size: 9px;
 }
 
+.leaderboard-sort {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border: 2px solid rgba(138, 241, 255, 0.28);
+  border-radius: 6px;
+  background: rgba(5, 9, 24, 0.42);
+}
+
+.leaderboard-sort button {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.leaderboard-sort button:hover,
+.leaderboard-sort button.active {
+  background: #8a3ffc;
+  color: #ffffff;
+}
+
 .leaderboard-table-head,
 .leaderboard-row {
   display: grid;
@@ -2461,7 +2489,8 @@ body.lesson-open .course-shell {
 
 .leaderboard-stat strong,
 .leaderboard-rank,
-.leaderboard-xp {
+.leaderboard-xp,
+.leaderboard-badges {
   font-family: var(--font-pixel);
   font-size: 10px;
   line-height: 1.5;
@@ -2471,7 +2500,8 @@ body.lesson-open .course-shell {
   color: #ffc857;
 }
 
-.leaderboard-xp {
+.leaderboard-xp,
+.leaderboard-badges {
   color: #8af1ff;
 }
 
@@ -2505,6 +2535,21 @@ body.lesson-open .course-shell {
 
 .light-mode .leaderboard-table-head {
   color: #5a6478;
+}
+
+.light-mode .leaderboard-sort {
+  border-color: #c8d3e2;
+  background: rgba(244, 247, 251, 0.82);
+}
+
+.light-mode .leaderboard-sort button {
+  color: #5a6478;
+}
+
+.light-mode .leaderboard-sort button:hover,
+.light-mode .leaderboard-sort button.active {
+  background: #8a3ffc;
+  color: #ffffff;
 }
 
 .light-mode .leaderboard-row {
@@ -3768,7 +3813,8 @@ body.lesson-open .course-shell {
 
   .leaderboard-stat,
   .leaderboard-rank,
-  .leaderboard-xp {
+  .leaderboard-xp,
+  .leaderboard-badges {
     grid-column: 2;
   }
 
