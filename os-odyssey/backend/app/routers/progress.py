@@ -215,6 +215,67 @@ async def complete_module(
         raise HTTPException(status_code=500, detail="Failed to complete module.")
 
 
+@router.post("/quiz-xp")
+@limiter.limit("20/minute")
+async def award_quiz_xp(
+    request: Request,
+    user=Depends(get_current_user),
+):
+    """
+    Award XP for a correct quiz answer.
+    Fixed at 15 XP per call. Rate-limited to prevent farming.
+    """
+    QUIZ_XP_REWARD = 15
+
+    try:
+        admin = get_admin_client()
+
+        profile_result = (
+            admin.table("profiles")
+            .select("xp")
+            .eq("id", user["id"])
+            .single()
+            .execute()
+        )
+
+        if not profile_result.data:
+            raise HTTPException(status_code=404, detail="Profile not found.")
+
+        profile = profile_result.data
+        current_xp = profile.get("xp", 0)
+
+        xp_update = await run_in_pool(_compute_xp_update, current_xp, QUIZ_XP_REWARD)
+
+        admin.table("profiles").update(xp_update).eq("id", user["id"]).execute()
+
+        logger.info(
+            "Quiz XP awarded to user %s — XP: %d → %d",
+            user["id"], current_xp, xp_update["xp"],
+        )
+
+        log_audit_event(
+            user_id=user["id"],
+            action="quiz_xp",
+            detail={
+                "xp_before": current_xp,
+                "xp_after": xp_update["xp"],
+                "xp_awarded": QUIZ_XP_REWARD,
+            },
+            request=request,
+        )
+
+        return {
+            "xp": xp_update["xp"],
+            "level": xp_update["level"],
+            "rank": xp_update["rank"],
+        }
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("Quiz XP error: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to award quiz XP.")
+
 @router.post("/streak")
 @limiter.limit(MUTATION_LIMIT)
 async def update_streak(

@@ -9,6 +9,39 @@
   const AUTH_MESSAGE_KEY = 'os-odyssey-auth-message';
   let activeProfile = null;
 
+  /* ---- Backend API helper ---- */
+  const BACKEND_API = 'https://os-odyssey-api.onrender.com/api';
+
+  /**
+   * Call the backend API. Automatically attaches the Supabase JWT.
+   * Returns the parsed JSON body, or null on error.
+   */
+  async function backendCall(method, path, body = null) {
+    try {
+      const session = await getSession();
+      if (!session) return null;
+
+      const opts = {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      };
+      if (body) opts.body = JSON.stringify(body);
+
+      const res = await fetch(`${BACKEND_API}${path}`, opts);
+      if (!res.ok) {
+        console.error(`Backend ${method} ${path} failed:`, res.status, await res.text());
+        return null;
+      }
+      return await res.json();
+    } catch (err) {
+      console.error(`Backend ${method} ${path} error:`, err);
+      return null;
+    }
+  }
+
   /* ---- Global Background Music ---- */
   (function initBgMusic() {
     const BGM_SRC = '../../assets/Purity - Beautiful Piano Song, Relaxing BGM BigRicePiano.mp3';
@@ -362,13 +395,12 @@
     // Show the popup
     showBadgePopup(badge);
 
-    // Persist to Supabase
-    const saved = await updateUserProfile({
-      earned_badges: updatedBadges,
-      badges: updatedCount
-    });
-    if (saved) {
-      activeProfile = { ...activeProfile, ...saved };
+    // Persist via backend API (RLS blocks direct writes to earned_badges)
+    const result = await backendCall('POST', '/progress/award-badge', { badge_id: badge.id });
+    if (result) {
+      // Refresh profile to get server-authoritative state
+      const refreshed = await getCurrentUser();
+      if (refreshed) activeProfile = { ...activeProfile, ...refreshed };
     }
   }
 
@@ -381,40 +413,16 @@
   async function updateStreak() {
     if (!activeProfile) return;
 
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    const lastActive = activeProfile.last_active_date;
+    const today = new Date().toISOString().slice(0, 10);
+    if (activeProfile.last_active_date === today) return;
 
-    if (lastActive === today) return; // already counted today
-
-    let newStreak = 1;
-
-    if (lastActive) {
-      const lastDate = new Date(lastActive + 'T00:00:00');
-      const todayDate = new Date(today + 'T00:00:00');
-      const diffDays = Math.round((todayDate - lastDate) / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 1) {
-        // Consecutive day — increment streak
-        newStreak = (activeProfile.streak || 0) + 1;
-      } else if (diffDays === 0) {
-        return; // same day
-      }
-      // diffDays > 1 means streak is broken, reset to 1
-    }
-
-    // Optimistic update
-    activeProfile.streak = newStreak;
-    activeProfile.last_active_date = today;
-    const streakEl = document.getElementById('profileStreak');
-    if (streakEl) streakEl.textContent = newStreak;
-
-    // Persist
-    const saved = await updateUserProfile({
-      streak: newStreak,
-      last_active_date: today
-    });
-    if (saved) {
-      activeProfile = { ...activeProfile, ...saved };
+    // Call backend — server determines streak logic (tamper-proof)
+    const result = await backendCall('POST', '/progress/streak');
+    if (result && result.streak != null) {
+      activeProfile.streak = result.streak;
+      activeProfile.last_active_date = today;
+      const streakEl = document.getElementById('profileStreak');
+      if (streakEl) streakEl.textContent = result.streak;
     }
   }
 
@@ -455,20 +463,25 @@
   async function markModuleCompleted(moduleId) {
     if (!activeProfile) return;
 
-    // Award the corresponding module badge (has its own duplicate check)
-    awardBadge(moduleId);
-
     const completed = activeProfile.completed_modules || [];
     if (completed.includes(moduleId)) return;
-    const updated = [...completed, moduleId];
-    const saved = await updateUserProfile({ completed_modules: updated });
-    if (saved) {
-      activeProfile = { ...activeProfile, ...saved };
+
+    // Call backend — awards XP, updates completed_modules, and validates module ID
+    const result = await backendCall('POST', '/progress/complete-module', { module_id: moduleId });
+    if (result && !result.already_completed) {
+      // Update local profile from server response
+      activeProfile.completed_modules = [...completed, moduleId];
+      if (result.xp != null) activeProfile.xp = result.xp;
+      if (result.level != null) activeProfile.level = result.level;
+      if (result.rank != null) activeProfile.rank = result.rank;
+      renderProfileStats(activeProfile);
       updateProgressDisplay(activeProfile);
       renderCourseProgressPanel();
-      // Refresh lock state so the next module is now visually unlocked
       if (typeof applyModuleLockState === 'function') applyModuleLockState();
     }
+
+    // Award the corresponding module badge via backend
+    awardBadge(moduleId);
   }
 
   /* ---- Supabase helpers ---- */
@@ -2189,29 +2202,16 @@
     }
 
     async function awardQuestionXp() {
-      const currentXp = Number(activeProfile?.xp || document.getElementById('profileXp')?.textContent || 0);
-      const nextXp = currentXp + 15;
-      const nextLevel = calculateLevel(nextXp);
-      const nextRank = calculateRank(nextLevel);
-      const nextProfile = {
-        ...(activeProfile || {}),
-        xp: nextXp,
-        level: nextLevel,
-        rank: nextRank
-      };
-
-      activeProfile = nextProfile;
-      renderProfileStats(nextProfile);
-
-      const savedProfile = await updateUserProfile({
-        xp: nextXp,
-        level: nextLevel,
-        rank: nextRank
-      });
-
-      if (savedProfile) {
-        activeProfile = savedProfile;
-        renderProfileStats(savedProfile);
+      // Call backend — awards a fixed 15 XP server-side (tamper-proof)
+      const result = await backendCall('POST', '/progress/quiz-xp');
+      if (result && result.xp != null) {
+        activeProfile = {
+          ...(activeProfile || {}),
+          xp: result.xp,
+          level: result.level,
+          rank: result.rank
+        };
+        renderProfileStats(activeProfile);
       }
     }
 
