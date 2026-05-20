@@ -1786,3 +1786,105 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ---- Mobile compatibility pass ---- */
+@media (max-width: 768px) {
+  .sim-shell {
+    padding-bottom: 56px;
+  }
+
+  .sim-header {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .sim-header h1 {
+    font-size: clamp(18px, 8vw, 28px);
+    overflow-wrap: anywhere;
+  }
+
+  .sim-header-icon {
+    align-self: flex-start;
+  }
+
+  .sim-controls,
+  .sim-panel,
+  .sim-card,
+  .sim-explainer,
+  .sim-results {
+    padding: 18px;
+  }
+
+  .sim-control-row {
+    gap: 12px;
+  }
+
+  .sim-field,
+  .sim-field-wide,
+  .sim-control-row input,
+  .sim-control-row select {
+    width: 100%;
+  }
+
+  .gantt-viewport,
+  .sim-table-wrap,
+  .thread-timeline-wrap,
+  .syscall-timeline,
+  .frag-memory-bar,
+  .boot-console,
+  .state-queue,
+  .rq-queue,
+  .pool-queue {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .os-structure-grid,
+  .pcb-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  }
+
+  .thread-stats,
+  .pool-stats,
+  .paging-stats,
+  .sim-averages {
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .sim-shell {
+    width: min(100% - 20px, 1200px);
+    padding-top: 24px;
+  }
+
+  .sim-header {
+    padding: 20px 16px;
+  }
+
+  .sim-icon-cpu,
+  .sim-icon-ram {
+    width: 58px;
+    height: 58px;
+    font-size: 11px;
+  }
+
+  .sim-controls,
+  .sim-panel,
+  .sim-card,
+  .sim-explainer,
+  .sim-results {
+    padding: 14px;
+  }
+
+  .sim-btn,
+  .mem-tab,
+  .profile-button {
+    min-width: 0;
+  }
+
+  .os-structure-grid {
+    grid-template-columns: 1fr;
+  }
+}

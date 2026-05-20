@@ -1083,3 +1083,127 @@
     min-height: 0;
   }
 }
+
+/* ---- Mobile compatibility pass ---- */
+@media (max-width: 768px) {
+  .profile-shell {
+    padding-bottom: 56px;
+  }
+
+  .prof-banner-change-btn {
+    right: 16px;
+    max-width: calc(100% - 120px);
+    padding: 8px 10px;
+    font-size: 7px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .prof-username-row,
+  .prof-rename-editor,
+  .prof-info-row,
+  .prof-progress-details,
+  .prof-card-head,
+  .prof-tabs {
+    flex-wrap: wrap;
+  }
+
+  .prof-info-left,
+  .prof-info-right,
+  .prof-rename-editor,
+  .prof-rename-input {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .prof-rename-save,
+  .prof-rename-cancel {
+    flex: 1 1 120px;
+  }
+
+  .prof-layout {
+    gap: 18px;
+  }
+
+  .prof-stats-card {
+    gap: 12px;
+  }
+
+  .prof-overview-progress {
+    align-items: center;
+  }
+
+  .prof-progress-ring {
+    transform: scale(0.88);
+  }
+
+  .prof-module-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  }
+
+  .prof-mod-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .prof-badges-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  }
+
+  .prof-bg-picker {
+    width: min(100% - 24px, 640px);
+    max-height: calc(100svh - 32px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .prof-banner {
+    height: 148px;
+  }
+
+  .prof-banner-content {
+    left: 16px;
+  }
+
+  .prof-banner-change-btn {
+    bottom: 10px;
+    right: 10px;
+    max-width: calc(100% - 116px);
+  }
+
+  .prof-info-row {
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-bottom: 22px;
+  }
+
+  .prof-info-left h1 {
+    font-size: clamp(16px, 7vw, 24px);
+    overflow-wrap: anywhere;
+  }
+
+  .prof-layout {
+    padding: 0 12px;
+  }
+
+  .prof-stats-card,
+  .prof-bg-grid,
+  .prof-badges-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .prof-stats-card,
+  .prof-xp-progress,
+  .prof-overview-progress {
+    padding: 16px;
+  }
+
+  .prof-tab {
+    flex: 1 1 120px;
+    justify-content: center;
+  }
+
+  .prof-bg-picker {
+    padding: 18px 14px;
+  }
+}

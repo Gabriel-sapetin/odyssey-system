@@ -3947,3 +3947,438 @@ body.lesson-open .course-shell {
     grid-column: 2;
   }
 }
+
+/* ---- Mobile compatibility pass ---- */
+html {
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  min-width: 0;
+}
+
+.btn,
+.profile-button,
+.lesson-button,
+.player-course-btn,
+.app-link-button,
+.nav-leaderboard-link,
+.course-shell-nav a,
+.course-shell-nav .netacad-tool {
+  overflow-wrap: anywhere;
+}
+
+.lesson-body p,
+.reader-content-split p {
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .nav-right {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .hero {
+    min-height: 100svh;
+    padding: 96px 16px 48px;
+    background-position: center bottom;
+  }
+
+  .hero-content {
+    width: min(100%, 520px);
+    margin-top: 0;
+    padding: 0;
+  }
+
+  .title-os {
+    font-size: clamp(42px, 16vw, 66px);
+    -webkit-text-stroke-width: 2px;
+    text-shadow: 0 3px 0 #f47c20, 3px 5px 0 #152040;
+  }
+
+  .title-odyssey {
+    font-size: clamp(48px, 18vw, 78px);
+    -webkit-text-stroke-width: 2px;
+    text-shadow: 0 4px 0 #f47c20, 4px 6px 0 #152040;
+  }
+
+  .hero-subtitle {
+    max-width: 34ch;
+  }
+
+  .stats-band {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 18px 12px;
+  }
+
+  .stat {
+    min-width: 0;
+    padding: 0 8px;
+  }
+
+  .stat-divider {
+    display: none;
+  }
+
+  .modules {
+    padding: 56px 16px;
+  }
+
+  .modules-grid {
+    gap: 18px;
+  }
+
+  .app-nav {
+    min-height: auto;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .app-brand {
+    font-size: 12px;
+  }
+
+  .app-nav-links {
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    white-space: nowrap;
+  }
+
+  .app-nav-links > * {
+    flex: 0 0 auto;
+  }
+
+  .dashboard-shell,
+  .character-shell {
+    width: min(100% - 24px, 1152px);
+    padding-bottom: 56px;
+  }
+
+  .speech-bubble {
+    padding: 16px;
+    font-size: 10px;
+  }
+
+  .mentor-avatar {
+    width: 76px;
+    height: 76px;
+  }
+
+  .course-hero {
+    min-height: 236px;
+    padding: 24px 18px;
+  }
+
+  .course-hero h1 {
+    font-size: clamp(24px, 9vw, 36px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .course-actions .btn,
+  .course-actions .course-link {
+    width: 100%;
+  }
+
+  .course-progress {
+    width: min(100%, 220px);
+  }
+
+  .course-progress strong {
+    right: 8px;
+    color: #050918;
+  }
+
+  .explore-card {
+    grid-template-columns: 46px minmax(0, 1fr);
+    padding: 16px;
+  }
+
+  .card-icon {
+    width: 46px;
+    height: 46px;
+    font-size: 10px;
+  }
+
+  .profile-card,
+  .club-card {
+    padding: 18px;
+  }
+
+  .profile-stats {
+    gap: 16px;
+    font-size: 9px;
+  }
+
+  .leaderboard-hero {
+    min-height: 180px;
+  }
+
+  .leaderboard-hero h1 {
+    font-size: clamp(24px, 10vw, 34px);
+    line-height: 1.25;
+  }
+
+  .leaderboard-row {
+    gap: 8px 12px;
+  }
+
+  .leaderboard-player strong {
+    white-space: normal;
+  }
+
+  .course-page .netacad-course.standalone .netacad-workspace,
+  .netacad-course.standalone .netacad-workspace,
+  .netacad-workspace {
+    min-height: 0;
+  }
+
+  .reader-content-split {
+    gap: 24px;
+    padding: 24px 18px;
+  }
+
+  .reader-content-split h1,
+  .reader-content-split h2,
+  .netacad-player .lesson-heading h2 {
+    font-size: clamp(26px, 9vw, 36px);
+  }
+
+  .reader-topic-stack {
+    min-width: 0;
+  }
+
+  .progress-panel-stats-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .progress-stat-mini {
+    align-items: flex-start;
+  }
+
+  .netacad-player.fullpage-player {
+    height: 100svh;
+    overflow-y: auto;
+  }
+
+  .fullpage-player .netacad-player-grid,
+  .netacad-player-grid {
+    height: auto;
+    min-height: 0;
+  }
+
+  .lesson-reader {
+    overflow-y: visible;
+    padding: 0 18px 28px;
+  }
+
+  .lesson-outline-panel {
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .lesson-body {
+    min-height: 0;
+  }
+
+  .netacad-player .lesson-body p,
+  .lesson-body p {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .lesson-code {
+    padding: 14px;
+    font-size: 12px;
+  }
+
+  .lesson-actions .lesson-button,
+  .reader-actions .lesson-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .player-bar-right,
+  .player-course-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 10px 12px;
+  }
+
+  .nav-logo {
+    max-width: calc(100% - 52px);
+    font-size: 8px;
+  }
+
+  .nav-right {
+    justify-content: space-between;
+  }
+
+  .nav-leaderboard-link {
+    font-size: 7px;
+  }
+
+  .theme-toggle {
+    width: 36px;
+    height: 34px;
+  }
+
+  .btn {
+    min-height: 40px;
+    padding: 10px 12px;
+    font-size: 8px;
+  }
+
+  .btn-cta {
+    width: 100%;
+    max-width: 280px;
+    padding: 12px 14px;
+  }
+
+  .hero-eyebrow {
+    font-size: 8px;
+  }
+
+  .hero-subtitle {
+    font-size: 14px;
+  }
+
+  .stats-band {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .module-card {
+    box-shadow: 4px 4px 0 #1a1a2e;
+  }
+
+  .auth-card {
+    padding: 28px 18px;
+  }
+
+  .auth-form input,
+  .fill-answer input {
+    font-size: 16px;
+  }
+
+  .app-nav-links {
+    gap: 18px;
+    font-size: 9px;
+  }
+
+  .welcome-row,
+  .speech-row {
+    margin-bottom: 34px;
+  }
+
+  .course-hero {
+    margin-top: 18px;
+  }
+
+  .explore-section,
+  .module-roadmap {
+    margin-top: 38px;
+  }
+
+  .explore-section h2,
+  .module-roadmap h2 {
+    font-size: 19px;
+  }
+
+  .leaderboard-panel {
+    padding: 14px 10px;
+  }
+
+  .leaderboard-row {
+    padding: 12px 10px;
+  }
+
+  .leaderboard-player {
+    gap: 10px;
+  }
+
+  .leaderboard-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .leaderboard-avatar img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .course-page .netacad-shell-header,
+  .netacad-shell-header,
+  .netacad-player-bar {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .netacad-brand-lockup {
+    width: 100%;
+  }
+
+  .netacad-brand-lockup span:not(.netacad-brand-mark) {
+    overflow-wrap: anywhere;
+  }
+
+  .course-outline-module,
+  .lesson-outline-item {
+    padding: 10px 12px;
+  }
+
+  .reader-topline,
+  .netacad-player .lesson-topline {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 0;
+  }
+
+  .answer-option {
+    grid-template-columns: 32px minmax(0, 1fr);
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .blank-sentence {
+    padding: 14px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 360px) {
+  .title-odyssey {
+    font-size: 44px;
+  }
+
+  .course-app-brand span,
+  .netacad-brand-lockup span {
+    display: none;
+  }
+
+  .course-shell-nav {
+    font-size: 8px;
+  }
+}
