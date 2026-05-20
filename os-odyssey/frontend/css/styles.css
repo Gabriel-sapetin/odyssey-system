@@ -184,6 +184,16 @@ a {
   gap: 14px;
 }
 
+.nav-leaderboard-link {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--text);
+}
+
+.nav-leaderboard-link:hover {
+  color: var(--orange);
+}
+
 .nav-profile {
   min-height: 42px;
   display: inline-flex;
@@ -297,6 +307,7 @@ a {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: rgba(0, 0, 0, 0.22);
   pointer-events: none;
 }
@@ -442,21 +453,49 @@ a {
 }
 
 /* ---- MODULES SECTION ----
-   Background: bg-mountains-day.jpg (or dark mode: transparent letting --bg show)
+   Background: penguin ice.mp4 video, with --bg as fallback.
    Header mascot: penguin-flower.png
    Card thumbs: each card has its own background-image (see HTML)
 */
 .modules {
+  position: relative;
   padding: 80px 40px;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.modules-bg-video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  pointer-events: none;
+}
+
+.modules::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(232, 248, 255, 0.2);
+  pointer-events: none;
 }
 
 .modules-header {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
   margin-bottom: 52px;
   text-align: center;
 }
@@ -489,9 +528,13 @@ a {
 }
 
 .modules-grid {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 22px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Module cards */
@@ -1232,6 +1275,10 @@ a {
 }
 
 .app-nav-links a:hover {
+  color: var(--orange);
+}
+
+.app-nav-links a[aria-current="page"] {
   color: var(--orange);
 }
 
@@ -2235,6 +2282,248 @@ body.lesson-open .course-shell {
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+/* ---- Leaderboard ---- */
+.leaderboard-page {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(5, 9, 24, 0.38), rgba(5, 9, 24, 0.94)),
+    url('../../assets/bg-mountains-sunrise.jpg') center top / cover fixed;
+}
+
+.leaderboard-shell {
+  width: min(1000px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 52px 0 90px;
+}
+
+.leaderboard-hero {
+  min-height: 230px;
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.leaderboard-hero img {
+  width: 78px;
+  height: 78px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.42));
+}
+
+.leaderboard-hero h1 {
+  color: #ffffff;
+  font-family: var(--font-pixel);
+  font-size: clamp(26px, 5vw, 42px);
+  text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
+}
+
+.leaderboard-panel {
+  overflow: hidden;
+  padding: 24px;
+  border: 2px solid rgba(138, 241, 255, 0.25);
+  border-radius: 8px;
+  background: rgba(22, 31, 70, 0.76);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(12px);
+}
+
+.leaderboard-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.leaderboard-panel h2 {
+  margin-top: 10px;
+  color: #ffffff;
+  font-family: var(--font-pixel);
+  font-size: clamp(14px, 2vw, 20px);
+  line-height: 1.5;
+}
+
+.leaderboard-pill {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 16px;
+  border-radius: 6px;
+  background: #8a3ffc;
+  color: #ffffff;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+}
+
+.leaderboard-table-head,
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 72px minmax(220px, 1fr) 112px 120px 132px;
+  gap: 14px;
+  align-items: center;
+}
+
+.leaderboard-table-head {
+  padding: 18px 16px 10px;
+  color: rgba(255, 255, 255, 0.68);
+  font-family: var(--font-pixel);
+  font-size: 8px;
+}
+
+.leaderboard-list {
+  display: grid;
+  gap: 12px;
+}
+
+.leaderboard-row {
+  min-height: 80px;
+  padding: 14px 16px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.84);
+  color: #ffffff;
+}
+
+.leaderboard-row.is-current-user {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 2px rgba(245, 166, 35, 0.16);
+}
+
+.leaderboard-position {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #111827;
+  color: #ffffff;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+}
+
+.leaderboard-row.top-1 .leaderboard-position,
+.leaderboard-row.top-2 .leaderboard-position,
+.leaderboard-row.top-3 .leaderboard-position {
+  background: #8a3ffc;
+}
+
+.leaderboard-player {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.leaderboard-avatar {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.leaderboard-avatar img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.leaderboard-player strong {
+  display: block;
+  overflow: hidden;
+  color: #ffffff;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-player small,
+.leaderboard-stat small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.leaderboard-stat strong,
+.leaderboard-rank,
+.leaderboard-xp {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.leaderboard-rank {
+  color: #ffc857;
+}
+
+.leaderboard-xp {
+  color: #8af1ff;
+}
+
+.leaderboard-state {
+  padding: 28px 18px;
+  border: 2px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.76);
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.light-mode.leaderboard-page {
+  background:
+    linear-gradient(180deg, rgba(238, 243, 249, 0.2), rgba(238, 243, 249, 0.92)),
+    url('../../assets/bg-mountains-day.jpg') center top / cover fixed;
+}
+
+.light-mode .leaderboard-panel {
+  border-color: #c8d3e2;
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.light-mode .leaderboard-panel h2,
+.light-mode .leaderboard-hero h1 {
+  color: #1a1f36;
+  text-shadow: none;
+}
+
+.light-mode .leaderboard-table-head {
+  color: #5a6478;
+}
+
+.light-mode .leaderboard-row {
+  background: rgba(255, 255, 255, 0.96);
+  color: #1a1f36;
+}
+
+.light-mode .leaderboard-player strong {
+  color: #1a1f36;
+}
+
+.light-mode .leaderboard-player small,
+.light-mode .leaderboard-stat small {
+  color: #5a6478;
+}
+
+.light-mode .leaderboard-state {
+  border-color: #c8d3e2;
+  color: #5a6478;
 }
 
 .profile-card,
@@ -3469,6 +3758,20 @@ body.lesson-open .course-shell {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .leaderboard-table-head {
+    display: none;
+  }
+
+  .leaderboard-row {
+    grid-template-columns: 46px minmax(0, 1fr);
+  }
+
+  .leaderboard-stat,
+  .leaderboard-rank,
+  .leaderboard-xp {
+    grid-column: 2;
+  }
+
   .character-grid {
     grid-template-columns: 1fr;
   }
@@ -3578,6 +3881,24 @@ body.lesson-open .course-shell {
 
   .profile-stats {
     grid-template-columns: 1fr;
+  }
+
+  .leaderboard-shell {
+    width: min(100% - 24px, 1000px);
+    padding-top: 30px;
+  }
+
+  .leaderboard-panel {
+    padding: 16px;
+  }
+
+  .leaderboard-panel-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .leaderboard-row {
+    padding: 14px;
   }
 
   .netacad-shell-header,

@@ -540,6 +540,8 @@
     });
 
     if (!user) {
+      loadLeaderboard(null);
+
       // Redirect away from dashboard if not logged in
       if (document.body.classList.contains('dashboard-page') || document.body.classList.contains('course-page')) {
         window.location.href = 'login.html';
@@ -588,6 +590,8 @@
     // Refresh lock/unlock state for sidebar & action buttons now that profile is loaded
     applyModuleLockState();
 
+    loadLeaderboard(displayUser);
+
     // Set personalized welcome text for typewriter
     const typewriterEl = document.getElementById('typewriterText');
     if (typewriterEl) {
@@ -618,6 +622,75 @@
     if (profileLevel) profileLevel.textContent = `Level ${user.level}`;
     if (profileXp) profileXp.textContent = user.xp;
     if (profileRank) profileRank.textContent = user.rank;
+  }
+
+  function formatXp(value) {
+    return Number(value || 0).toLocaleString();
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[char]));
+  }
+
+  function avatarMarkup(entry) {
+    if (entry.avatar === 'computer') {
+      return '<span class="computer-avatar mini"><span class="screen-face"></span></span>';
+    }
+
+    const avatar = entry.avatar || DEFAULT_AVATAR;
+    const name = entry.username || entry.character || DEFAULT_CHARACTER;
+    return `<img src="${escapeHtml(avatar)}" alt="${escapeHtml(name)} avatar" />`;
+  }
+
+  async function loadLeaderboard(currentUser) {
+    const list = document.getElementById('leaderboardList');
+    if (!list) return;
+
+    list.innerHTML = '<div class="leaderboard-state">Loading leaderboard...</div>';
+
+    try {
+      const { data, error } = await supa.rpc('get_leaderboard');
+      if (error) throw error;
+
+      const entries = Array.isArray(data) ? data : [];
+      if (!entries.length) {
+        list.innerHTML = '<div class="leaderboard-state">No leaderboard data yet.</div>';
+        return;
+      }
+
+      list.innerHTML = entries.map((entry, index) => {
+        const position = Number(entry.position || index + 1);
+        const isCurrentUser = currentUser && entry.username === currentUser.username;
+        const medalClass = position <= 3 ? ` top-${position}` : '';
+        const currentClass = isCurrentUser ? ' is-current-user' : '';
+        const rank = entry.rank || calculateRank(entry.level || 1);
+
+        return `
+          <article class="leaderboard-row${medalClass}${currentClass}">
+            <span class="leaderboard-position">${position}</span>
+            <span class="leaderboard-player">
+              <span class="leaderboard-avatar">${avatarMarkup(entry)}</span>
+              <span>
+                <strong>${escapeHtml(entry.username || 'Anonymous')}</strong>
+                <small>${isCurrentUser ? 'You' : escapeHtml(entry.character || DEFAULT_CHARACTER)}</small>
+              </span>
+            </span>
+            <span class="leaderboard-stat"><strong>${Number(entry.level || 1)}</strong><small>Level</small></span>
+            <span class="leaderboard-rank">${escapeHtml(rank)}</span>
+            <span class="leaderboard-xp">${formatXp(entry.xp)} XP</span>
+          </article>
+        `;
+      }).join('');
+    } catch (error) {
+      console.error('Failed to load leaderboard:', error);
+      list.innerHTML = '<div class="leaderboard-state">Leaderboard is not ready yet. Apply the latest database migration and reload.</div>';
+    }
   }
 
   function showAuthError(message) {

@@ -66,21 +66,25 @@ async def get_leaderboard(request: Request):
         admin = get_admin_client()
         result = (
             admin.table("profiles")
-            .select("username, xp, level, rank, character, earned_badges")
+            .select("username, xp, level, rank, character, avatar, earned_badges")
             .order("xp", desc=True)
-            .limit(10)
+            .limit(25)
             .execute()
         )
 
         leaderboard = []
         for i, entry in enumerate(result.data or [], 1):
+            xp = int(entry.get("xp") or 0)
+            level = max(1, xp // 20)
+            rank = "Gold" if level >= 75 else "Silver" if level >= 30 else "Bronze"
             leaderboard.append({
                 "position": i,
                 "username": entry.get("username", "Anonymous"),
-                "xp": entry.get("xp", 0),
-                "level": entry.get("level", 1),
-                "rank": entry.get("rank", "Bronze"),
+                "xp": xp,
+                "level": level,
+                "rank": rank,
                 "character": entry.get("character", "Kernel Penguin"),
+                "avatar": entry.get("avatar", "../../assets/penguin-flower-removebg-preview.png"),
                 "badge_count": len(entry.get("earned_badges") or []),
             })
 
