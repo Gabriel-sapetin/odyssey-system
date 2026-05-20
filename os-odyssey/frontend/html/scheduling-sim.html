@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>OS Odyssey - CPU Scheduling Simulator</title>
   <meta name="description" content="Interactive CPU scheduling simulator. Practice FCFS, SJF, Priority, and Round-Robin algorithms with visual Gantt charts." />
