@@ -648,6 +648,23 @@
     return `${count.toLocaleString()} ${count === 1 ? 'Badge' : 'Badges'}`;
   }
 
+  function formatOrdinal(value) {
+    const number = Number(value || 0);
+    const tens = number % 100;
+    if (tens >= 11 && tens <= 13) return `${number}th`;
+
+    switch (number % 10) {
+      case 1:
+        return `${number}st`;
+      case 2:
+        return `${number}nd`;
+      case 3:
+        return `${number}rd`;
+      default:
+        return `${number}th`;
+    }
+  }
+
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({
       '&': '&amp;',
@@ -674,6 +691,7 @@
 
     const title = document.getElementById('leaderboardTitle');
     const metricHead = document.getElementById('leaderboardMetricHead');
+    const userRankSummary = document.getElementById('leaderboardUserRankSummary');
     const sortButtons = document.querySelectorAll('[data-rank-mode]');
     let rankMode = 'xp';
 
@@ -692,6 +710,20 @@
 
       if (title) title.textContent = rankMode === 'badges' ? 'Ranked by Badges' : 'Ranked by Total XP';
       if (metricHead) metricHead.textContent = rankMode === 'badges' ? 'Badges' : 'Total XP';
+      if (userRankSummary) {
+        const modeLabel = rankMode === 'badges' ? 'BADGES' : 'XP';
+        const currentIndex = currentUser
+          ? rankedEntries.findIndex(entry => entry.username === currentUser.username)
+          : -1;
+
+        if (!currentUser) {
+          userRankSummary.textContent = `Sign in to see your ${modeLabel} leaderboard rank.`;
+        } else if (currentIndex >= 0) {
+          userRankSummary.textContent = `You're ranked ${formatOrdinal(currentIndex + 1)} in the ${modeLabel} Leaderboard!`;
+        } else {
+          userRankSummary.textContent = `You're not ranked in the ${modeLabel} Leaderboard yet.`;
+        }
+      }
 
       list.innerHTML = rankedEntries.map((entry, index) => {
         const position = index + 1;
@@ -729,6 +761,11 @@
       const entries = Array.isArray(data) ? data : [];
       if (!entries.length) {
         list.innerHTML = '<div class="leaderboard-state">No leaderboard data yet.</div>';
+        if (userRankSummary) {
+          userRankSummary.textContent = currentUser
+            ? 'Your leaderboard rank will appear once rankings are ready.'
+            : 'Sign in to see your leaderboard rank.';
+        }
         return;
       }
 
@@ -744,6 +781,9 @@
     } catch (error) {
       console.error('Failed to load leaderboard:', error);
       list.innerHTML = '<div class="leaderboard-state">Leaderboard is not ready yet. Apply the latest database migration and reload.</div>';
+      if (userRankSummary) {
+        userRankSummary.textContent = 'Your leaderboard rank is unavailable right now.';
+      }
     }
   }
 

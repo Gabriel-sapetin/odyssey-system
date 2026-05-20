@@ -2330,6 +2330,15 @@ body.lesson-open .course-shell {
   text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
 }
 
+.leaderboard-user-rank {
+  max-width: min(100%, 720px);
+  color: #8af1ff;
+  font-family: var(--font-pixel);
+  font-size: clamp(8px, 1.2vw, 10px);
+  line-height: 1.8;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.48);
+}
+
 .leaderboard-panel {
   flex: 1 1 auto;
   min-height: 0;
@@ -2564,6 +2573,11 @@ body.lesson-open .course-shell {
 .light-mode .leaderboard-panel h2,
 .light-mode .leaderboard-hero h1 {
   color: #1a1f36;
+  text-shadow: none;
+}
+
+.light-mode .leaderboard-user-rank {
+  color: #167ba8;
   text-shadow: none;
 }
 
