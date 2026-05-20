@@ -27,6 +27,7 @@
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
+        keepalive: true,
       };
       if (body) opts.body = JSON.stringify(body);
 
