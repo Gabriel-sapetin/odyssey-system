@@ -62,6 +62,8 @@ def _calculate_level(xp: int) -> int:
 
 
 def _calculate_rank(level: int) -> str:
+    if level >= 115:
+        return "Platinum"
     if level >= 75:
         return "Gold"
     if level >= 30:

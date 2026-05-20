@@ -31,6 +31,16 @@ def _aggregate_stats(profiles_count: int) -> dict:
     }
 
 
+def _calculate_rank(level: int) -> str:
+    if level >= 115:
+        return "Platinum"
+    if level >= 75:
+        return "Gold"
+    if level >= 30:
+        return "Silver"
+    return "Bronze"
+
+
 @router.get("/")
 @limiter.limit("30/minute")
 async def get_platform_stats(request: Request):
@@ -76,7 +86,7 @@ async def get_leaderboard(request: Request):
         for i, entry in enumerate(result.data or [], 1):
             xp = int(entry.get("xp") or 0)
             level = max(1, xp // 20)
-            rank = "Gold" if level >= 75 else "Silver" if level >= 30 else "Bronze"
+            rank = _calculate_rank(level)
             leaderboard.append({
                 "position": i,
                 "username": entry.get("username", "Anonymous"),

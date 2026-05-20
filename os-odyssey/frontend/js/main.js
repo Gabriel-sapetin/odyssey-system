@@ -621,6 +621,7 @@
   }
 
   function calculateRank(level) {
+    if (level >= 115) return 'Platinum';
     if (level >= 75) return 'Gold';
     if (level >= 30) return 'Silver';
     return 'Bronze';

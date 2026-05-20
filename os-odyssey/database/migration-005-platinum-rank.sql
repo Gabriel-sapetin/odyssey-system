@@ -1,5 +1,6 @@
--- Public leaderboard RPC
--- Exposes only display-safe profile fields while keeping profile RLS intact.
+-- MIGRATION 005: Add Platinum rank tier
+-- Users reach Platinum at level 115.
+
 CREATE OR REPLACE FUNCTION public.get_leaderboard()
 RETURNS TABLE (
   "position" BIGINT,
