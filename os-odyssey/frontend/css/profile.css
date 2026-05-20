@@ -1050,16 +1050,18 @@
   }
 
   .prof-stats-card {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .prof-module-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 8px;
   }
 
   .prof-mod-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: 54px minmax(160px, 1fr) auto auto;
+    gap: 12px;
   }
 
   .prof-tab {
@@ -1142,7 +1144,7 @@
   }
 
   .prof-mod-row {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 54px minmax(160px, 1fr) auto auto;
   }
 
   .prof-badges-grid {
@@ -1189,7 +1191,53 @@
   .prof-stats-card,
   .prof-bg-grid,
   .prof-badges-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .prof-stats-card {
+    gap: 8px;
+    overflow-x: auto;
+  }
+
+  .prof-stat-item {
+    min-width: 64px;
+    flex-direction: column;
+    justify-content: flex-start;
+    text-align: center;
+    gap: 7px;
+  }
+
+  .prof-stat-item img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .prof-stat-item strong {
+    font-size: 11px;
+  }
+
+  .prof-stat-item span {
+    font-size: 6px;
+  }
+
+  .prof-bg-grid,
+  .prof-badges-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prof-module-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .prof-modules-list {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .prof-mod-row {
+    min-width: 520px;
   }
 
   .prof-stats-card,

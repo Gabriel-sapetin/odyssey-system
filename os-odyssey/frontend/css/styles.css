@@ -3803,7 +3803,7 @@ body.lesson-open .course-shell {
   }
 
   .modules-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(156px, 1fr));
   }
 
   .stats-band {
@@ -3876,11 +3876,14 @@ body.lesson-open .course-shell {
 
   .explore-grid,
   .dashboard-side {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: 8px;
   }
 
   .profile-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .leaderboard-shell {
@@ -4165,12 +4168,13 @@ textarea {
   }
 
   .progress-panel-stats-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
 
   .progress-stat-mini {
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
   }
 
   .netacad-player.fullpage-player {
@@ -4211,7 +4215,7 @@ textarea {
 
   .lesson-actions .lesson-button,
   .reader-actions .lesson-button {
-    width: 100%;
+    width: auto;
     min-width: 0;
   }
 
@@ -4265,12 +4269,24 @@ textarea {
   }
 
   .stats-band {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .module-card {
     box-shadow: 4px 4px 0 #1a1a2e;
+  }
+
+  .stat {
+    padding: 0 4px;
+  }
+
+  .stat-number {
+    font-size: 18px;
+  }
+
+  .stat-label {
+    font-size: 6px;
   }
 
   .auth-card {
@@ -4345,7 +4361,12 @@ textarea {
 
   .course-outline-module,
   .lesson-outline-item {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
     padding: 10px 12px;
+  }
+
+  .course-outline-module small {
+    grid-column: auto;
   }
 
   .reader-topline,
