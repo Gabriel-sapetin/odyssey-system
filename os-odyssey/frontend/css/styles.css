@@ -2286,6 +2286,10 @@ body.lesson-open .course-shell {
 
 /* ---- Leaderboard ---- */
 .leaderboard-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   min-height: 100vh;
   background:
     linear-gradient(180deg, rgba(5, 9, 24, 0.38), rgba(5, 9, 24, 0.94)),
@@ -2294,21 +2298,26 @@ body.lesson-open .course-shell {
 
 .leaderboard-shell {
   width: min(1000px, calc(100% - 40px));
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   margin: 0 auto;
-  padding: 52px 0 90px;
+  padding: clamp(14px, 2vh, 26px) 0 clamp(14px, 2vh, 26px);
 }
 
 .leaderboard-hero {
-  min-height: 230px;
+  min-height: clamp(92px, 15vh, 130px);
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
-  gap: 14px;
+  gap: 8px;
   text-align: center;
 }
 
 .leaderboard-hero img {
-  width: 78px;
-  height: 78px;
+  width: 54px;
+  height: 54px;
   object-fit: contain;
   image-rendering: pixelated;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.42));
@@ -2322,8 +2331,12 @@ body.lesson-open .course-shell {
 }
 
 .leaderboard-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  padding: 24px;
+  padding: 16px 20px;
   border: 2px solid rgba(138, 241, 255, 0.25);
   border-radius: 8px;
   background: rgba(22, 31, 70, 0.76);
@@ -2336,15 +2349,15 @@ body.lesson-open .course-shell {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding-bottom: 18px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .leaderboard-panel h2 {
-  margin-top: 10px;
+  margin-top: 6px;
   color: #ffffff;
   font-family: var(--font-pixel);
-  font-size: clamp(14px, 2vw, 20px);
+  font-size: clamp(13px, 1.8vw, 18px);
   line-height: 1.5;
 }
 
@@ -2397,7 +2410,7 @@ body.lesson-open .course-shell {
 }
 
 .leaderboard-table-head {
-  padding: 18px 16px 10px;
+  padding: 10px 12px 8px;
   color: rgba(255, 255, 255, 0.68);
   font-family: var(--font-pixel);
   font-size: 8px;
@@ -2405,12 +2418,33 @@ body.lesson-open .course-shell {
 
 .leaderboard-list {
   display: grid;
-  gap: 12px;
+  gap: 4px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(138, 241, 255, 0.55) rgba(5, 9, 24, 0.42);
+}
+
+.leaderboard-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.leaderboard-list::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: rgba(5, 9, 24, 0.42);
+}
+
+.leaderboard-list::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(5, 9, 24, 0.42);
+  border-radius: 999px;
+  background: rgba(138, 241, 255, 0.72);
 }
 
 .leaderboard-row {
-  min-height: 80px;
-  padding: 14px 16px;
+  min-height: 36px;
+  padding: 4px 12px;
   border: 2px solid transparent;
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.84);
@@ -2423,8 +2457,8 @@ body.lesson-open .course-shell {
 }
 
 .leaderboard-position {
-  width: 34px;
-  height: 34px;
+  width: 24px;
+  height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2432,7 +2466,7 @@ body.lesson-open .course-shell {
   background: #111827;
   color: #ffffff;
   font-family: var(--font-pixel);
-  font-size: 11px;
+  font-size: 9px;
 }
 
 .leaderboard-row.top-1 .leaderboard-position,
@@ -2449,8 +2483,8 @@ body.lesson-open .course-shell {
 }
 
 .leaderboard-avatar {
-  width: 44px;
-  height: 44px;
+  width: 30px;
+  height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2461,8 +2495,8 @@ body.lesson-open .course-shell {
 }
 
 .leaderboard-avatar img {
-  width: 44px;
-  height: 44px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   image-rendering: pixelated;
 }
@@ -2481,9 +2515,9 @@ body.lesson-open .course-shell {
 .leaderboard-player small,
 .leaderboard-stat small {
   display: block;
-  margin-top: 4px;
+  margin-top: 2px;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 800;
 }
 
