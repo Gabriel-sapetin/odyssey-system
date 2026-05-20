@@ -23,14 +23,13 @@ router = APIRouter()
 # ─── Schemas ────────────────────────────────────────────
 
 class ProfileUpdate(BaseModel):
+    # Only cosmetic fields are user-editable.
+    # Gameplay fields (xp, level, rank, streak, last_active_date,
+    # earned_badges, badges, completed_modules) are managed exclusively
+    # by the progress endpoints to prevent XP manipulation.
     username: Optional[str] = None
     character: Optional[str] = None
     avatar: Optional[str] = None
-    streak: Optional[int] = None
-    last_active_date: Optional[str] = None
-    earned_badges: Optional[list[str]] = None
-    badges: Optional[int] = None
-    completed_modules: Optional[list[str]] = None
 
     @field_validator("username")
     @classmethod

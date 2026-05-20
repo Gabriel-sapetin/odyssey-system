@@ -36,6 +36,19 @@ class StreakUpdateRequest(BaseModel):
     pass  # no body needed — uses server date
 
 
+# ─── Valid IDs (whitelist) ───────────────────────────────
+
+VALID_MODULE_IDS = {"module1", "module2", "module3", "module4"}
+
+VALID_BADGE_IDS = {
+    # Module-completion badges
+    "badge_module1", "badge_module2", "badge_module3", "badge_module4",
+    # Simulator-interaction badges
+    "badge_sim_boot", "badge_sim_syscall", "badge_sim_scheduling",
+    "badge_sim_memory", "badge_sim_process", "badge_sim_thread",
+}
+
+
 # ─── CPU-heavy helpers (run in thread pool) ─────────────
 
 def _calculate_level(xp: int) -> int:
@@ -113,6 +126,13 @@ async def complete_module(
     Awards XP and recalculates level/rank in the thread pool.
     """
     MODULE_XP_REWARD = 40  # XP per module completion
+
+    # Reject unknown module IDs to prevent XP farming with fake IDs
+    if body.module_id not in VALID_MODULE_IDS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid module_id: {body.module_id}",
+        )
 
     try:
         admin = get_admin_client()
@@ -247,6 +267,13 @@ async def award_badge(
     Award a badge to the user.
     Idempotent — silently succeeds if badge already earned.
     """
+    # Reject unknown badge IDs to prevent badge farming with fake IDs
+    if body.badge_id not in VALID_BADGE_IDS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid badge_id: {body.badge_id}",
+        )
+
     try:
         admin = get_admin_client()
 
