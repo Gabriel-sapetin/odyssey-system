@@ -2325,6 +2325,69 @@ body.lesson-open .course-shell {
   gap: 18px;
 }
 
+.sim-progress-card {
+  padding: 20px;
+}
+
+.sim-progress-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.sim-progress-head h2 {
+  font-size: 16px;
+}
+
+.sim-progress-head span {
+  max-width: 120px;
+  color: #8af1ff;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  line-height: 1.6;
+  text-align: right;
+}
+
+.sim-progress-list {
+  display: grid;
+  gap: 8px;
+}
+
+.sim-progress-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 10px;
+  border: 1px solid rgba(82, 96, 122, 0.28);
+  border-radius: 4px;
+  background: rgba(18, 27, 48, 0.5);
+}
+
+.sim-progress-item span {
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.sim-progress-item strong {
+  color: var(--app-muted);
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.sim-progress-item.complete {
+  border-color: rgba(34, 197, 94, 0.38);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.sim-progress-item.complete strong {
+  color: #8ef76e;
+}
+
 /* ---- Leaderboard ---- */
 .leaderboard-page {
   height: 100vh;

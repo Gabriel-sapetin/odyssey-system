@@ -20,6 +20,29 @@
 
   let running = false;
   let callCount = 0;
+  let stepMode = false;
+  let stepResume = null;
+
+  const syscallTools = document.createElement('div');
+  syscallTools.className = 'sim-step-tools';
+  syscallTools.innerHTML = `
+    <label class="sim-toggle"><input type="checkbox" id="syscallStepMode" /> Step-by-step mode</label>
+    <button class="sim-btn sim-btn-preset" type="button" id="syscallNextStep" disabled>Next Step</button>
+    <span class="sim-step-note" id="syscallStepNote"><strong>Step guide:</strong> Execute a program to explain each user/kernel transition.</span>
+  `;
+  $id('syscallControls').appendChild(syscallTools);
+  const syscallStepToggle = $id('syscallStepMode');
+  const syscallNextStep = $id('syscallNextStep');
+  const syscallStepNote = $id('syscallStepNote');
+
+  syscallStepToggle.addEventListener('change', () => {
+    stepMode = syscallStepToggle.checked;
+    if (!stepMode && stepResume) stepResume();
+  });
+
+  syscallNextStep.addEventListener('click', () => {
+    if (stepResume) stepResume();
+  });
 
   /* ---- Program Definitions ---- */
   const PROGRAMS = {
@@ -115,11 +138,13 @@
       // User mode → prepare syscall
       setMode('user', `→ ${call.name}`);
       addTimelineBlock('user', `App calls ${call.name}`, CAT_COLORS[call.cat]);
+      await explainSyscallStep(`The app prepares ${call.name} with arguments ${call.args}.`, i, 'user');
       await delay(400);
 
       // Transition to kernel
       setMode('kernel', call.name);
       addTimelineBlock('kernel', `Kernel: ${call.name}`, CAT_COLORS[call.cat]);
+      await explainSyscallStep(`The CPU enters kernel mode so the OS can safely handle ${call.desc.toLowerCase()}.`, i, 'kernel');
       await delay(600);
 
       // Add to table
@@ -128,6 +153,7 @@
       // Return to user mode
       setMode('user', `← return`);
       addTimelineBlock('return', `Return: ${call.ret}`, '#8af1ff');
+      await explainSyscallStep(`The kernel returns ${call.ret}; the program resumes in user mode.`, i, 'return');
       await delay(300);
     }
 
@@ -143,6 +169,22 @@
     if (typeof window.OS_ODYSSEY_AWARD_BADGE === 'function') {
       window.OS_ODYSSEY_AWARD_BADGE('sim_syscall');
     }
+    if (typeof window.OS_ODYSSEY_RECORD_SIM_COMPLETION === 'function') {
+      window.OS_ODYSSEY_RECORD_SIM_COMPLETION('syscall', Math.min(100, callCount * 20), 0);
+    }
+  }
+
+  function explainSyscallStep(text, index, phase) {
+    syscallStepNote.innerHTML = `<strong>Call ${index + 1} ${phase}:</strong> ${text}`;
+    if (!stepMode) return Promise.resolve();
+    syscallNextStep.disabled = false;
+    return new Promise(resolve => {
+      stepResume = () => {
+        stepResume = null;
+        syscallNextStep.disabled = true;
+        resolve();
+      };
+    });
   }
 
   /* ---- Timeline Block ---- */

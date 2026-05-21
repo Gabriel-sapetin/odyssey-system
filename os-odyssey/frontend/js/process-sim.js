@@ -25,6 +25,16 @@
   let contextSwitches = 0;
   let simTimer = null;
 
+  const processTools = document.createElement('div');
+  processTools.className = 'sim-step-tools';
+  processTools.innerHTML = `
+    <label class="sim-toggle"><input type="checkbox" id="psStepMode" checked /> Step-by-step mode</label>
+    <span class="sim-step-note" id="psStepNote"><strong>Step guide:</strong> Use Step Once to inspect each process-state transition.</span>
+  `;
+  $id('processControls').appendChild(processTools);
+  const processStepToggle = $id('psStepMode');
+  const processStepNote = $id('psStepNote');
+
   /* ---- Add Process ---- */
   addBtn.addEventListener('click', addProcess);
 
@@ -53,6 +63,7 @@
     autoId++;
     $id('psProcName').value = '';
     renderAll();
+    processStepNote.innerHTML = `<strong>Step guide:</strong> ${name} was created in the New state. Run one step to admit it to Ready.`;
   }
 
   /* ---- Preset ---- */
@@ -143,6 +154,10 @@
     });
 
     renderAll();
+    const runningAfterStep = processes.find(p => p.state === 'running');
+    const waitingAfterStep = processes.filter(p => p.state === 'waiting').length;
+    const terminatedAfterStep = processes.filter(p => p.state === 'terminated').length;
+    processStepNote.innerHTML = `<strong>Step:</strong> Scheduler advanced one quantum. Running: ${runningAfterStep ? runningAfterStep.name : 'none'}; waiting: ${waitingAfterStep}; terminated: ${terminatedAfterStep}.`;
 
     // Check if all terminated
     if (processes.length > 0 && processes.every(p => p.state === 'terminated')) {
@@ -156,6 +171,18 @@
     if (processes.length === 0) return;
     if (simRunning) {
       stopSim();
+      return;
+    }
+    if (processStepToggle.checked) {
+      pcbPanel.style.display = '';
+      csLogPanel.style.display = '';
+      simulationStep();
+      if (typeof window.OS_ODYSSEY_AWARD_BADGE === 'function') {
+        window.OS_ODYSSEY_AWARD_BADGE('sim_process');
+      }
+      if (processes.length > 0 && processes.every(p => p.state === 'terminated') && typeof window.OS_ODYSSEY_RECORD_SIM_COMPLETION === 'function') {
+        window.OS_ODYSSEY_RECORD_SIM_COMPLETION('process', Math.max(1, 100 - contextSwitches * 5), 0);
+      }
       return;
     }
     simRunning = true;
@@ -174,6 +201,9 @@
     // Award sim badge
     if (typeof window.OS_ODYSSEY_AWARD_BADGE === 'function') {
       window.OS_ODYSSEY_AWARD_BADGE('sim_process');
+    }
+    if (processes.length > 0 && processes.every(p => p.state === 'terminated') && typeof window.OS_ODYSSEY_RECORD_SIM_COMPLETION === 'function') {
+      window.OS_ODYSSEY_RECORD_SIM_COMPLETION('process', Math.max(1, 100 - contextSwitches * 5), 0);
     }
   });
 

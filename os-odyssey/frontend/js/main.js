@@ -495,6 +495,88 @@
     if (text) text.textContent = pct + '%';
   }
 
+  const SIM_PROGRESS_KEY = 'os-odyssey-sim-progress';
+  const SIM_META = [
+    { id: 'boot', name: 'Boot & Interrupts' },
+    { id: 'syscall', name: 'System Call Tracer' },
+    { id: 'scheduling', name: 'Scheduling Challenges' },
+    { id: 'memory', name: 'Memory Labs' },
+    { id: 'process', name: 'Process States' },
+    { id: 'thread', name: 'Thread Visualizer' }
+  ];
+
+  function readSimProgress() {
+    try {
+      const raw = localStorage.getItem(SIM_PROGRESS_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (err) {
+      console.warn('Unable to read simulation progress:', err);
+      return {};
+    }
+  }
+
+  function getSimBonusXp(progress) {
+    return Object.values(progress || {}).reduce((sum, sim) => sum + Number(sim.bonusXp || 0), 0);
+  }
+
+  function displayXpWithBonus(baseXp) {
+    const bonus = getSimBonusXp(readSimProgress());
+    return Number(baseXp || 0) + bonus;
+  }
+
+  function recordSimCompletion(simId, score = 0, bonusXp = 0) {
+    if (!simId) return null;
+    const progress = readSimProgress();
+    const existing = progress[simId] || {};
+    const bestScore = Math.max(Number(existing.bestScore || 0), Number(score || 0));
+    const earnedBonus = Math.max(Number(existing.bonusXp || 0), Number(bonusXp || 0));
+
+    progress[simId] = {
+      completed: true,
+      bestScore,
+      bonusXp: earnedBonus,
+      completedAt: existing.completedAt || new Date().toISOString(),
+      lastPlayedAt: new Date().toISOString()
+    };
+
+    localStorage.setItem(SIM_PROGRESS_KEY, JSON.stringify(progress));
+    renderSimProgressDashboard();
+    renderProfileStats(activeProfile);
+    return progress[simId];
+  }
+
+  function renderSimProgressDashboard() {
+    const list = document.getElementById('simProgressList');
+    const summary = document.getElementById('simProgressSummary');
+    if (!list && !summary) return;
+
+    const progress = readSimProgress();
+    const completedCount = SIM_META.filter(sim => progress[sim.id] && progress[sim.id].completed).length;
+    const bonusXp = getSimBonusXp(progress);
+
+    if (summary) {
+      summary.textContent = `${completedCount}/${SIM_META.length} complete | ${bonusXp} bonus XP`;
+    }
+
+    if (list) {
+      list.innerHTML = SIM_META.map(sim => {
+        const entry = progress[sim.id] || {};
+        const complete = Boolean(entry.completed);
+        const score = Number(entry.bestScore || 0);
+        return `
+          <div class="sim-progress-item ${complete ? 'complete' : ''}">
+            <span>${sim.name}</span>
+            <strong>${complete ? `Best ${score}` : 'Not cleared'}</strong>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  window.OS_ODYSSEY_RECORD_SIM_COMPLETION = recordSimCompletion;
+  window.OS_ODYSSEY_READ_SIM_PROGRESS = readSimProgress;
+
   async function markModuleCompleted(moduleId) {
     if (!activeProfile) return;
 
@@ -622,12 +704,13 @@
 
     if (profileName) profileName.textContent = displayUser.username;
     if (profileLevel) profileLevel.textContent = `Level ${displayUser.level}`;
-    if (profileXp) profileXp.textContent = displayUser.xp;
+    if (profileXp) profileXp.textContent = displayXpWithBonus(displayUser.xp);
     if (profileRank) profileRank.textContent = displayUser.rank;
     if (profileBadges) profileBadges.textContent = (displayUser.earned_badges || []).length;
     if (profileStreak) profileStreak.textContent = displayUser.streak;
     if (profileAvatar) renderAvatar(profileAvatar, displayUser);
     updateProgressDisplay(displayUser);
+    renderSimProgressDashboard();
 
     // Update streak on each session
     updateStreak();
@@ -669,7 +752,7 @@
     const profileRank = document.getElementById('profileRank');
 
     if (profileLevel) profileLevel.textContent = `Level ${user.level}`;
-    if (profileXp) profileXp.textContent = user.xp;
+    if (profileXp) profileXp.textContent = displayXpWithBonus(user.xp);
     if (profileRank) profileRank.textContent = user.rank;
   }
 

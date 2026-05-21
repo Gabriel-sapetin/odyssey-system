@@ -219,6 +219,70 @@
   box-shadow: none !important;
 }
 
+.sim-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.sim-step-tools,
+.sim-challenge-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(82, 96, 122, 0.3);
+}
+
+.sim-toggle {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid rgba(138, 241, 255, 0.28);
+  border-radius: 4px;
+  background: rgba(32, 167, 255, 0.08);
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sim-toggle input {
+  accent-color: var(--orange);
+}
+
+.sim-step-note,
+.sim-challenge-status {
+  min-height: 44px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-left: 4px solid #8af1ff;
+  background: rgba(32, 167, 255, 0.08);
+  color: var(--app-text);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+.sim-step-note strong,
+.sim-challenge-status strong {
+  color: #8af1ff;
+}
+
+.sim-challenge-status.success {
+  border-left-color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.sim-challenge-status.warning {
+  border-left-color: #f5a623;
+  background: rgba(245, 166, 35, 0.1);
+}
+
 /* ---- Panels ---- */
 .sim-panel {
   margin-bottom: 24px;

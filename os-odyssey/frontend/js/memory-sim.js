@@ -36,6 +36,36 @@
   const memFramesVis = $id('memFramesVis');
   const pageTraceHead = $id('pageTraceHead');
   const pageTraceBody = $id('pageTraceBody');
+  let memStepMode = false;
+  let memStepResume = null;
+  let memChallengeRunning = false;
+  let memChallengeStart = 0;
+  let memChallengeTimer = null;
+
+  const pagingTools = document.createElement('div');
+  pagingTools.className = 'sim-step-tools';
+  pagingTools.innerHTML = `
+    <label class="sim-toggle"><input type="checkbox" id="memStepMode" /> Step-by-step mode</label>
+    <button class="sim-btn sim-btn-preset" type="button" id="memNextStep" disabled>Next Step</button>
+    <button class="sim-btn sim-btn-run" type="button" id="memChallenge">Challenge Mode</button>
+    <span class="sim-challenge-status" id="memChallengeStatus">Challenge: reduce page faults in 40s for up to 50 bonus XP.</span>
+  `;
+  $id('tab-paging').querySelector('.sim-controls').appendChild(pagingTools);
+  const memStepToggle = $id('memStepMode');
+  const memNextStepBtn = $id('memNextStep');
+  const memChallengeBtn = $id('memChallenge');
+  const memChallengeStatus = $id('memChallengeStatus');
+
+  memStepToggle.addEventListener('change', () => {
+    memStepMode = memStepToggle.checked;
+    if (!memStepMode && memStepResume) memStepResume();
+  });
+
+  memNextStepBtn.addEventListener('click', () => {
+    if (memStepResume) memStepResume();
+  });
+
+  memChallengeBtn.addEventListener('click', startMemoryChallenge);
 
   /* ---- Preset ---- */
   presetPageBtn.addEventListener('click', () => {
@@ -47,13 +77,14 @@
 
   /* ---- Reset ---- */
   resetPageBtn.addEventListener('click', () => {
+    stopMemoryChallenge(false);
     refInput.value = '';
     frameInput.value = '3';
     pagingResult.style.display = 'none';
   });
 
   /* ---- Run ---- */
-  runPageBtn.addEventListener('click', () => {
+  runPageBtn.addEventListener('click', async () => {
     const refStr = refInput.value.trim();
     if (!refStr) return;
     const refs = refStr.split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
@@ -62,13 +93,69 @@
     const algo = pageAlgo.value;
 
     const result = simulatePageReplacement(refs, numFrames, algo);
-    renderPageResult(refs, numFrames, result);
+    runPageBtn.disabled = true;
+    await renderPageResultStepwise(refs, numFrames, result);
+    runPageBtn.disabled = false;
 
     // Award sim badge
     if (typeof window.OS_ODYSSEY_AWARD_BADGE === 'function') {
       window.OS_ODYSSEY_AWARD_BADGE('sim_memory');
     }
+
+    const score = Math.max(1, Math.round((result.hits / refs.length) * 100));
+    if (memChallengeRunning) {
+      stopMemoryChallenge(true, { refs, result });
+    } else {
+      recordMemoryCompletion(score, 0);
+    }
   });
+
+  function startMemoryChallenge() {
+    refInput.value = '1 2 3 2 4 1 5 2 1 2 3 4 5';
+    frameInput.value = '3';
+    pageAlgo.value = 'optimal';
+    pagingResult.style.display = 'none';
+    memChallengeRunning = true;
+    memChallengeStart = Date.now();
+    memChallengeBtn.disabled = true;
+    memChallengeStatus.className = 'sim-challenge-status warning';
+    memChallengeStatus.textContent = 'Challenge running: Optimal is selected. Run the trace before the 40s timer expires.';
+    clearInterval(memChallengeTimer);
+    memChallengeTimer = setInterval(() => {
+      const left = Math.max(0, 40 - Math.floor((Date.now() - memChallengeStart) / 1000));
+      memChallengeStatus.textContent = `Challenge running: ${left}s left. Score improves with fewer faults and faster completion.`;
+      if (left <= 0) stopMemoryChallenge(false);
+    }, 1000);
+  }
+
+  function stopMemoryChallenge(completed, payload) {
+    clearInterval(memChallengeTimer);
+    memChallengeTimer = null;
+    if (!memChallengeRunning) return;
+
+    const elapsed = Math.floor((Date.now() - memChallengeStart) / 1000);
+    memChallengeRunning = false;
+    memChallengeBtn.disabled = false;
+
+    if (!completed || elapsed > 40) {
+      memChallengeStatus.className = 'sim-challenge-status';
+      memChallengeStatus.textContent = 'Challenge ended. Start again to chase bonus XP.';
+      return;
+    }
+
+    const faultRate = payload.result.faults / payload.refs.length;
+    const score = Math.max(10, Math.round(130 - faultRate * 80 + Math.max(0, 40 - elapsed)));
+    const bonusXp = Math.min(50, Math.max(20, Math.round(score / 3)));
+    memChallengeStatus.className = 'sim-challenge-status success';
+    memChallengeStatus.innerHTML = `Challenge complete in <strong>${elapsed}s</strong>. Score <strong>${score}</strong>, bonus XP <strong>${bonusXp}</strong>.`;
+    recordMemoryCompletion(score, bonusXp);
+  }
+
+  function recordMemoryCompletion(score, bonusXp) {
+    if (typeof window.OS_ODYSSEY_RECORD_SIM_COMPLETION === 'function') {
+      window.OS_ODYSSEY_RECORD_SIM_COMPLETION('memory', score, bonusXp);
+    }
+  }
 
   /* ---- FIFO ---- */
   function fifo(refs, numFrames) {
@@ -175,6 +262,100 @@
     }
   }
 
+  async function renderPageResultStepwise(refs, numFrames, result) {
+    pagingResult.style.display = '';
+    pageFaults.textContent = result.faults;
+    pageHits.textContent = result.hits;
+    pageFaultRate.textContent = ((result.faults / refs.length) * 100).toFixed(1) + '%';
+    memFramesVis.innerHTML = '';
+    pageTraceHead.innerHTML = '<tr><th>Step</th>' + refs.map(r => `<th>${r}</th>`).join('') + '</tr>';
+    pageTraceBody.innerHTML = '';
+
+    for (let i = 0; i < result.steps.length; i++) {
+      const step = result.steps[i];
+      const col = document.createElement('div');
+      col.className = 'mem-frame-col';
+
+      const header = document.createElement('div');
+      header.className = 'mem-frame-header';
+      header.textContent = refs[i];
+      header.style.color = step.fault ? '#ff6b6b' : '#22c55e';
+      col.appendChild(header);
+
+      for (let f = 0; f < numFrames; f++) {
+        const cell = document.createElement('div');
+        cell.className = 'mem-frame-cell';
+        if (step.frames[f] !== undefined) {
+          cell.textContent = step.frames[f];
+          if (step.fault && step.frames[f] === refs[i]) cell.classList.add('fault');
+          if (!step.fault && step.frames[f] === refs[i]) cell.classList.add('hit');
+        } else {
+          cell.textContent = '-';
+          cell.style.opacity = '0.3';
+        }
+        col.appendChild(cell);
+      }
+
+      const status = document.createElement('div');
+      status.className = 'mem-frame-status ' + (step.fault ? 'fault' : 'hit');
+      status.textContent = step.fault ? 'F' : 'H';
+      col.appendChild(status);
+      memFramesVis.appendChild(col);
+
+      renderTraceTableStepwise(refs, numFrames, result.steps.slice(0, i + 1));
+      await explainMemoryStep(step, i);
+    }
+  }
+
+  function renderTraceTableStepwise(refs, numFrames, steps) {
+    let rows = '';
+    for (let f = 0; f < numFrames; f++) {
+      rows += `<tr><td><strong>Frame ${f + 1}</strong></td>`;
+      steps.forEach((step, i) => {
+        const val = step.frames[f] !== undefined ? step.frames[f] : '-';
+        const cls = step.fault && step.frames[f] === refs[i] ? 'fault-cell' :
+          !step.fault && step.frames[f] === refs[i] ? 'hit-cell' : '';
+        rows += `<td class="${cls}">${val}</td>`;
+      });
+      rows += '</tr>';
+    }
+    rows += '<tr><td><strong>Status</strong></td>';
+    steps.forEach(step => {
+      rows += `<td class="${step.fault ? 'fault-cell' : 'hit-cell'}">${step.fault ? 'Fault' : 'Hit'}</td>`;
+    });
+    rows += '</tr>';
+    pageTraceBody.innerHTML = rows;
+  }
+
+  function explainMemoryStep(step, index) {
+    const note = ensureMemoryStepNote();
+    const replacement = step.replaced !== null && step.replaced !== undefined ? ` It replaces page ${step.replaced}.` : '';
+    note.innerHTML = step.fault
+      ? `<strong>Step ${index + 1}:</strong> Page ${step.page} is not in memory, so this is a page fault.${replacement}`
+      : `<strong>Step ${index + 1}:</strong> Page ${step.page} is already loaded, so the CPU gets a hit.`;
+
+    if (!memStepMode) return Promise.resolve();
+    memNextStepBtn.disabled = false;
+    return new Promise(resolve => {
+      memStepResume = () => {
+        memStepResume = null;
+        memNextStepBtn.disabled = true;
+        resolve();
+      };
+    });
+  }
+
+  function ensureMemoryStepNote() {
+    let note = $id('memStepNote');
+    if (!note) {
+      note = document.createElement('div');
+      note.id = 'memStepNote';
+      note.className = 'sim-step-note';
+      pagingResult.appendChild(note);
+    }
+    return note;
+  }
+
   /* ---- Render ---- */
   function renderPageResult(refs, numFrames, result) {
     pagingResult.style.display = '';
@@ -264,6 +445,10 @@
   const fragUsedEl = $id('fragUsed');
   const fragFreeEl = $id('fragFree');
   const fragExtFragEl = $id('fragExtFrag');
+  const fragNote = document.createElement('div');
+  fragNote.className = 'sim-step-note';
+  fragNote.innerHTML = '<strong>Fragmentation step:</strong> Allocate or deallocate a process to see the placement decision explained.';
+  $id('fragPanel').appendChild(fragNote);
 
   let memorySize = 1024;
   let allocations = []; // { name, start, size, color }
@@ -337,6 +522,7 @@
 
     if (start === -1) {
       alert(`Cannot allocate ${size} KB for ${name}. Not enough contiguous memory!`);
+      fragNote.innerHTML = `<strong>Allocation failed:</strong> ${algo} could not find one free block large enough for ${name} (${size} KB).`;
       return;
     }
 
@@ -346,12 +532,15 @@
     fragProcName.value = '';
     fragProcSize.value = '200';
     renderFragmentation();
+    fragNote.innerHTML = `<strong>Allocation step:</strong> ${algo} placed ${name} at address ${start} because that free block fit ${size} KB.`;
+    recordMemoryCompletion(Math.min(100, allocations.length * 20), 0);
   });
 
   /* ---- Deallocate ---- */
   function deallocate(name) {
     allocations = allocations.filter(a => a.name !== name);
     renderFragmentation();
+    fragNote.innerHTML = `<strong>Deallocation step:</strong> ${name} was released, creating or merging free memory space in the map.`;
   }
 
   /* ---- Reset ---- */

@@ -36,6 +36,36 @@
   let processes = [];
   let autoCounter = 1;
   let simRunning = false;
+  let stepMode = false;
+  let stepResume = null;
+  let challengeRunning = false;
+  let challengeStart = 0;
+  let challengeTimer = null;
+
+  const tools = document.createElement('div');
+  tools.className = 'sim-step-tools';
+  tools.innerHTML = `
+    <label class="sim-toggle"><input type="checkbox" id="schedStepMode" /> Step-by-step mode</label>
+    <button class="sim-btn sim-btn-preset" type="button" id="schedNextStep" disabled>Next Step</button>
+    <button class="sim-btn sim-btn-run" type="button" id="schedChallenge">Challenge Mode</button>
+    <span class="sim-challenge-status" id="schedChallengeStatus">Challenge: clear a schedule in 45s for up to 50 bonus XP.</span>
+  `;
+  document.getElementById('schedControls').appendChild(tools);
+  const stepModeToggle = $id('schedStepMode');
+  const nextStepBtn = $id('schedNextStep');
+  const challengeBtn = $id('schedChallenge');
+  const challengeStatus = $id('schedChallengeStatus');
+
+  stepModeToggle.addEventListener('change', () => {
+    stepMode = stepModeToggle.checked;
+    if (!stepMode && stepResume) stepResume();
+  });
+
+  nextStepBtn.addEventListener('click', () => {
+    if (stepResume) stepResume();
+  });
+
+  challengeBtn.addEventListener('click', startChallenge);
 
   /* ---- Toggle quantum field ---- */
   algoSelect.addEventListener('change', () => {
@@ -124,6 +154,7 @@
   /* ---- Reset ---- */
   resetBtn.addEventListener('click', () => {
     if (simRunning) return;
+    stopChallenge(false);
     processes = [];
     autoCounter = 1;
     renderTable();
@@ -147,6 +178,62 @@
     const schedule = computeSchedule(algo, quantum);
     animateSchedule(schedule);
   });
+
+  function startChallenge() {
+    if (simRunning) return;
+    processes = [
+      { name: 'P1', arrival: 0, burst: 5, priority: 2, color: COLORS[0] },
+      { name: 'P2', arrival: 1, burst: 3, priority: 1, color: COLORS[1] },
+      { name: 'P3', arrival: 2, burst: 7, priority: 4, color: COLORS[2] },
+      { name: 'P4', arrival: 4, burst: 2, priority: 3, color: COLORS[3] }
+    ];
+    autoCounter = 5;
+    algoSelect.value = 'sjf';
+    quantumField.style.display = 'none';
+    renderTable();
+    hideResults();
+    challengeRunning = true;
+    challengeStart = Date.now();
+    challengeBtn.disabled = true;
+    challengeStatus.className = 'sim-challenge-status warning';
+    challengeStatus.textContent = 'Challenge running: SJF schedule loaded. Run it before the 45s timer expires.';
+    clearInterval(challengeTimer);
+    challengeTimer = setInterval(() => {
+      const left = Math.max(0, 45 - Math.floor((Date.now() - challengeStart) / 1000));
+      challengeStatus.textContent = `Challenge running: ${left}s left. Best score rewards speed and low average waiting time.`;
+      if (left <= 0) stopChallenge(false);
+    }, 1000);
+  }
+
+  function stopChallenge(completed, metrics) {
+    clearInterval(challengeTimer);
+    challengeTimer = null;
+    if (!challengeRunning) return;
+
+    const elapsed = Math.floor((Date.now() - challengeStart) / 1000);
+    challengeRunning = false;
+    challengeBtn.disabled = false;
+
+    if (!completed || elapsed > 45) {
+      challengeStatus.className = 'sim-challenge-status';
+      challengeStatus.textContent = 'Challenge ended. Start again to chase bonus XP.';
+      return;
+    }
+
+    const speedPoints = Math.max(0, 45 - elapsed);
+    const waitPenalty = Math.round((metrics.avgWaiting || 0) * 2);
+    const score = Math.max(10, 100 + speedPoints - waitPenalty);
+    const bonusXp = Math.min(50, Math.max(20, Math.round(score / 3)));
+    challengeStatus.className = 'sim-challenge-status success';
+    challengeStatus.innerHTML = `Challenge complete in <strong>${elapsed}s</strong>. Score <strong>${score}</strong>, bonus XP <strong>${bonusXp}</strong>.`;
+    recordCompletion(score, bonusXp);
+  }
+
+  function recordCompletion(score, bonusXp) {
+    if (typeof window.OS_ODYSSEY_RECORD_SIM_COMPLETION === 'function') {
+      window.OS_ODYSSEY_RECORD_SIM_COMPLETION('scheduling', score, bonusXp);
+    }
+  }
 
   /* ---- Scheduling Algorithms ---- */
   function computeSchedule(algo, quantum) {
@@ -291,10 +378,11 @@
       const block = timeline[i];
       await addGanttBlock(block, i, delay);
       updateReadyQueue(timeline, i);
+      await explainSchedulingStep(timeline, i);
     }
 
     // Build results
-    buildResults(timeline);
+    const metrics = buildResults(timeline);
     buildLegend();
 
     simRunning = false;
@@ -307,6 +395,44 @@
     if (typeof window.OS_ODYSSEY_AWARD_BADGE === 'function') {
       window.OS_ODYSSEY_AWARD_BADGE('sim_scheduling');
     }
+    if (challengeRunning) {
+      stopChallenge(true, metrics);
+    } else {
+      recordCompletion(Math.max(1, 100 - Math.round(metrics.avgWaiting * 5)), 0);
+    }
+  }
+
+  function explainSchedulingStep(timeline, index) {
+    const note = ensureStepNote();
+    const block = timeline[index];
+    const ready = processes
+      .filter(p => p.arrival <= block.start && timeline.slice(index).some(b => b.name === p.name))
+      .map(p => p.name)
+      .filter(name => name !== block.name);
+    note.innerHTML = block.name === 'idle'
+      ? `<strong>Step ${index + 1}:</strong> CPU is idle from t=${block.start} to t=${block.end} because no process has arrived yet.`
+      : `<strong>Step ${index + 1}:</strong> ${block.name} runs from t=${block.start} to t=${block.end}. Ready queue before this slice: ${ready.join(', ') || 'empty'}.`;
+
+    if (!stepMode) return Promise.resolve();
+    nextStepBtn.disabled = false;
+    return new Promise(resolve => {
+      stepResume = () => {
+        stepResume = null;
+        nextStepBtn.disabled = true;
+        resolve();
+      };
+    });
+  }
+
+  function ensureStepNote() {
+    let note = $id('schedStepNote');
+    if (!note) {
+      note = document.createElement('div');
+      note.id = 'schedStepNote';
+      note.className = 'sim-step-note';
+      rqPanel.appendChild(note);
+    }
+    return note;
   }
 
   function addGanttBlock(block, index, delay) {
@@ -406,14 +532,16 @@
     });
 
     const n = entries.length;
+    const avgTurnaround = totalTurnaround / n;
+    const avgWaiting = totalWaiting / n;
     simAverages.innerHTML = `
       <div class="sim-avg-item">
         <span>AVG TURNAROUND</span>
-        <span>${(totalTurnaround / n).toFixed(2)}</span>
+        <span>${avgTurnaround.toFixed(2)}</span>
       </div>
       <div class="sim-avg-item">
         <span>AVG WAITING</span>
-        <span>${(totalWaiting / n).toFixed(2)}</span>
+        <span>${avgWaiting.toFixed(2)}</span>
       </div>
       <div class="sim-avg-item">
         <span>TOTAL TIME</span>
@@ -424,6 +552,7 @@
         <span>${n}</span>
       </div>
     `;
+    return { avgTurnaround, avgWaiting, totalTime: timeline[timeline.length - 1].end, processes: n };
   }
 
   function buildLegend() {

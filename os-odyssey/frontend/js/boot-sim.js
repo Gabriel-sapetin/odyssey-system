@@ -21,6 +21,29 @@
 
   let booting = false;
   let booted = false;
+  let stepMode = false;
+  let stepResume = null;
+
+  const bootTools = document.createElement('div');
+  bootTools.className = 'sim-step-tools';
+  bootTools.innerHTML = `
+    <label class="sim-toggle"><input type="checkbox" id="bootStepMode" /> Step-by-step mode</label>
+    <button class="sim-btn sim-btn-preset" type="button" id="bootNextStep" disabled>Next Step</button>
+    <span class="sim-step-note" id="bootStepNote"><strong>Step guide:</strong> Start the boot sequence to explain each phase.</span>
+  `;
+  startBtn.closest('.sim-controls').appendChild(bootTools);
+  const bootStepToggle = $id('bootStepMode');
+  const bootNextStep = $id('bootNextStep');
+  const bootStepNote = $id('bootStepNote');
+
+  bootStepToggle.addEventListener('change', () => {
+    stepMode = bootStepToggle.checked;
+    if (!stepMode && stepResume) stepResume();
+  });
+
+  bootNextStep.addEventListener('click', () => {
+    if (stepResume) stepResume();
+  });
 
   const SPEEDS = { fast: 80, normal: 250, slow: 600 };
 
@@ -143,9 +166,11 @@
     document.querySelectorAll('.storage-fill').forEach(f => f.style.width = '0%');
     document.querySelectorAll('.storage-level').forEach(l => l.classList.remove('storage-active'));
 
-    for (const step of BOOT_SEQUENCE) {
+    for (let i = 0; i < BOOT_SEQUENCE.length; i++) {
+      const step = BOOT_SEQUENCE[i];
       addConsoleLine(step.text, step.type);
       if (step.storage) animateStorage(step.storage);
+      await explainBootStep(step, i);
       await delay(step.type === 'divider' ? speed / 3 : speed);
     }
 
@@ -166,6 +191,26 @@
     if (typeof window.OS_ODYSSEY_AWARD_BADGE === 'function') {
       window.OS_ODYSSEY_AWARD_BADGE('sim_boot');
     }
+    if (typeof window.OS_ODYSSEY_RECORD_SIM_COMPLETION === 'function') {
+      window.OS_ODYSSEY_RECORD_SIM_COMPLETION('boot', 100, 0);
+    }
+  }
+
+  function explainBootStep(step, index) {
+    if (step.type !== 'divider') {
+      const storageText = step.storage ? ` It touches ${step.storage.toUpperCase()} in the storage hierarchy.` : '';
+      bootStepNote.innerHTML = `<strong>Step ${index + 1}:</strong> ${step.text || 'Phase break.'}${storageText}`;
+    }
+
+    if (!stepMode || step.type === 'divider') return Promise.resolve();
+    bootNextStep.disabled = false;
+    return new Promise(resolve => {
+      stepResume = () => {
+        stepResume = null;
+        bootNextStep.disabled = true;
+        resolve();
+      };
+    });
   }
 
   /* ---- Interrupt Handling ---- */
@@ -194,6 +239,7 @@
     activeISR.style.color = irq.color;
 
     // Log
+    bootStepNote.innerHTML = `<strong>Interrupt step:</strong> ${irq.device} raised IRQ ${irq.irq}; the CPU saves user state and jumps to ISR ${irq.isr}.`;
     const logLine = document.createElement('div');
     logLine.className = 'boot-line boot-info';
     logLine.innerHTML = `<span style="color:${irq.color}">[IRQ ${irq.irq}]</span> ${irq.device} → CPU saved state → jumping to ISR at <code style="color:#8af1ff">${irq.isr}</code>`;

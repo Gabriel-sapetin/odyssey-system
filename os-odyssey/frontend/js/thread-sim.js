@@ -18,6 +18,52 @@
   if (!$id('runParallel')) return;
 
   const TASK_COLORS = ['#f5a623', '#20a7ff', '#22c55e', '#e879f9', '#f97316', '#06b6d4', '#a78bfa', '#fb7185'];
+  let threadStepMode = false;
+  let threadStepResume = null;
+
+  function addThreadStepTools(container, noteId) {
+    const tools = document.createElement('div');
+    tools.className = 'sim-step-tools';
+    tools.innerHTML = `
+      <label class="sim-toggle"><input type="checkbox" class="thread-step-toggle" /> Step-by-step mode</label>
+      <button class="sim-btn sim-btn-preset thread-next-step" type="button" disabled>Next Step</button>
+      <span class="sim-step-note" id="${noteId}"><strong>Step guide:</strong> Run this thread simulation to explain each step.</span>
+    `;
+    container.appendChild(tools);
+    const toggle = tools.querySelector('.thread-step-toggle');
+    const next = tools.querySelector('.thread-next-step');
+    toggle.addEventListener('change', () => {
+      threadStepMode = toggle.checked;
+      if (!threadStepMode && threadStepResume) threadStepResume();
+    });
+    next.addEventListener('click', () => {
+      if (threadStepResume) threadStepResume();
+    });
+    return { next, note: $id(noteId) };
+  }
+
+  const parallelStep = addThreadStepTools($id('tab-parallel').querySelector('.sim-controls'), 'parallelStepNote');
+  const modelStep = addThreadStepTools($id('tab-models').querySelector('.sim-controls'), 'modelStepNote');
+  const poolStep = addThreadStepTools($id('tab-pool').querySelector('.sim-controls'), 'poolStepNote');
+
+  function explainThreadStep(text, controls) {
+    controls.note.innerHTML = `<strong>Step:</strong> ${text}`;
+    if (!threadStepMode) return Promise.resolve();
+    controls.next.disabled = false;
+    return new Promise(resolve => {
+      threadStepResume = () => {
+        threadStepResume = null;
+        controls.next.disabled = true;
+        resolve();
+      };
+    });
+  }
+
+  function recordThreadCompletion(score) {
+    if (typeof window.OS_ODYSSEY_RECORD_SIM_COMPLETION === 'function') {
+      window.OS_ODYSSEY_RECORD_SIM_COMPLETION('thread', score, 0);
+    }
+  }
 
   /* ================================================================
      TAB 1: PARALLELISM VS CONCURRENCY
@@ -85,6 +131,7 @@
         const a = assignments[t];
         const block = createTimeBlock(a.name, a.color, taskDuration);
         timelineRows[0].appendChild(block);
+        await explainThreadStep(`${a.name} runs on Core 0 while the OS time-slices concurrency on one CPU core.`, parallelStep);
         await delay(taskDuration);
         elapsed += taskDuration;
       }
@@ -101,6 +148,7 @@
             timelineRows[c].appendChild(block);
           }
         }
+        await explainThreadStep(`Round ${r + 1}: available cores run separate tasks at the same time, which is true parallelism.`, parallelStep);
         await delay(taskDuration);
         elapsed += taskDuration;
       }
@@ -127,6 +175,7 @@
     if (typeof window.OS_ODYSSEY_AWARD_BADGE === 'function') {
       window.OS_ODYSSEY_AWARD_BADGE('sim_thread');
     }
+    recordThreadCompletion(Math.min(100, Math.round(Number(speedup) * 35)));
   });
 
   resetParallelBtn.addEventListener('click', () => {
@@ -239,6 +288,8 @@
       </div>
       <p style="margin-top:16px;color:var(--app-muted);"><strong>Examples:</strong> ${info.examples}</p>
     `;
+    modelStep.note.innerHTML = `<strong>Step:</strong> ${info.title} maps ${userCount} user threads onto ${kernelCount} kernel thread${kernelCount === 1 ? '' : 's'}.`;
+    recordThreadCompletion(70);
   });
 
   /* ================================================================
@@ -297,6 +348,7 @@
       while (tasks.length > 0) {
         const task = tasks.shift();
         renderPoolQueue(tasks);
+        await explainThreadStep(`Worker ${threadIdx + 1} takes ${task.name} from the shared queue; remaining queued tasks: ${tasks.length}.`, poolStep);
 
         const body = $id(`poolWorker-${threadIdx}`);
         body.innerHTML = `<div class="pool-active-task" style="background:${task.color}20;border-color:${task.color}">
@@ -342,6 +394,7 @@
     poolRunning = false;
     runPoolBtn.disabled = false;
     runPoolBtn.textContent = '▶ Execute Tasks';
+    recordThreadCompletion(Math.min(100, Math.round(completed * 8)));
   });
 
   resetPoolBtn.addEventListener('click', () => {
