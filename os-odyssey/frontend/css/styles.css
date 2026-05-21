@@ -1310,8 +1310,9 @@ a {
   display: flex;
   align-items: center;
   gap: clamp(18px, 3vw, 36px);
-  font-family: var(--font-pixel);
-  font-size: 11px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
   color: var(--app-text);
 }
 
@@ -1328,8 +1329,9 @@ a {
   background: none;
   border: 0;
   color: var(--app-text);
-  font-family: var(--font-pixel);
-  font-size: 11px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
 }
 
