@@ -527,7 +527,7 @@
     const systemLabSection = document.getElementById('system-lab');
     if (systemLabSection) systemLabSection.hidden = !unlocked;
 
-    document.querySelectorAll('.explore-card-link[href$="-sim.html"]').forEach(cardLink => {
+    document.querySelectorAll('.explore-card-link.kernel-sim-link').forEach(cardLink => {
       cardLink.classList.toggle('kernel-locked', !unlocked);
       cardLink.setAttribute('aria-disabled', unlocked ? 'false' : 'true');
       let lock = cardLink.querySelector('.kernel-lock-label');
@@ -765,7 +765,7 @@
     renderSimProgressDashboard();
     renderSystemLabState(displayUser);
 
-    if (document.querySelector('.sim-shell') && !isKernelModeUnlocked(displayUser)) {
+    if (document.body.dataset.kernelSim && !isKernelModeUnlocked(displayUser)) {
       window.location.href = 'dashboard.html#practice';
       return;
     }
