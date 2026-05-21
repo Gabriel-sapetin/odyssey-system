@@ -495,6 +495,50 @@
     if (text) text.textContent = pct + '%';
   }
 
+  function completedModuleCount(user) {
+    const completed = Array.isArray(user && user.completed_modules) ? user.completed_modules : [];
+    return MODULE_META.filter(module => completed.includes(module.id)).length;
+  }
+
+  function isKernelModeUnlocked(user) {
+    return completedModuleCount(user) >= TOTAL_MODULES;
+  }
+
+  function renderSystemLabState(user) {
+    const unlocked = isKernelModeUnlocked(user);
+    const card = document.getElementById('systemLabCard');
+    const title = document.getElementById('systemLabTitle');
+    const copy = document.getElementById('systemLabCopy');
+    const action = document.getElementById('systemLabAction');
+    const completed = completedModuleCount(user);
+
+    if (card) card.classList.toggle('kernel-unlocked', unlocked);
+    if (title) title.textContent = unlocked ? 'Kernel mode unlocked' : 'Unlock kernel mode';
+    if (copy) {
+      copy.textContent = unlocked
+        ? 'System Lab is open. Launch simulations and complete kernel-mode challenges.'
+        : `Complete ${TOTAL_MODULES - completed} more module${TOTAL_MODULES - completed === 1 ? '' : 's'} to unlock System Lab simulations.`;
+    }
+    if (action) {
+      action.textContent = unlocked ? 'Enter System Lab' : 'Open Course';
+      action.setAttribute('href', unlocked ? '#practice' : 'course.html');
+    }
+
+    document.querySelectorAll('.explore-card-link[href$="-sim.html"]').forEach(cardLink => {
+      cardLink.classList.toggle('kernel-locked', !unlocked);
+      cardLink.setAttribute('aria-disabled', unlocked ? 'false' : 'true');
+      let lock = cardLink.querySelector('.kernel-lock-label');
+      if (!unlocked && !lock) {
+        lock = document.createElement('span');
+        lock.className = 'kernel-lock-label';
+        lock.textContent = `Complete all ${TOTAL_MODULES} modules`;
+        cardLink.appendChild(lock);
+      } else if (unlocked && lock) {
+        lock.remove();
+      }
+    });
+  }
+
   const SIM_PROGRESS_KEY = 'os-odyssey-sim-progress';
   const SIM_META = [
     { id: 'boot', name: 'Boot & Interrupts' },
@@ -593,6 +637,7 @@
       if (result.rank != null) activeProfile.rank = result.rank;
       renderProfileStats(activeProfile);
       updateProgressDisplay(activeProfile);
+      renderSystemLabState(activeProfile);
       renderCourseProgressPanel();
       if (typeof applyModuleLockState === 'function') applyModuleLockState();
     }
@@ -711,6 +756,12 @@
     if (profileAvatar) renderAvatar(profileAvatar, displayUser);
     updateProgressDisplay(displayUser);
     renderSimProgressDashboard();
+    renderSystemLabState(displayUser);
+
+    if (document.querySelector('.sim-shell') && !isKernelModeUnlocked(displayUser)) {
+      window.location.href = 'dashboard.html#practice';
+      return;
+    }
 
     // Update streak on each session
     updateStreak();
@@ -2750,6 +2801,17 @@
       clubDismiss.closest('.club-card').style.display = 'none';
     });
   }
+
+  document.addEventListener('click', (event) => {
+    const lockedSim = event.target.closest('.explore-card-link.kernel-locked');
+    if (!lockedSim) return;
+    event.preventDefault();
+    const systemLabCard = document.getElementById('systemLabCard');
+    if (systemLabCard) {
+      systemLabCard.classList.add('kernel-attention');
+      setTimeout(() => systemLabCard.classList.remove('kernel-attention'), 700);
+    }
+  });
 
   /* ---- Easter egg ---- */
   console.log('%c🐧 OS ODYSSEY', 'font-family:monospace;font-size:22px;color:#f5a623;font-weight:bold;');

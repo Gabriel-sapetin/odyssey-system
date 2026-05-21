@@ -1879,6 +1879,33 @@ a {
   box-shadow: 4px 4px 0 #063d66, 0 0 16px rgba(32, 167, 255, 0.3);
 }
 
+.explore-card-link.kernel-locked {
+  position: relative;
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.explore-card-link.kernel-locked:hover {
+  transform: none;
+  border-color: var(--app-line);
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.34);
+}
+
+.kernel-lock-label {
+  grid-column: 1 / -1;
+  justify-self: start;
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  padding: 0 9px;
+  border: 1px solid rgba(245, 166, 35, 0.45);
+  border-radius: 4px;
+  background: rgba(245, 166, 35, 0.12);
+  color: #ffd484;
+  font-family: var(--font-pixel);
+  font-size: 7px;
+}
+
 .explore-arrow {
   display: none;
   font-size: 22px;
@@ -2802,6 +2829,31 @@ body.lesson-open .course-shell {
 
 .club-card {
   position: relative;
+}
+
+.club-card.kernel-unlocked {
+  border-color: rgba(34, 197, 94, 0.65);
+  background: linear-gradient(145deg, rgba(10, 16, 32, 0.94), rgba(8, 45, 33, 0.88));
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.34), 0 0 26px rgba(34, 197, 94, 0.12);
+}
+
+.club-card.kernel-unlocked h2 {
+  color: #8ef76e;
+}
+
+.club-card.kernel-unlocked .profile-button {
+  border-color: #22c55e;
+  color: #8ef76e;
+}
+
+.club-card.kernel-attention {
+  animation: kernelAttention 0.7s ease;
+}
+
+@keyframes kernelAttention {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
 .club-card button {
