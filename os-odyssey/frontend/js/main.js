@@ -874,6 +874,68 @@
     });
   }
 
+  /* ---- Mobile Menu Toggle ---- */
+  const mobileNavToggle = document.getElementById('mobileNavToggle');
+  let navbar = document.querySelector('.navbar');
+  
+  if (mobileNavToggle && navbar) {
+    mobileNavToggle.addEventListener('click', () => {
+      navbar.classList.toggle('mobile-menu-open');
+      document.body.style.overflow = navbar.classList.contains('mobile-menu-open') ? 'hidden' : '';
+    });
+
+    // Close menu when clicking on links
+    const navLinks = navbar.querySelectorAll('.nav-leaderboard-link, .btn-primary');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        navbar.classList.remove('mobile-menu-open');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!navbar.contains(e.target) && navbar.classList.contains('mobile-menu-open')) {
+        navbar.classList.remove('mobile-menu-open');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
+  /* ---- Mobile Menu Toggle for App Nav ---- */
+  const appNavMobileToggle = document.querySelector('.app-nav-mobile-toggle');
+  const appNav = document.querySelector('.app-nav');
+  
+  if (appNavMobileToggle && appNav) {
+    appNavMobileToggle.addEventListener('click', () => {
+      const isOpen = appNav.classList.toggle('mobile-menu-open');
+      appNavMobileToggle.setAttribute('aria-expanded', String(isOpen));
+      appNavMobileToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+
+    // Close menu when clicking on links
+    const appNavLinks = appNav.querySelectorAll('.app-nav-links > a, .app-link-button');
+    appNavLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        appNav.classList.remove('mobile-menu-open');
+        appNavMobileToggle.setAttribute('aria-expanded', 'false');
+        appNavMobileToggle.setAttribute('aria-label', 'Open navigation menu');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!appNav.contains(e.target) && appNav.classList.contains('mobile-menu-open')) {
+        appNav.classList.remove('mobile-menu-open');
+        appNavMobileToggle.setAttribute('aria-expanded', 'false');
+        appNavMobileToggle.setAttribute('aria-label', 'Open navigation menu');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
   /* ---- Theme Toggle (dashboard) ---- */
   const dashToggle = document.getElementById('dashThemeToggle');
   const isDashboard = document.body.classList.contains('app-page') || document.body.classList.contains('dashboard-page');
@@ -894,7 +956,6 @@
   }
 
   /* ---- Navbar scroll shadow ---- */
-  const navbar = document.querySelector('.navbar');
   if (navbar) {
     window.addEventListener('scroll', () => {
       navbar.style.boxShadow = window.scrollY > 20 ? '0 4px 0 rgba(0,0,0,0.2)' : 'none';
@@ -904,7 +965,7 @@
   function initMobileNav() {
     document.querySelectorAll('.navbar, .app-nav').forEach((nav, index) => {
       const menu = nav.querySelector('.nav-right, .app-nav-links');
-      if (!menu || nav.querySelector('.mobile-nav-toggle')) return;
+      if (!menu || nav.querySelector('.mobile-nav-toggle, .app-nav-mobile-toggle')) return;
 
       const menuId = menu.id || `mobileNavMenu${index + 1}`;
       menu.id = menuId;
