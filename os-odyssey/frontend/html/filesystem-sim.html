@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
+  <title>OS Odyssey - File System Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../../assets/favicon.png" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/sim.css" />
+</head>
+
+<body class="app-page dashboard-page" data-kernel-sim="filesystem">
+  <nav class="app-nav">
+    <a href="dashboard.html#system-lab" class="app-brand"><img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="" />OS ODYSSEY</a>
+    <div class="app-nav-links">
+      <a href="dashboard.html#system-lab">â† System Lab</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode"><span class="toggle-icon sun-icon">â˜€ï¸</span><span class="toggle-icon moon-icon">ðŸŒ™</span></button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="sim-shell">
+    <div class="sim-header">
+      <div class="sim-header-text">
+        <p class="section-kicker">KERNEL MODE</p>
+        <h1>File System Simulator</h1>
+        <p class="sim-subtitle">Create and delete files, inspect inodes, and watch allocation blocks change.</p>
+      </div>
+      <span class="sim-icon-ram" style="background:#16a34a;border-color:#86efac;">FS</span>
+    </div>
+
+    <section class="sim-controls">
+      <div class="sim-control-row">
+        <div class="sim-field"><label for="fsName">File name</label><input id="fsName" value="notes.txt" maxlength="16" /></div>
+        <div class="sim-field"><label for="fsSize">Blocks</label><input type="number" id="fsSize" min="1" max="6" value="2" /></div>
+        <button class="sim-btn sim-btn-add" type="button" id="fsCreate">+ Create File</button>
+        <button class="sim-btn sim-btn-reset" type="button" id="fsDelete">Delete Selected</button>
+        <button class="sim-btn sim-btn-preset" type="button" id="fsPreset">Load Example</button>
+      </div>
+    </section>
+
+    <section class="sim-panel">
+      <div class="kernel-grid">
+        <div>
+          <h2>Directory Tree</h2>
+          <div class="kernel-list" id="fsTree"></div>
+        </div>
+        <div>
+          <h2>Inodes & Blocks</h2>
+          <div class="kernel-viz" id="fsViz"></div>
+          <div class="sim-step-note" id="fsNote"><strong>Step:</strong> Select or create a file to inspect metadata.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/kernel-sims.js"></script>
+</body>
+
+</html>

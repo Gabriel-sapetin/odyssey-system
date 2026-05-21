@@ -521,8 +521,11 @@
     }
     if (action) {
       action.textContent = unlocked ? 'Enter System Lab' : 'Open Course';
-      action.setAttribute('href', unlocked ? '#practice' : 'course.html');
+      action.setAttribute('href', unlocked ? '#system-lab' : 'course.html');
     }
+
+    const systemLabSection = document.getElementById('system-lab');
+    if (systemLabSection) systemLabSection.hidden = !unlocked;
 
     document.querySelectorAll('.explore-card-link[href$="-sim.html"]').forEach(cardLink => {
       cardLink.classList.toggle('kernel-locked', !unlocked);
@@ -546,7 +549,11 @@
     { id: 'scheduling', name: 'Scheduling Challenges' },
     { id: 'memory', name: 'Memory Labs' },
     { id: 'process', name: 'Process States' },
-    { id: 'thread', name: 'Thread Visualizer' }
+    { id: 'thread', name: 'Thread Visualizer' },
+    { id: 'filesystem', name: 'File System Simulator' },
+    { id: 'deadlock', name: 'Deadlock Simulator' },
+    { id: 'disk', name: 'Disk Scheduling Simulator' },
+    { id: 'virtual-memory', name: 'Virtual Memory Simulator' }
   ];
 
   function readSimProgress() {

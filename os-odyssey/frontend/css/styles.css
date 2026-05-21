@@ -1748,6 +1748,19 @@ a {
   margin-top: 54px;
 }
 
+.system-lab-section {
+  padding-top: 10px;
+}
+
+.system-lab-section[hidden] {
+  display: none;
+}
+
+.system-lab-section .explore-card {
+  border-color: rgba(34, 197, 94, 0.38);
+  background: rgba(4, 24, 20, 0.82);
+}
+
 .module-heading-row {
   display: flex;
   align-items: flex-end;

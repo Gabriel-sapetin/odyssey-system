@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
+  <title>OS Odyssey - Disk Scheduling Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../../assets/favicon.png" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/sim.css" />
+</head>
+
+<body class="app-page dashboard-page" data-kernel-sim="disk">
+  <nav class="app-nav"><a href="dashboard.html#system-lab" class="app-brand"><img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="" />OS ODYSSEY</a><div class="app-nav-links"><a href="dashboard.html#system-lab">â† System Lab</a><button class="app-link-button" type="button" data-logout>Log out</button></div></nav>
+  <main class="sim-shell">
+    <div class="sim-header"><div class="sim-header-text"><p class="section-kicker">KERNEL MODE</p><h1>Disk Scheduling Simulator</h1><p class="sim-subtitle">Visualize seek order and total head movement for classic disk scheduling algorithms.</p></div><span class="sim-icon-cpu" style="background:#9333ea;border-color:#d8b4fe;">DSK</span></div>
+    <section class="sim-controls">
+      <div class="sim-control-row">
+        <div class="sim-field sim-field-wide"><label for="diskQueue">Request queue</label><input id="diskQueue" value="98 183 37 122 14 124 65 67" /></div>
+        <div class="sim-field"><label for="diskHead">Head</label><input type="number" id="diskHead" value="53" min="0" max="199" /></div>
+        <div class="sim-field"><label for="diskAlgo">Algorithm</label><select id="diskAlgo"><option value="fcfs">FCFS</option><option value="sstf">SSTF</option><option value="scan">SCAN</option><option value="cscan">C-SCAN</option><option value="look">LOOK</option></select></div>
+        <button class="sim-btn sim-btn-run" type="button" id="diskRun">Run</button>
+      </div>
+    </section>
+    <section class="sim-panel"><div class="sim-panel-header"><h2>Disk Arm Path</h2><span class="stat-chip">Movement: <strong id="diskMovement">0</strong></span></div><div class="kernel-viz" id="diskViz"></div><div class="sim-step-note" id="diskNote"><strong>Step:</strong> Run an algorithm to trace head movement.</div></section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/kernel-sims.js"></script>
+</body>
+
+</html>

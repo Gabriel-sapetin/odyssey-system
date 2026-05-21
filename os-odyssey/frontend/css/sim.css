@@ -775,6 +775,106 @@
   color: #8ef76e;
 }
 
+/* ---- Kernel Mode Simulators ---- */
+.kernel-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.4fr);
+  gap: 20px;
+}
+
+.kernel-list {
+  display: grid;
+  gap: 8px;
+}
+
+.kernel-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(82, 96, 122, 0.28);
+  border-radius: 4px;
+  background: rgba(18, 27, 48, 0.58);
+  color: var(--app-text);
+  font-weight: 800;
+}
+
+.kernel-item.active {
+  border-color: #8af1ff;
+  background: rgba(32, 167, 255, 0.12);
+}
+
+.kernel-viz {
+  min-height: 240px;
+  padding: 18px;
+  border: 2px solid #26314d;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.18);
+  overflow-x: auto;
+}
+
+.block-row,
+.disk-track,
+.rag-row,
+.vm-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fs-block,
+.disk-cylinder,
+.rag-node,
+.vm-page {
+  min-width: 46px;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #26314d;
+  border-radius: 4px;
+  background: rgba(18, 27, 48, 0.72);
+  color: var(--app-text);
+  font-family: var(--font-pixel);
+  font-size: 9px;
+}
+
+.fs-block.used,
+.disk-cylinder.active,
+.rag-node.active,
+.vm-page.hit {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.16);
+  color: #8ef76e;
+}
+
+.vm-page.fault,
+.rag-node.deadlocked {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.14);
+  color: #ff9b9b;
+}
+
+.disk-cylinder {
+  min-width: 38px;
+  min-height: 38px;
+}
+
+.disk-path {
+  margin-top: 18px;
+  color: var(--app-muted);
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .kernel-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .mem-frame-status {
   padding: 4px;
   font-family: var(--font-pixel);
