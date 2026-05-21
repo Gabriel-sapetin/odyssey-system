@@ -176,6 +176,40 @@
     localStorage.setItem('os-odyssey-topics-done-' + moduleId, 'true');
   }
 
+  function quizHistoryKey(userId) {
+    return `os-odyssey-quiz-history-${userId || 'guest'}`;
+  }
+
+  function readQuizHistory(userId) {
+    try {
+      const raw = localStorage.getItem(quizHistoryKey(userId));
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (err) {
+      console.warn('Unable to read quiz history:', err);
+      return {};
+    }
+  }
+
+  function recordQuizAttempt(moduleId, score, total) {
+    if (!moduleId || !total) return;
+
+    const userId = activeProfile && activeProfile.id;
+    const history = readQuizHistory(userId);
+    const attempts = Array.isArray(history[moduleId]) ? history[moduleId] : [];
+    history[moduleId] = [
+      ...attempts,
+      {
+        score,
+        total,
+        percent: Math.round((score / total) * 100),
+        completedAt: new Date().toISOString()
+      }
+    ];
+
+    localStorage.setItem(quizHistoryKey(userId), JSON.stringify(history));
+  }
+
   /**
    * Module unlock logic:
    * - Module 1 is always unlocked.
@@ -866,6 +900,49 @@
       navbar.style.boxShadow = window.scrollY > 20 ? '0 4px 0 rgba(0,0,0,0.2)' : 'none';
     }, { passive: true });
   }
+
+  function initMobileNav() {
+    document.querySelectorAll('.navbar, .app-nav').forEach((nav, index) => {
+      const menu = nav.querySelector('.nav-right, .app-nav-links');
+      if (!menu || nav.querySelector('.mobile-nav-toggle')) return;
+
+      const menuId = menu.id || `mobileNavMenu${index + 1}`;
+      menu.id = menuId;
+
+      const toggle = document.createElement('button');
+      toggle.className = 'mobile-nav-toggle';
+      toggle.type = 'button';
+      toggle.setAttribute('aria-label', 'Open navigation menu');
+      toggle.setAttribute('aria-controls', menuId);
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.innerHTML = '<span></span><span></span><span></span>';
+
+      menu.before(toggle);
+
+      toggle.addEventListener('click', () => {
+        const isOpen = nav.classList.toggle('mobile-menu-open');
+        toggle.setAttribute('aria-expanded', String(isOpen));
+        toggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+      });
+
+      menu.addEventListener('click', (event) => {
+        if (!event.target.closest('a, button')) return;
+        nav.classList.remove('mobile-menu-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Open navigation menu');
+      });
+
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+          nav.classList.remove('mobile-menu-open');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.setAttribute('aria-label', 'Open navigation menu');
+        }
+      });
+    });
+  }
+
+  initMobileNav();
 
   /* ---- Scroll-triggered fade-in for module cards ---- */
   const observer = new IntersectionObserver((entries) => {
@@ -1858,6 +1935,7 @@
       correctConcept: 0,
       correctCoding: 0,
       answered: false,
+      summaryRecorded: false,
       topicsCompleted: false
     };
 
@@ -2022,6 +2100,7 @@
       state.correctConcept = 0;
       state.correctCoding = 0;
       state.answered = false;
+      state.summaryRecorded = false;
       state.topicsCompleted = isModuleTopicsDone(moduleId);
       syncCourseButtons(moduleId);
 
@@ -2214,6 +2293,12 @@
       elements.primaryAction.disabled = false;
       elements.secondaryAction.hidden = false;
       if (elements.backAction) elements.backAction.hidden = true;
+
+      if (!state.summaryRecorded) {
+        recordQuizAttempt(state.activeModuleId, state.correct, module.quiz.length);
+        state.summaryRecorded = true;
+      }
+
       if (state.activeModuleId === 'module4') {
         elements.body.innerHTML = `
           <h3>Your Score: ${state.correct} / ${module.quiz.length}</h3>
@@ -2329,6 +2414,7 @@
         state.correct = 0;
         state.correctConcept = 0;
         state.correctCoding = 0;
+        state.summaryRecorded = false;
         transitionContent(() => renderQuestion());
         return;
       }
@@ -2363,6 +2449,7 @@
         state.correct = 0;
         state.correctConcept = 0;
         state.correctCoding = 0;
+        state.summaryRecorded = false;
         transitionContent(() => renderQuestion());
       }
     }
@@ -2437,6 +2524,7 @@
       state.correct = 0;
       state.correctConcept = 0;
       state.correctCoding = 0;
+      state.summaryRecorded = false;
       transitionContent(() => renderReview());
     });
 
@@ -2464,6 +2552,7 @@
           state.correct = 0;
           state.correctConcept = 0;
           state.correctCoding = 0;
+          state.summaryRecorded = false;
           transitionContent(() => renderQuestion());
         }
       });

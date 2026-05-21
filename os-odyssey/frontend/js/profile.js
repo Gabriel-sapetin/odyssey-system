@@ -50,6 +50,45 @@
     return 'Bronze';
   }
 
+  function quizHistoryKey(userId) {
+    return `os-odyssey-quiz-history-${userId || 'guest'}`;
+  }
+
+  function readQuizHistory(userId) {
+    try {
+      const raw = localStorage.getItem(quizHistoryKey(userId));
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (err) {
+      console.warn('Unable to read quiz history:', err);
+      return {};
+    }
+  }
+
+  function quizStatsFor(history, moduleId) {
+    const attempts = (Array.isArray(history[moduleId]) ? history[moduleId] : [])
+      .filter(attempt => Number.isFinite(Number(attempt.score)) && Number.isFinite(Number(attempt.total)) && Number(attempt.total) > 0);
+
+    if (!attempts.length) {
+      return { attempts: 0, bestLabel: '--', averageLabel: '--' };
+    }
+
+    const best = attempts.reduce((top, attempt) => {
+      const topPct = Number(top.score) / Number(top.total);
+      const attemptPct = Number(attempt.score) / Number(attempt.total);
+      return attemptPct > topPct ? attempt : top;
+    }, attempts[0]);
+    const averagePct = Math.round(
+      attempts.reduce((sum, attempt) => sum + (Number(attempt.score) / Number(attempt.total)) * 100, 0) / attempts.length
+    );
+
+    return {
+      attempts: attempts.length,
+      bestLabel: `${best.score}/${best.total} (${Math.round((Number(best.score) / Number(best.total)) * 100)}%)`,
+      averageLabel: `${averagePct}%`
+    };
+  }
+
   /* ---- Wait for Supabase auth, then populate ---- */
   async function initProfile() {
     // Guard: only run on profile page
@@ -85,13 +124,14 @@
       const level = calculateLevel(user.xp);
       const rank = calculateRank(level);
       const completed = user.completed_modules || [];
+      const quizHistory = readQuizHistory(user.id);
 
       renderHeader(user, level, rank);
       renderStats(user, level, rank);
       renderXpProgress(user.xp, level);
       renderOverview(completed);
-      renderModuleCards(completed);
-      renderModulesList(completed);
+      renderModuleCards(completed, quizHistory);
+      renderModulesList(completed, quizHistory);
       renderBadges(user.earned_badges || []);
 
     } catch (e) {
@@ -288,12 +328,13 @@
   }
 
   /* ---- Module Cards (Overview tab) ---- */
-  function renderModuleCards(completed) {
+  function renderModuleCards(completed, quizHistory) {
     const grid = $id('profModuleGrid');
     if (!grid) return;
 
     grid.innerHTML = MODULES.map(m => {
       const done = completed.includes(m.id);
+      const stats = quizStatsFor(quizHistory, m.id);
       return `
         <div class="prof-module-card ${done ? 'completed' : ''}">
           <div class="prof-mc-header">
@@ -304,6 +345,11 @@
           <div class="prof-mc-meta">
             <span><strong>${m.topics}</strong> topics</span>
             <span><strong>${m.quizQuestions}</strong> quiz questions</span>
+          </div>
+          <div class="prof-quiz-history">
+            <span><strong>${stats.bestLabel}</strong> Best</span>
+            <span><strong>${stats.averageLabel}</strong> Avg</span>
+            <span><strong>${stats.attempts}</strong> Attempts</span>
           </div>
           <div class="prof-mc-bar">
             <div class="prof-mc-fill ${done ? 'done' : 'pending'}" style="width:${done ? 100 : 0}%"></div>
@@ -321,17 +367,19 @@
   }
 
   /* ---- Modules List (Modules tab) ---- */
-  function renderModulesList(completed) {
+  function renderModulesList(completed, quizHistory) {
     const list = $id('profModulesList');
     if (!list) return;
 
     list.innerHTML = MODULES.map(m => {
       const done = completed.includes(m.id);
+      const stats = quizStatsFor(quizHistory, m.id);
       return `
         <a href="dashboard.html#${m.id}" class="prof-mod-row">
           <span class="prof-mod-num">${m.number}</span>
           <span class="prof-mod-title">${m.title}</span>
           <span class="prof-mod-topics">${m.topics} topics</span>
+          <span class="prof-mod-score">Best ${stats.bestLabel}<br>Avg ${stats.averageLabel} - ${stats.attempts} attempts</span>
           <span class="prof-mod-badge ${done ? 'done' : 'pending'}">${done ? '✓ Completed' : 'Start →'}</span>
         </a>
       `;

@@ -596,6 +596,34 @@
   color: #8af1ff;
 }
 
+.prof-quiz-history {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.prof-quiz-history span {
+  min-width: 0;
+  padding: 9px 8px;
+  border: 1px solid rgba(138, 241, 255, 0.16);
+  border-radius: 6px;
+  background: rgba(32, 167, 255, 0.08);
+  color: var(--app-muted);
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  line-height: 1.45;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.prof-quiz-history strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #8af1ff;
+  font-size: 8px;
+}
+
 .prof-mc-bar {
   height: 8px;
   background: rgba(82, 96, 122, 0.2);
@@ -626,7 +654,7 @@
 
 .prof-mod-row {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto auto auto;
   gap: 18px;
   align-items: center;
   padding: 20px 24px;
@@ -663,6 +691,15 @@
   font-family: var(--font-pixel);
   font-size: 9px;
   color: var(--app-muted);
+  white-space: nowrap;
+}
+
+.prof-mod-score {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: #8af1ff;
+  line-height: 1.6;
+  text-align: right;
   white-space: nowrap;
 }
 
@@ -956,6 +993,16 @@
   color: #1a8fe8;
 }
 
+.light-mode .prof-quiz-history span {
+  border-color: rgba(26, 143, 232, 0.18);
+  background: rgba(26, 143, 232, 0.06);
+}
+
+.light-mode .prof-quiz-history strong,
+.light-mode .prof-mod-score {
+  color: #1a8fe8;
+}
+
 .light-mode .prof-edit-btn {
   border-color: #1a8fe8;
   color: #1a8fe8;
@@ -1060,7 +1107,7 @@
   }
 
   .prof-mod-row {
-    grid-template-columns: 54px minmax(160px, 1fr) auto auto;
+    grid-template-columns: 54px minmax(160px, 1fr) auto auto auto;
     gap: 12px;
   }
 
@@ -1144,7 +1191,7 @@
   }
 
   .prof-mod-row {
-    grid-template-columns: 54px minmax(160px, 1fr) auto auto;
+    grid-template-columns: 54px minmax(160px, 1fr) auto auto auto;
   }
 
   .prof-badges-grid {
@@ -1237,7 +1284,7 @@
   }
 
   .prof-mod-row {
-    min-width: 520px;
+    min-width: 660px;
   }
 
   .prof-stats-card,
