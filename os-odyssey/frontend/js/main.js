@@ -542,7 +542,10 @@
     });
   }
 
-  const SIM_PROGRESS_KEY = 'os-odyssey-sim-progress';
+  function simProgressKey() {
+    const userId = activeProfile && activeProfile.id;
+    return `os-odyssey-sim-progress-${userId || 'guest'}`;
+  }
   const SIM_META = [
     { id: 'boot', name: 'Boot & Interrupts' },
     { id: 'syscall', name: 'System Call Tracer' },
@@ -558,7 +561,7 @@
 
   function readSimProgress() {
     try {
-      const raw = localStorage.getItem(SIM_PROGRESS_KEY);
+      const raw = localStorage.getItem(simProgressKey());
       const parsed = raw ? JSON.parse(raw) : {};
       return parsed && typeof parsed === 'object' ? parsed : {};
     } catch (err) {
@@ -591,7 +594,7 @@
       lastPlayedAt: new Date().toISOString()
     };
 
-    localStorage.setItem(SIM_PROGRESS_KEY, JSON.stringify(progress));
+    localStorage.setItem(simProgressKey(), JSON.stringify(progress));
     renderSimProgressDashboard();
     renderProfileStats(activeProfile);
     return progress[simId];
