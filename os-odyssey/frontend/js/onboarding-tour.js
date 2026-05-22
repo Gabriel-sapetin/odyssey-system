@@ -15,56 +15,48 @@
   const TOUR_STEPS = [
     {
       target: '.welcome-row',
-      icon: '🐧',
       title: 'Your Penguin Mentor',
       text: 'Meet your personal guide! This friendly penguin greets you each session with helpful tips and keeps you motivated on your OS learning journey.',
       position: 'bottom'
     },
     {
       target: '.course-hero',
-      icon: '📖',
       title: 'Continue Learning',
       text: 'Jump right back into your course! This card shows your current progress and lets you pick up exactly where you left off.',
       position: 'bottom'
     },
     {
       target: '.profile-card',
-      icon: '👤',
       title: 'Your Profile Stats',
       text: 'Track your XP, rank, badges, and daily streak here. Level up by completing modules and simulations to climb the ranks!',
       position: 'left'
     },
     {
       target: '.explore-section#practice',
-      icon: '🧪',
       title: 'Interactive Simulations',
       text: 'Practice OS concepts hands-on! Boot sequences, system calls, CPU scheduling, memory management — each simulator brings theory to life.',
       position: 'top'
     },
     {
       target: '#systemLabCard',
-      icon: '🔒',
       title: 'System Lab — Unlock It!',
       text: 'Complete all course modules to unlock advanced kernel-mode simulations: filesystems, deadlock recovery, disk scheduling, and more.',
       position: 'left'
     },
     {
       target: '.sim-progress-card',
-      icon: '📊',
       title: 'Simulation Tracking',
       text: 'Monitor which simulations you\'ve cleared and earn bonus XP. Try to complete all 10 labs for maximum rewards!',
       position: 'left'
     },
     {
       target: '.app-nav-links',
-      icon: '🧭',
       title: 'Navigation',
       text: 'Use the navigation bar to access courses, practice simulations, view the leaderboard, or customize your avatar. Everything is one click away!',
       position: 'bottom'
     },
     {
       target: '#dashThemeToggle',
-      icon: '🎨',
       title: 'Dark & Light Mode',
       text: 'Toggle between dark and light themes to match your preference. Your choice is saved automatically!',
       position: 'bottom'
@@ -127,7 +119,7 @@
           <div class="tour-welcome-mascot">
             <img src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey mascot" />
           </div>
-          <div class="tour-welcome-badge">🎓 QUICK TOUR</div>
+          <div class="tour-welcome-badge">QUICK TOUR</div>
           <h2 class="tour-welcome-title">Welcome to<br>OS Odyssey!</h2>
           <p class="tour-welcome-text">
             Let us show you around! This quick tour will highlight the key features
@@ -135,7 +127,7 @@
           </p>
           <div class="tour-welcome-actions">
             <button class="tour-welcome-start" id="tourStartBtn">
-              Let's Go! 🚀
+              Let's Go!
             </button>
             <button class="tour-welcome-dismiss" id="tourDismissBtn">
               Skip tour, I'll explore on my own
@@ -286,7 +278,7 @@
       this.elements.tooltip.innerHTML = `
         <div class="tour-tooltip-arrow"></div>
         <div class="tour-tooltip-header">
-          <div class="tour-tooltip-icon">${step.icon}</div>
+          <div class="tour-tooltip-step-num">${this.currentStep + 1} / ${TOUR_STEPS.length}</div>
           <h3 class="tour-tooltip-title">${step.title}</h3>
         </div>
         <div class="tour-tooltip-body">
@@ -467,14 +459,14 @@
       const overlay = createElement('div', 'tour-complete-overlay');
       overlay.innerHTML = `
         <div class="tour-complete-card">
-          <div class="tour-complete-emoji">🎉</div>
+          <div class="tour-complete-title-label">WELL DONE</div>
           <h2 class="tour-complete-title">Tour Complete!</h2>
           <p class="tour-complete-text">
             You're all set! Start exploring OS Odyssey — complete modules, run simulations,
             earn badges, and climb the leaderboard. Happy learning!
           </p>
           <button class="tour-complete-close" id="tourCompleteClose">
-            Start Learning! 🐧
+            Start Learning!
           </button>
         </div>
       `;
@@ -509,7 +501,7 @@
 
       const btn = createElement('button', 'tour-replay-btn');
       btn.id = 'tourReplayBtn';
-      btn.innerHTML = '<span class="replay-icon">🗺️</span> Replay Tour';
+      btn.innerHTML = '<span class="replay-icon">↻</span> Replay Tour';
       btn.setAttribute('aria-label', 'Replay onboarding tour');
       document.body.appendChild(btn);
 
