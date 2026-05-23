@@ -3126,7 +3126,125 @@ body.lesson-open .course-shell {
   font-size: 9px;
 }
 
+/* ---- PROFILE CARD BACKGROUND IMAGE ---- */
+.dashboard-side .profile-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 25%;
+  overflow: hidden;
+  border-radius: 4px 4px 0 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.profile-card-bg img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+/* Dark mode: show dark bg, hide light bg */
+.profile-bg-dark {
+  display: block;
+}
+
+.profile-bg-light {
+  display: none;
+}
+
+/* Light mode: show light bg, hide dark bg */
+.light-mode .profile-bg-dark {
+  display: none;
+}
+
+.light-mode .profile-bg-light {
+  display: block;
+}
+
+/* Make profile-top sit above the background */
+.profile-top {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- SNOWFALL EFFECT ---- */
+.profile-snow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.snowflake {
+  position: absolute;
+  top: -6px;
+  display: block;
+  width: 3px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  opacity: 0;
+  animation: snowfall linear infinite;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+@keyframes snowfall {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateX(0);
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(100% + 10px)) translateX(var(--drift, 8px));
+  }
+}
+
+/* Individual snowflake positioning and timing — natural variation */
+.sf1  { left:  3%; animation-duration: 4.2s; animation-delay: 0.0s; width: 2px; height: 2px; --drift: 5px; }
+.sf2  { left: 10%; animation-duration: 5.1s; animation-delay: 0.8s; width: 3px; height: 3px; --drift: -7px; }
+.sf3  { left: 18%; animation-duration: 3.8s; animation-delay: 1.6s; width: 2px; height: 2px; --drift: 10px; }
+.sf4  { left: 25%; animation-duration: 4.7s; animation-delay: 0.3s; width: 4px; height: 4px; --drift: -4px; opacity: 0.6; }
+.sf5  { left: 33%; animation-duration: 5.5s; animation-delay: 2.1s; width: 2px; height: 2px; --drift: 6px; }
+.sf6  { left: 40%; animation-duration: 3.5s; animation-delay: 0.6s; width: 3px; height: 3px; --drift: -9px; }
+.sf7  { left: 48%; animation-duration: 4.9s; animation-delay: 1.2s; width: 2px; height: 2px; --drift: 3px; }
+.sf8  { left: 55%; animation-duration: 4.0s; animation-delay: 2.5s; width: 3px; height: 3px; --drift: -6px; }
+.sf9  { left: 62%; animation-duration: 5.3s; animation-delay: 0.4s; width: 2px; height: 2px; --drift: 8px; }
+.sf10 { left: 70%; animation-duration: 3.9s; animation-delay: 1.8s; width: 4px; height: 4px; --drift: -3px; opacity: 0.5; }
+.sf11 { left: 78%; animation-duration: 4.4s; animation-delay: 0.9s; width: 2px; height: 2px; --drift: 7px; }
+.sf12 { left: 85%; animation-duration: 5.0s; animation-delay: 2.3s; width: 3px; height: 3px; --drift: -8px; }
+.sf13 { left: 92%; animation-duration: 3.6s; animation-delay: 0.2s; width: 2px; height: 2px; --drift: 4px; }
+.sf14 { left:  7%; animation-duration: 4.6s; animation-delay: 1.4s; width: 3px; height: 3px; --drift: -5px; }
+.sf15 { left: 15%; animation-duration: 5.2s; animation-delay: 2.7s; width: 2px; height: 2px; --drift: 9px; }
+.sf16 { left: 22%; animation-duration: 3.4s; animation-delay: 0.7s; width: 2px; height: 2px; --drift: -6px; }
+.sf17 { left: 37%; animation-duration: 4.8s; animation-delay: 1.9s; width: 3px; height: 3px; --drift: 5px; }
+.sf18 { left: 44%; animation-duration: 5.4s; animation-delay: 0.1s; width: 2px; height: 2px; --drift: -7px; }
+.sf19 { left: 52%; animation-duration: 3.7s; animation-delay: 2.0s; width: 4px; height: 4px; --drift: 3px; opacity: 0.55; }
+.sf20 { left: 58%; animation-duration: 4.3s; animation-delay: 1.1s; width: 2px; height: 2px; --drift: -4px; }
+.sf21 { left: 66%; animation-duration: 5.6s; animation-delay: 2.6s; width: 3px; height: 3px; --drift: 6px; }
+.sf22 { left: 74%; animation-duration: 3.3s; animation-delay: 0.5s; width: 2px; height: 2px; --drift: -8px; }
+.sf23 { left: 82%; animation-duration: 4.1s; animation-delay: 1.7s; width: 3px; height: 3px; --drift: 4px; }
+.sf24 { left: 88%; animation-duration: 5.8s; animation-delay: 2.4s; width: 2px; height: 2px; --drift: -5px; }
+.sf25 { left: 96%; animation-duration: 4.5s; animation-delay: 0.3s; width: 2px; height: 2px; --drift: 7px; }
+
 .profile-stats {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px 18px;
@@ -3146,6 +3264,8 @@ body.lesson-open .course-shell {
 }
 
 .profile-button {
+  position: relative;
+  z-index: 1;
   min-height: 40px;
   display: flex;
   align-items: center;
