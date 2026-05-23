@@ -527,7 +527,7 @@
     const systemLabSection = document.getElementById('system-lab');
     if (systemLabSection) systemLabSection.hidden = !unlocked;
 
-    document.querySelectorAll('.explore-card-link.kernel-sim-link').forEach(cardLink => {
+    document.querySelectorAll('.sim-module-card.kernel-sim-link').forEach(cardLink => {
       cardLink.classList.toggle('kernel-locked', !unlocked);
       cardLink.setAttribute('aria-disabled', unlocked ? 'false' : 'true');
       let lock = cardLink.querySelector('.kernel-lock-label');
@@ -2813,7 +2813,7 @@
   }
 
   document.addEventListener('click', (event) => {
-    const lockedSim = event.target.closest('.explore-card-link.kernel-locked');
+    const lockedSim = event.target.closest('.sim-module-card.kernel-locked');
     if (!lockedSim) return;
     event.preventDefault();
     const systemLabCard = document.getElementById('systemLabCard');

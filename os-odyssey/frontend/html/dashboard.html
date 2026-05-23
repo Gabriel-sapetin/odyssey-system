@@ -74,58 +74,60 @@
 
         <section class="explore-section" id="practice">
           <h2>Explore Simulations</h2>
-          <div class="explore-grid">
-            <a href="boot-sim.html" class="explore-card explore-card-link">
-              <span class="card-icon"
-                style="background:#7c3aed;border-color:#c4b5fd;box-shadow:3px 3px 0 #3b0764;">PWR</span>
-              <div>
+          <div class="sim-modules-grid">
+            <a href="boot-sim.html" class="sim-module-card">
+              <div class="sim-module-thumb" style="background-image:url('../../assets/bg-forest-lantern.jpg')">
+                <span class="sim-module-badge" style="background:#7c3aed;border-color:#c4b5fd;">PWR</span>
+              </div>
+              <div class="sim-module-body">
                 <h3>Boot & Interrupts</h3>
                 <p>Watch the boot sequence and trigger hardware IRQs in real time.</p>
               </div>
-              <span class="explore-arrow">→</span>
             </a>
-            <a href="syscall-sim.html" class="explore-card explore-card-link">
-              <span class="card-icon"
-                style="background:#0891b2;border-color:#67e8f9;box-shadow:3px 3px 0 #164e63;">SYS</span>
-              <div>
+            <a href="syscall-sim.html" class="sim-module-card">
+              <div class="sim-module-thumb" style="background-image:url('../../assets/bg-mountains-purple.jpg')">
+                <span class="sim-module-badge" style="background:#0891b2;border-color:#67e8f9;">SYS</span>
+              </div>
+              <div class="sim-module-body">
                 <h3>System Call Tracer</h3>
                 <p>Trace system calls and watch user ↔ kernel mode transitions.</p>
               </div>
-              <span class="explore-arrow">→</span>
             </a>
-            <a href="scheduling-sim.html" class="explore-card explore-card-link">
-              <span class="card-icon">CPU</span>
-              <div>
+            <a href="scheduling-sim.html" class="sim-module-card">
+              <div class="sim-module-thumb" style="background-image:url('../../assets/bg-mountains-sunrise.jpg')">
+                <span class="sim-module-badge" style="background:#2563eb;border-color:#93c5fd;">CPU</span>
+              </div>
+              <div class="sim-module-body">
                 <h3>Scheduling Challenges</h3>
                 <p>Practice FCFS, SJF, priority, and round-robin scheduling.</p>
               </div>
-              <span class="explore-arrow">→</span>
             </a>
-            <a href="memory-sim.html" class="explore-card explore-card-link">
-              <span class="card-icon">RAM</span>
-              <div>
+            <a href="memory-sim.html" class="sim-module-card">
+              <div class="sim-module-thumb" style="background-image:url('../../assets/bg-mountains-day.jpg')">
+                <span class="sim-module-badge" style="background:#0891b2;border-color:#67e8f9;">RAM</span>
+              </div>
+              <div class="sim-module-body">
                 <h3>Memory Labs</h3>
                 <p>Trace paging, fragmentation, virtual memory, and page faults.</p>
               </div>
-              <span class="explore-arrow">→</span>
             </a>
-            <a href="process-sim.html" class="explore-card explore-card-link">
-              <span class="card-icon"
-                style="background:#059669;border-color:#6ee7b7;box-shadow:3px 3px 0 #064e3b;">PCB</span>
-              <div>
+            <a href="process-sim.html" class="sim-module-card">
+              <div class="sim-module-thumb" style="background-image:url('../../assets/bg-forest-lantern-2.jpg')">
+                <span class="sim-module-badge" style="background:#059669;border-color:#6ee7b7;">PCB</span>
+              </div>
+              <div class="sim-module-body">
                 <h3>Process States</h3>
                 <p>Drive processes through the 5-state lifecycle and inspect PCBs.</p>
               </div>
-              <span class="explore-arrow">→</span>
             </a>
-            <a href="thread-sim.html" class="explore-card explore-card-link">
-              <span class="card-icon"
-                style="background:#dc2626;border-color:#fca5a5;box-shadow:3px 3px 0 #7f1d1d;">THR</span>
-              <div>
+            <a href="thread-sim.html" class="sim-module-card">
+              <div class="sim-module-thumb" style="background-image:url('../../assets/hero-bg-night.jpg');background-position:top center">
+                <span class="sim-module-badge" style="background:#dc2626;border-color:#fca5a5;">THR</span>
+              </div>
+              <div class="sim-module-body">
                 <h3>Thread Visualizer</h3>
                 <p>Visualize parallelism vs concurrency and threading models.</p>
               </div>
-              <span class="explore-arrow">→</span>
             </a>
           </div>
         </section>
@@ -133,42 +135,42 @@
         <section class="explore-section system-lab-section" id="system-lab" hidden>
           <p class="section-kicker">KERNEL MODE</p>
           <h2>System Lab Simulations</h2>
-          <div class="explore-grid">
-            <a href="filesystem-sim.html" class="explore-card explore-card-link kernel-sim-link">
-              <span class="card-icon"
-                style="background:#16a34a;border-color:#86efac;box-shadow:3px 3px 0 #064e3b;">FS</span>
-              <div>
+          <div class="sim-modules-grid">
+            <a href="filesystem-sim.html" class="sim-module-card sim-module-card--kernel kernel-sim-link">
+              <div class="sim-module-thumb" style="background-image:url('../../assets/bg-forest-lantern.jpg')">
+                <span class="sim-module-badge" style="background:#16a34a;border-color:#86efac;">FS</span>
+              </div>
+              <div class="sim-module-body">
                 <h3>File System Simulator</h3>
                 <p>Browse a virtual directory tree, create/delete files, and inspect inodes and allocation blocks.</p>
               </div>
-              <span class="explore-arrow">â†’</span>
             </a>
-            <a href="deadlock-sim.html" class="explore-card explore-card-link kernel-sim-link">
-              <span class="card-icon"
-                style="background:#b91c1c;border-color:#fca5a5;box-shadow:3px 3px 0 #7f1d1d;">DL</span>
-              <div>
+            <a href="deadlock-sim.html" class="sim-module-card sim-module-card--kernel kernel-sim-link">
+              <div class="sim-module-thumb" style="background-image:url('../../assets/bg-mountains-purple.jpg')">
+                <span class="sim-module-badge" style="background:#b91c1c;border-color:#fca5a5;">DL</span>
+              </div>
+              <div class="sim-module-body">
                 <h3>Deadlock Simulator</h3>
                 <p>Visualize resource allocation graphs, deadlock detection, and Banker's Algorithm safety checks.</p>
               </div>
-              <span class="explore-arrow">â†’</span>
             </a>
-            <a href="disk-sim.html" class="explore-card explore-card-link kernel-sim-link">
-              <span class="card-icon"
-                style="background:#9333ea;border-color:#d8b4fe;box-shadow:3px 3px 0 #581c87;">DSK</span>
-              <div>
+            <a href="disk-sim.html" class="sim-module-card sim-module-card--kernel kernel-sim-link">
+              <div class="sim-module-thumb" style="background-image:url('../../assets/bg-mountains-sunrise.jpg')">
+                <span class="sim-module-badge" style="background:#9333ea;border-color:#d8b4fe;">DSK</span>
+              </div>
+              <div class="sim-module-body">
                 <h3>Disk Scheduling Simulator</h3>
                 <p>Compare FCFS, SSTF, SCAN, C-SCAN, and LOOK seek patterns on a disk arm.</p>
               </div>
-              <span class="explore-arrow">â†’</span>
             </a>
-            <a href="virtual-memory-sim.html" class="explore-card explore-card-link kernel-sim-link">
-              <span class="card-icon"
-                style="background:#0f766e;border-color:#5eead4;box-shadow:3px 3px 0 #134e4a;">VM</span>
-              <div>
+            <a href="virtual-memory-sim.html" class="sim-module-card sim-module-card--kernel kernel-sim-link">
+              <div class="sim-module-thumb" style="background-image:url('../../assets/hero-bg-night.jpg');background-position:top center">
+                <span class="sim-module-badge" style="background:#0f766e;border-color:#5eead4;">VM</span>
+              </div>
+              <div class="sim-module-body">
                 <h3>Virtual Memory Simulator</h3>
                 <p>Step through FIFO, LRU, and Optimal replacement while visualizing page tables and the TLB.</p>
               </div>
-              <span class="explore-arrow">â†’</span>
             </a>
           </div>
         </section>

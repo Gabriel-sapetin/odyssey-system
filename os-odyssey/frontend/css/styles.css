@@ -1950,6 +1950,227 @@ a {
   gap: 18px;
 }
 
+/* ---- SIMULATION MODULE CARDS (dashboard) ----
+   Mirrors the index-page module-card design: vertical layout
+   with a background-image thumbnail at the top and body text below.
+   Each card's thumbnail is the sim's thematic pixel-art landscape.
+*/
+.sim-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.sim-module-card {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(10, 16, 32, 0.92);
+  border: 2px solid var(--app-line, #26314d);
+  border-radius: var(--radius, 6px);
+  overflow: hidden;
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.45);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.25s ease,
+              border-color 0.25s ease;
+  animation: simCardFadeIn 0.4s ease both;
+  cursor: pointer;
+}
+
+.sim-module-card:nth-child(1) { animation-delay: 0.05s; }
+.sim-module-card:nth-child(2) { animation-delay: 0.12s; }
+.sim-module-card:nth-child(3) { animation-delay: 0.19s; }
+.sim-module-card:nth-child(4) { animation-delay: 0.26s; }
+.sim-module-card:nth-child(5) { animation-delay: 0.33s; }
+.sim-module-card:nth-child(6) { animation-delay: 0.40s; }
+
+@keyframes simCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sim-module-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.5);
+  border-color: var(--orange, #f59e0b);
+}
+
+/* Thumbnail — background-image set inline in HTML */
+.sim-module-thumb {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  overflow: hidden;
+}
+
+/* Gradient overlay on thumbnail for depth */
+.sim-module-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 40%,
+    rgba(10, 16, 32, 0.7) 100%
+  );
+  pointer-events: none;
+}
+
+/* Hover: thumbnail brightens subtly */
+.sim-module-card:hover .sim-module-thumb {
+  filter: brightness(1.12) saturate(1.1);
+  transition: filter 0.3s ease;
+}
+
+/* Badge label on thumbnail (PWR, SYS, CPU, etc.) */
+.sim-module-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 30px;
+  padding: 0 10px;
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 9px;
+  color: #fff;
+  border: 2px solid;
+  border-radius: 4px;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.05em;
+}
+
+/* Body text area */
+.sim-module-body {
+  padding: 16px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sim-module-body h3 {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 9px;
+  color: var(--app-text, #e2e8f0);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.sim-module-body p {
+  font-family: var(--font-body, 'Nunito', sans-serif);
+  font-size: 12px;
+  color: var(--app-muted, #8194b2);
+  line-height: 1.55;
+}
+
+/* Kernel-mode card green tint */
+.sim-module-card--kernel {
+  border-color: rgba(34, 197, 94, 0.38);
+  background: rgba(4, 24, 20, 0.88);
+}
+
+.sim-module-card--kernel:hover {
+  border-color: #22c55e;
+}
+
+/* Light mode overrides */
+.light-mode .sim-module-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #c8d3e2;
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.06);
+}
+
+.light-mode .sim-module-card:hover {
+  border-color: var(--orange, #f59e0b);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);
+}
+
+.light-mode .sim-module-body h3 {
+  color: var(--app-text, #1e293b);
+}
+
+.light-mode .sim-module-body p {
+  color: var(--app-muted, #64748b);
+}
+
+.light-mode .sim-module-card--kernel {
+  background: rgba(240, 253, 244, 0.95);
+  border-color: #86efac;
+}
+
+.light-mode .sim-module-card--kernel:hover {
+  border-color: #22c55e;
+}
+
+/* Responsive: 2 columns on tablets */
+@media (max-width: 900px) {
+  .sim-modules-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Responsive: 1 column on mobile */
+@media (max-width: 600px) {
+  .sim-modules-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .sim-module-thumb {
+    height: 100px;
+  }
+
+  .sim-module-badge {
+    min-width: 38px;
+    height: 26px;
+    font-size: 8px;
+    padding: 0 8px;
+  }
+}
+
+/* Kernel-locked state (modules not yet completed) */
+.sim-module-card.kernel-locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: auto;
+}
+
+.sim-module-card.kernel-locked:hover {
+  transform: none;
+  border-color: rgba(34, 197, 94, 0.38);
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.45);
+}
+
+.sim-module-card .kernel-lock-label {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 14px 14px;
+  min-height: 24px;
+  padding: 0 9px;
+  border: 1px solid rgba(245, 166, 35, 0.45);
+  border-radius: 4px;
+  background: rgba(245, 166, 35, 0.12);
+  color: #ffd484;
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 7px;
+}
+
 .explore-card,
 .roadmap-card,
 .lesson-card,
