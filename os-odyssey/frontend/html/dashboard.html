@@ -271,6 +271,40 @@
   <script src="../js/supabase.js"></script>
   <script src="../js/main.js"></script>
   <script src="../js/onboarding-tour.js"></script>
+  <script>
+    /* Force profile background video to play */
+    (function() {
+      var vid = document.querySelector('.profile-bg-dark');
+      if (!vid || vid.tagName !== 'VIDEO') return;
+
+      function tryPlay() {
+        if (!document.body.classList.contains('light-mode')) {
+          vid.play().catch(function() {});
+        } else {
+          vid.pause();
+        }
+      }
+
+      /* Play on load */
+      if (vid.readyState >= 2) {
+        tryPlay();
+      } else {
+        vid.addEventListener('loadeddata', tryPlay);
+      }
+
+      /* Re-play after theme toggle */
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(m) {
+          if (m.attributeName === 'class') tryPlay();
+        });
+      });
+      observer.observe(document.body, { attributes: true });
+
+      /* Fallback: retry after short delay */
+      setTimeout(tryPlay, 500);
+      setTimeout(tryPlay, 1500);
+    })();
+  </script>
 </body>
 
 </html>
