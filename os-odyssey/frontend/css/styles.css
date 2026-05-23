@@ -3168,7 +3168,8 @@ body.lesson-open .course-shell {
   );
 }
 
-.profile-card-bg img {
+.profile-card-bg img,
+.profile-card-bg video {
   display: block;
   width: 100%;
   height: 100%;
