@@ -13,3 +13,7 @@ Thumbs.db
 .vscode/
 .idea/
 .gemini/
+
+# Node
+node_modules/
+dist/

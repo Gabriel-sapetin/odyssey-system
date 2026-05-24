@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm install && npm run build",
+  "outputDirectory": "dist",
   "redirects": [
     { "source": "/", "destination": "/os-odyssey/frontend/html/index.html", "statusCode": 302 }
   ],
