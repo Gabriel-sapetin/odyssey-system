@@ -180,7 +180,9 @@
       <aside class="dashboard-side">
         <section class="profile-card">
           <div class="profile-card-bg">
-            <video class="profile-bg-dark" src="../../assets/darksnowy.mp4" autoplay loop muted playsinline></video>
+            <video class="profile-bg-dark" autoplay loop muted playsinline preload="auto" disablepictureinpicture>
+              <source src="../../assets/darksnowy.mp4" type="video/mp4">
+            </video>
             <img class="profile-bg-light" src="../../assets/profilelight.jpg" alt="" />
             <div class="profile-snow">
               <span class="snowflake sf1"></span>
@@ -274,35 +276,56 @@
   <script>
     /* Force profile background video to play */
     (function() {
-      var vid = document.querySelector('.profile-bg-dark');
-      if (!vid || vid.tagName !== 'VIDEO') return;
+      var vid = document.querySelector('video.profile-bg-dark');
+      if (!vid) return;
+
+      /* Ensure muted property is set programmatically (required by Chrome for autoplay) */
+      vid.muted = true;
+      vid.playsInline = true;
+      vid.loop = true;
 
       function tryPlay() {
-        if (!document.body.classList.contains('light-mode')) {
-          vid.play().catch(function() {});
-        } else {
+        if (document.body.classList.contains('light-mode')) {
           vid.pause();
+          return;
+        }
+        var p = vid.play();
+        if (p && typeof p.then === 'function') {
+          p.then(function() {
+            console.log('[profile-bg] video playing');
+          }).catch(function(err) {
+            console.warn('[profile-bg] autoplay blocked:', err.message);
+          });
         }
       }
 
-      /* Play on load */
-      if (vid.readyState >= 2) {
-        tryPlay();
-      } else {
-        vid.addEventListener('loadeddata', tryPlay);
-      }
+      /* Listen for video ready states */
+      vid.addEventListener('canplay', tryPlay);
+      vid.addEventListener('loadeddata', tryPlay);
+
+      /* Log any video errors */
+      vid.addEventListener('error', function(e) {
+        console.error('[profile-bg] video error:', vid.error);
+      });
 
       /* Re-play after theme toggle */
-      var observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(m) {
-          if (m.attributeName === 'class') tryPlay();
-        });
-      });
-      observer.observe(document.body, { attributes: true });
+      var observer = new MutationObserver(function() { tryPlay(); });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-      /* Fallback: retry after short delay */
-      setTimeout(tryPlay, 500);
-      setTimeout(tryPlay, 1500);
+      /* Retry on intervals */
+      tryPlay();
+      setTimeout(tryPlay, 300);
+      setTimeout(tryPlay, 1000);
+      setTimeout(tryPlay, 3000);
+
+      /* Ultimate fallback: play on first user interaction */
+      function onInteraction() {
+        tryPlay();
+        document.removeEventListener('click', onInteraction);
+        document.removeEventListener('touchstart', onInteraction);
+      }
+      document.addEventListener('click', onInteraction);
+      document.addEventListener('touchstart', onInteraction);
     })();
   </script>
 </body>
