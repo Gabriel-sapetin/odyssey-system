@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="../css/sim.css" />
 </head>
 
-<body class="app-page dashboard-page">
+<body class="app-page dashboard-page">Dr
   <nav class="app-nav">
     <a href="dashboard.html" class="app-brand">
       <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
@@ -59,11 +59,11 @@
         <div class="sim-field sim-field-wide">
           <label>Select Program</label>
           <select id="programSelect">
-            <option value="fileRead">📄 File Read (open → read → close)</option>
-            <option value="fileWrite">✏️ File Write (open → write → close)</option>
-            <option value="processCreate">🔄 Fork Process (fork → exec → wait)</option>
-            <option value="networkIO">🌐 Network Socket (socket → connect → send → recv)</option>
-            <option value="memAlloc">🧠 Memory Alloc (mmap → access → munmap)</option>
+            <option value="fileRead"> File Read (open → read → close)</option>
+            <option value="fileWrite"> File Write (open → write → close)</option>
+            <option value="processCreate"> Fork Process (fork → exec → wait)</option>
+            <option value="networkIO"> Network Socket (socket → connect → send → recv)</option>
+            <option value="memAlloc"> Memory Alloc (mmap → access → munmap)</option>
           </select>
         </div>
         <button class="sim-btn sim-btn-run" type="button" id="runSyscall">▶ Execute Program</button>
@@ -133,32 +133,32 @@
       <h2>OS Structure Reference</h2>
       <div class="os-structure-grid" id="osStructureGrid">
         <div class="os-struct-card">
-          <div class="os-struct-icon">📂</div>
+          <div class="os-struct-icon"></div>
           <h3>File Management</h3>
           <p>open(), read(), write(), close(), lseek()</p>
         </div>
         <div class="os-struct-card">
-          <div class="os-struct-icon">⚙️</div>
+          <div class="os-struct-icon"></div>
           <h3>Process Control</h3>
           <p>fork(), exec(), wait(), exit(), kill()</p>
         </div>
         <div class="os-struct-card">
-          <div class="os-struct-icon">🧠</div>
+          <div class="os-struct-icon"></div>
           <h3>Memory Management</h3>
           <p>mmap(), munmap(), brk(), mprotect()</p>
         </div>
         <div class="os-struct-card">
-          <div class="os-struct-icon">🌐</div>
+          <div class="os-struct-icon"></div>
           <h3>Networking</h3>
           <p>socket(), bind(), connect(), send(), recv()</p>
         </div>
         <div class="os-struct-card">
-          <div class="os-struct-icon">📡</div>
+          <div class="os-struct-icon"></div>
           <h3>Device I/O</h3>
           <p>ioctl(), read(), write(), poll(), select()</p>
         </div>
         <div class="os-struct-card">
-          <div class="os-struct-icon">🔒</div>
+          <div class="os-struct-icon"></div>
           <h3>Security</h3>
           <p>setuid(), chmod(), chown(), getuid()</p>
         </div>
