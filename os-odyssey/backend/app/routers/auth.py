@@ -1,14 +1,5 @@
-"""
-Auth Router
-───────────
-Handles signup, login, logout, and password reset.
-All endpoints are aggressively rate-limited to prevent brute-force attacks.
-Auth is delegated to Supabase Auth — this layer adds:
-  • Rate limiting
-  • Input validation & sanitization
-  • Structured logging
-  • Consistent error responses
-"""
+#Handles signup, login, logout, and password reset.
+#All endpoints are aggressively rate-limited to prevent brute-force attacks
 
 import logging
 import os
