@@ -1,8 +1,5 @@
-"""
-Health Check Router
-───────────────────
-Lightweight endpoint for uptime monitors, load balancers, and CI pipelines.
-"""
+#Health Check Router For Ping Activity On Render
+#Lightweight endpoint for uptime monitors, load balancers, and CI pipelines.
 
 import time
 from fastapi import APIRouter, Request
