@@ -43,7 +43,7 @@
     }
   }
 
-  /* ---- Global Background Music ---- */
+  /* Global Background Music */
   (function initBgMusic() {
     const BGM_SRC = '../../assets/Purity - Beautiful Piano Song, Relaxing BGM BigRicePiano.mp3';
     const MUTE_KEY = 'os-odyssey-bgm-muted';
@@ -84,39 +84,7 @@
     btn.innerHTML = isMuted ? '🔇' : '🔊';
     document.body.appendChild(btn);
 
-    const style = document.createElement('style');
-    style.textContent = `
-      #bgmToggle {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        z-index: 9999;
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        border: 2px solid rgba(255,255,255,0.15);
-        background: rgba(20, 20, 35, 0.75);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        color: #fff;
-        font-size: 22px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-      }
-      #bgmToggle:hover {
-        transform: scale(1.12);
-        box-shadow: 0 6px 24px rgba(0,0,0,0.45);
-        background: rgba(40, 40, 60, 0.85);
-      }
-      #bgmToggle:active {
-        transform: scale(0.95);
-      }
-    `;
-    document.head.appendChild(style);
+    /* BGM toggle button styles are defined in styles.css */
 
     btn.addEventListener('click', (e) => {
       e.stopPropagation(); // don't trigger the document-level tryStartBgm
@@ -241,124 +209,7 @@
   // Expose badge defs globally for profile.js
   window.OS_ODYSSEY_BADGE_DEFS = BADGE_DEFS;
 
-  /* ---- Badge popup injection styles ---- */
-  (function injectBadgeStyles() {
-    const s = document.createElement('style');
-    s.textContent = `
-      .badge-popup-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 10000;
-        display: grid;
-        place-items: center;
-        background: rgba(3,7,18,0.75);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        animation: badgeFadeIn 0.4s ease both;
-      }
-      @keyframes badgeFadeIn {
-        from { opacity: 0; }
-        to   { opacity: 1; }
-      }
-      .badge-popup-card {
-        position: relative;
-        width: min(420px, 90vw);
-        background: linear-gradient(145deg, rgba(10,16,32,0.97), rgba(18,27,48,0.97));
-        border: 2px solid;
-        border-radius: 16px;
-        padding: 48px 36px 36px;
-        text-align: center;
-        box-shadow: 0 20px 80px rgba(0,0,0,0.7);
-        animation: badgeCardPop 0.55s cubic-bezier(0.34,1.56,0.64,1) both;
-      }
-      @keyframes badgeCardPop {
-        from { transform: scale(0.5) translateY(40px); opacity: 0; }
-        to   { transform: scale(1) translateY(0); opacity: 1; }
-      }
-      .badge-popup-confetti {
-        position: absolute;
-        top: -10px; left: 50%; transform: translateX(-50%);
-        font-size: 36px;
-        animation: badgeConfetti 0.6s ease both;
-      }
-      @keyframes badgeConfetti {
-        0% { transform: translateX(-50%) scale(0) rotate(-30deg); }
-        50% { transform: translateX(-50%) scale(1.3) rotate(5deg); }
-        100% { transform: translateX(-50%) scale(1) rotate(0deg); }
-      }
-      .badge-popup-icon {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 48px;
-        margin: 0 auto 20px;
-        border: 3px solid;
-        animation: badgeIconGlow 2s ease-in-out infinite alternate;
-      }
-      @keyframes badgeIconGlow {
-        from { box-shadow: 0 0 20px rgba(255,255,255,0.1); }
-        to   { box-shadow: 0 0 40px rgba(255,255,255,0.25); }
-      }
-      .badge-popup-label {
-        font-family: var(--font-pixel, 'Press Start 2P', monospace);
-        font-size: 10px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-        opacity: 0.7;
-      }
-      .badge-popup-name {
-        font-family: var(--font-pixel, 'Press Start 2P', monospace);
-        font-size: 18px;
-        line-height: 1.5;
-        margin-bottom: 12px;
-      }
-      .badge-popup-desc {
-        font-size: 14px;
-        color: #94a3b8;
-        line-height: 1.5;
-        margin-bottom: 28px;
-      }
-      .badge-popup-close {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 12px 36px;
-        border: 2px solid;
-        border-radius: 8px;
-        background: rgba(255,255,255,0.05);
-        font-family: var(--font-pixel, 'Press Start 2P', monospace);
-        font-size: 10px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-      .badge-popup-close:hover {
-        background: rgba(255,255,255,0.12);
-        transform: translateY(-1px);
-      }
-      .badge-popup-particles {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        overflow: hidden;
-        border-radius: 16px;
-      }
-      .badge-particle {
-        position: absolute;
-        width: 4px; height: 4px;
-        border-radius: 50%;
-        animation: badgeParticleFloat 3s ease-out forwards;
-      }
-      @keyframes badgeParticleFloat {
-        0%   { transform: translateY(0) scale(1); opacity: 1; }
-        100% { transform: translateY(-120px) translateX(var(--dx)) scale(0); opacity: 0; }
-      }
-    `;
-    document.head.appendChild(s);
-  })();
+  /* Badge popup styles are defined in styles.css */
 
   /** Show a premium badge-earned popup */
   function showBadgePopup(badge) {
@@ -398,8 +249,7 @@
     // Close
     const closeBtn = overlay.querySelector('.badge-popup-close');
     function close() {
-      overlay.style.opacity = '0';
-      overlay.style.transition = 'opacity 0.3s ease';
+      overlay.classList.add('overlay-fade-out');
       setTimeout(() => overlay.remove(), 320);
     }
     closeBtn.addEventListener('click', close);
@@ -2140,6 +1990,7 @@
       correctConcept: 0,
       correctCoding: 0,
       answered: false,
+      selectedMcIndex: null,
       summaryRecorded: false,
       topicsCompleted: false
     };
@@ -2337,6 +2188,7 @@
       elements.feedback.className = 'lesson-feedback';
       elements.feedback.textContent = '';
       elements.secondaryAction.hidden = true;
+      state.selectedMcIndex = null;
       if (elements.backAction) elements.backAction.hidden = false;
       updateBackAction();
     }
@@ -2420,7 +2272,7 @@
       elements.status.textContent = 'Quiz Mode';
       updateLessonOutline();
       elements.primaryAction.disabled = type === 'multiple-choice';
-      elements.primaryAction.textContent = type === 'multiple-choice' ? 'Choose an answer' : 'Submit Answer';
+      elements.primaryAction.textContent = 'Submit Answer';
       const intro = state.quizIndex === 0 && module.quizIntro ? module.quizIntro : '';
       const transition = state.quizIndex === module.questionTransitionIndex && module.questionTransition ? module.questionTransition : '';
 
@@ -2430,7 +2282,7 @@
           ${transition}
           <h3>${item.question}</h3>
           ${renderCodeBlock(item.code)}
-          <p class="lesson-prompt">Type A, B, C, or D by choosing an answer.</p>
+          <p class="lesson-prompt">Select your answer, then click Submit.</p>
         `;
         elements.answerGrid.hidden = false;
         elements.answerGrid.innerHTML = item.options.map((option, index) => `
@@ -2624,19 +2476,44 @@
         return;
       }
 
-      if (state.mode === 'quiz' && questionType(module, module.quiz[state.quizIndex]) === 'fill-blank' && !state.answered) {
+      if (state.mode === 'quiz' && !state.answered) {
         const item = module.quiz[state.quizIndex];
-        const grade = gradeFillAnswer(elements.fillInput.value, item);
-        const isCorrect = grade === 'correct' || grade === 'close';
-        const prefix = grade === 'correct'
-          ? 'Correct.'
-          : grade === 'close'
-            ? `Nearly right - the precise term is ${item.precise}.`
-            : `Not quite. The correct answer is ${item.precise}.`;
+        const type = questionType(module, item);
 
-        elements.fillInput.disabled = true;
-        completeAnswer(isCorrect, `${prefix} ${item.reinforcement}`);
-        return;
+        if (type === 'multiple-choice' && state.selectedMcIndex !== null) {
+          const selected = state.selectedMcIndex;
+          const isCorrect = selected === item.answer;
+
+          elements.answerGrid.querySelectorAll('.answer-option').forEach((button) => {
+            const index = Number(button.dataset.answerIndex);
+            button.disabled = true;
+            if (index === item.answer) button.classList.add('correct');
+            if (index === selected && !isCorrect) button.classList.add('incorrect');
+            button.classList.remove('selected');
+          });
+
+          completeAnswer(
+            isCorrect,
+            isCorrect
+              ? `Correct. ${item.explanation}`
+              : `Not quite. The correct answer is ${item.correctLabel || String.fromCharCode(65 + item.answer)}. ${item.explanation}`
+          );
+          return;
+        }
+
+        if (type === 'fill-blank') {
+          const grade = gradeFillAnswer(elements.fillInput.value, item);
+          const isCorrect = grade === 'correct' || grade === 'close';
+          const prefix = grade === 'correct'
+            ? 'Correct.'
+            : grade === 'close'
+              ? `Nearly right - the precise term is ${item.precise}.`
+              : `Not quite. The correct answer is ${item.precise}.`;
+
+          elements.fillInput.disabled = true;
+          completeAnswer(isCorrect, `${prefix} ${item.reinforcement}`);
+          return;
+        }
       }
 
       if (state.mode === 'quiz' && state.answered) {
@@ -2681,21 +2558,17 @@
       if (state.mode !== 'quiz' || state.answered || questionType(module, item) !== 'multiple-choice') return;
 
       const selected = Number(optionButton.dataset.answerIndex);
-      const isCorrect = selected === item.answer;
+      state.selectedMcIndex = selected;
 
+      // Highlight the selected option and remove highlight from others
       elements.answerGrid.querySelectorAll('.answer-option').forEach((button) => {
         const index = Number(button.dataset.answerIndex);
-        button.disabled = true;
-        if (index === item.answer) button.classList.add('correct');
-        if (index === selected && !isCorrect) button.classList.add('incorrect');
+        button.classList.toggle('selected', index === selected);
       });
 
-      completeAnswer(
-        isCorrect,
-        isCorrect
-          ? `Correct. ${item.explanation}`
-          : `Not quite. The correct answer is ${item.correctLabel || String.fromCharCode(65 + item.answer)}. ${item.explanation}`
-      );
+      // Enable the Submit Answer button
+      elements.primaryAction.disabled = false;
+      elements.primaryAction.textContent = 'Submit Answer';
     }
 
     document.querySelectorAll('[data-start-module]').forEach(button => {

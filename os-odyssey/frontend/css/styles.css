@@ -1365,6 +1365,12 @@ a {
   color: #1a8fe8;
 }
 
+.light-mode .answer-option.selected {
+  border-color: var(--orange);
+  background: rgba(245, 166, 35, 0.10);
+  box-shadow: 0 0 0 1px rgba(245, 166, 35, 0.25);
+}
+
 .light-mode .fill-answer input {
   border-color: #c8d3e2;
   background: #f4f7fb;
@@ -2560,6 +2566,12 @@ body.lesson-open .course-shell {
 .answer-option.correct {
   border-color: #8ef76e;
   background: rgba(34, 197, 94, 0.14);
+}
+
+.answer-option.selected {
+  border-color: var(--orange);
+  background: rgba(245, 166, 35, 0.14);
+  box-shadow: 0 0 0 1px rgba(245, 166, 35, 0.3);
 }
 
 .answer-option.incorrect {
@@ -4462,6 +4474,13 @@ body.lesson-open .course-shell {
 
   .course-launch-section {
     grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .course-launch-button {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
   }
 
   .module-launch-grid {
@@ -4490,6 +4509,7 @@ body.lesson-open .course-shell {
     min-height: 42px;
     overflow-x: auto;
     padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .netacad-sidebar,
@@ -4498,9 +4518,35 @@ body.lesson-open .course-shell {
     border-bottom: 1px solid #d9e1ea;
   }
 
+  .netacad-sidebar {
+    max-height: 280px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .lesson-outline-panel {
     max-height: 260px;
     overflow-y: auto;
+  }
+
+  .reader-content-split {
+    gap: 28px;
+    padding: clamp(24px, 4vw, 48px);
+  }
+
+  .reader-topic-stack {
+    min-width: 0;
+  }
+
+  .reader-actions {
+    justify-content: center;
+  }
+
+  .reader-actions .lesson-button {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: center;
+    justify-content: center;
   }
 
   .netacad-player.fullpage-player {
@@ -5030,18 +5076,78 @@ textarea {
   }
 
   .reader-content-split {
-    gap: 24px;
-    padding: 24px 18px;
+    gap: 20px;
+    padding: 20px 16px;
   }
 
   .reader-content-split h1,
   .reader-content-split h2,
   .netacad-player .lesson-heading h2 {
-    font-size: clamp(26px, 9vw, 36px);
+    font-size: clamp(22px, 8vw, 32px);
+  }
+
+  .reader-content-split p {
+    font-size: 15px;
   }
 
   .reader-topic-stack {
     min-width: 0;
+    width: 100%;
+  }
+
+  .reader-actions {
+    flex-direction: column;
+  }
+
+  .reader-actions .lesson-button {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .netacad-sidebar {
+    max-height: 220px;
+  }
+
+  .course-launch-section {
+    padding: 20px 16px;
+    margin-top: 36px;
+  }
+
+  .course-launch-section h2 {
+    font-size: clamp(14px, 5vw, 20px);
+  }
+
+  .course-launch-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .course-shell-nav {
+    gap: 10px;
+    font-size: 9px;
+  }
+
+  .course-shell-nav a,
+  .course-shell-nav .app-link-button,
+  .course-shell-nav .netacad-tool {
+    padding: 0 6px;
+    white-space: nowrap;
+  }
+
+  .course-outline-module,
+  .lesson-outline-item {
+    min-height: 60px;
+    padding: 10px 12px;
+  }
+
+  .progress-panel-header {
+    padding: 12px 14px 6px;
+  }
+
+  .progress-module-row {
+    min-height: 48px;
+    padding: 8px 12px;
   }
 
   .progress-panel-stats-row {
@@ -5580,26 +5686,86 @@ textarea {
   .course-page .netacad-shell-header,
   .netacad-shell-header,
   .netacad-player-bar {
-    gap: 12px;
-    padding: 12px;
+    gap: 8px;
+    padding: 10px 12px;
+    flex-wrap: wrap;
+  }
+
+  .course-shell-brand {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .course-app-brand {
+    font-size: 10px;
+    gap: 6px;
+  }
+
+  .course-app-brand .brand-penguin {
+    width: 24px;
+    height: 24px;
   }
 
   .netacad-brand-lockup {
     width: 100%;
+    gap: 8px;
+  }
+
+  .netacad-brand-lockup strong {
+    font-size: 11px;
   }
 
   .netacad-brand-lockup span:not(.netacad-brand-mark) {
     overflow-wrap: anywhere;
+    font-size: 10px;
+  }
+
+  .netacad-brand-mark {
+    width: 36px;
+    height: 30px;
+    font-size: 15px;
+  }
+
+  .course-shell-nav {
+    width: 100%;
+    gap: 8px;
+    font-size: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .course-shell-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .course-outline-module,
   .lesson-outline-item {
-    grid-template-columns: 30px minmax(0, 1fr) auto;
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+    gap: 8px;
     padding: 10px 12px;
   }
 
   .course-outline-module small {
     grid-column: auto;
+  }
+
+  .course-outline-module strong,
+  .lesson-outline-item strong {
+    font-size: 12px;
+  }
+
+  .course-outline-module em,
+  .lesson-outline-item em {
+    font-size: 11px;
+  }
+
+  .outline-check,
+  .outline-dot {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
   }
 
   .reader-topline,
@@ -5608,6 +5774,85 @@ textarea {
     flex-direction: column;
     gap: 6px;
     padding: 12px 0;
+  }
+
+  .reader-content-split {
+    gap: 16px;
+    padding: 16px 14px;
+  }
+
+  .reader-content-split h1,
+  .reader-content-split h2 {
+    font-size: clamp(20px, 7vw, 28px);
+    margin: 8px 0 12px;
+  }
+
+  .reader-content-split p {
+    font-size: 14px;
+  }
+
+  .reader-actions {
+    gap: 8px;
+  }
+
+  .reader-actions .lesson-button {
+    width: 100%;
+    min-width: 0;
+    font-size: 10px;
+  }
+
+  .reader-topic-stack {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .progress-panel-title {
+    font-size: 9px;
+  }
+
+  .progress-stat-num {
+    font-size: 12px;
+  }
+
+  .progress-stat-label {
+    font-size: 9px;
+  }
+
+  .progress-module-info strong {
+    font-size: 11px;
+  }
+
+  .progress-module-info em {
+    font-size: 10px;
+  }
+
+  .course-launch-section {
+    padding: 16px 14px;
+    margin-top: 28px;
+  }
+
+  .course-launch-section h2 {
+    font-size: clamp(12px, 4.5vw, 18px);
+    line-height: 1.6;
+  }
+
+  .course-launch-section p {
+    font-size: 13px;
+  }
+
+  .lesson-reader {
+    padding: 0 14px 24px;
+  }
+
+  .lesson-actions {
+    gap: 8px;
+  }
+
+  .lesson-actions .lesson-button {
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+    justify-content: center;
   }
 
   .answer-option {
@@ -5619,6 +5864,15 @@ textarea {
   .blank-sentence {
     padding: 14px;
     font-size: 15px;
+  }
+
+  .player-bar-right {
+    width: 100%;
+  }
+
+  .player-course-btn {
+    width: 100%;
+    font-size: 10px;
   }
 }
 
@@ -5805,5 +6059,188 @@ textarea {
 
   .course-shell-nav {
     font-size: 8px;
+    gap: 6px;
   }
+
+  .reader-content-split {
+    padding: 14px 12px;
+    gap: 14px;
+  }
+
+  .reader-content-split h1,
+  .reader-content-split h2 {
+    font-size: clamp(18px, 6vw, 24px);
+  }
+
+  .course-launch-section {
+    padding: 14px 12px;
+  }
+
+  .course-launch-section h2 {
+    font-size: clamp(11px, 4vw, 16px);
+  }
+
+  .netacad-sidebar,
+  .lesson-outline-panel {
+    max-height: 180px;
+  }
+
+  .lesson-actions {
+    gap: 6px;
+  }
+
+  .reader-actions {
+    gap: 6px;
+  }
+}
+
+/* ================================================================
+   REFACTORED: BGM Toggle Button (moved from main.js inline style)
+   ================================================================ */
+#bgmToggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(20, 20, 35, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+#bgmToggle:hover {
+  transform: scale(1.12);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  background: rgba(40, 40, 60, 0.85);
+}
+#bgmToggle:active {
+  transform: scale(0.95);
+}
+
+/* ================================================================
+   REFACTORED: Badge Popup (moved from main.js inline style)
+   ================================================================ */
+.badge-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  background: rgba(3, 7, 18, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: badgeFadeIn 0.4s ease both;
+}
+@keyframes badgeFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.badge-popup-card {
+  position: relative;
+  width: min(420px, 90vw);
+  background: linear-gradient(145deg, rgba(10, 16, 32, 0.97), rgba(18, 27, 48, 0.97));
+  border: 2px solid;
+  border-radius: 16px;
+  padding: 48px 36px 36px;
+  text-align: center;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.7);
+  animation: badgeCardPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes badgeCardPop {
+  from { transform: scale(0.5) translateY(40px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+.badge-popup-confetti {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 36px;
+  animation: badgeConfetti 0.6s ease both;
+}
+@keyframes badgeConfetti {
+  0% { transform: translateX(-50%) scale(0) rotate(-30deg); }
+  50% { transform: translateX(-50%) scale(1.3) rotate(5deg); }
+  100% { transform: translateX(-50%) scale(1) rotate(0deg); }
+}
+.badge-popup-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin: 0 auto 20px;
+  border: 3px solid;
+  animation: badgeIconGlow 2s ease-in-out infinite alternate;
+}
+@keyframes badgeIconGlow {
+  from { box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
+  to   { box-shadow: 0 0 40px rgba(255, 255, 255, 0.25); }
+}
+.badge-popup-label {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  opacity: 0.7;
+}
+.badge-popup-name {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.badge-popup-desc {
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-bottom: 28px;
+}
+.badge-popup-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 36px;
+  border: 2px solid;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.badge-popup-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+.badge-popup-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 16px;
+}
+.badge-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  animation: badgeParticleFloat 3s ease-out forwards;
+}
+@keyframes badgeParticleFloat {
+  0%   { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-120px) translateX(var(--dx)) scale(0); opacity: 0; }
 }
