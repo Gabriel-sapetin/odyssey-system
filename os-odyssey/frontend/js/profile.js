@@ -321,9 +321,9 @@
 
     // Color the ring percentage
     if (pct === 100) {
-      $id('profCompletedPct').style.color = '#22c55e';
+      $id('profCompletedPct').classList.add('color-hit');
     } else if (pct > 0) {
-      $id('profCompletedPct').style.color = '#f5a623';
+      $id('profCompletedPct').classList.add('color-booting');
     }
   }
 
@@ -487,8 +487,7 @@
     const backdrop = overlay.querySelector('.prof-bg-picker-backdrop');
 
     function close() {
-      overlay.style.opacity = '0';
-      overlay.style.transition = 'opacity 0.2s ease';
+      overlay.classList.add('overlay-fade-out-fast');
       setTimeout(() => overlay.remove(), 220);
     }
 

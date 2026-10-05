@@ -188,8 +188,8 @@
   function createTimeBlock(name, color, duration) {
     const block = document.createElement('div');
     block.className = 'thread-block';
-    block.style.background = color;
-    block.style.minWidth = '60px';
+    block.style.setProperty('--task-color', color);
+    block.style.background = 'var(--task-color)';
     block.textContent = name;
     return block;
   }
@@ -247,7 +247,7 @@
     // User threads column
     html += '<div class="model-col"><h3 class="pool-section-title">User Threads</h3>';
     for (let i = 0; i < userCount; i++) {
-      html += `<div class="model-thread user-thread" id="ut-${i}" style="border-color:${TASK_COLORS[i]}"><span style="color:${TASK_COLORS[i]}">UT${i + 1}</span></div>`;
+      html += `<div class="model-thread user-thread" id="ut-${i}" style="--thread-color:${TASK_COLORS[i]};border-color:var(--thread-color)"><span style="color:var(--thread-color)">UT${i + 1}</span></div>`;
     }
     html += '</div>';
 
@@ -274,19 +274,19 @@
 
     // Model description
     modelDescPanel.innerHTML = `
-      <h3 style="color:var(--orange);font-family:var(--font-pixel);font-size:14px;margin-bottom:12px;">${info.title}</h3>
-      <p style="margin-bottom:16px;line-height:1.7;">${info.desc}</p>
-      <div style="display:flex;gap:24px;flex-wrap:wrap;">
+      <h3 class="model-desc-title">${info.title}</h3>
+      <p class="model-desc-text">${info.desc}</p>
+      <div class="model-desc-columns">
         <div>
-          <h4 style="color:#22c55e;font-family:var(--font-pixel);font-size:10px;margin-bottom:8px;">✓ ADVANTAGES</h4>
-          <ul style="list-style:none;padding:0;margin:0;">${info.pros.map(p => `<li style="padding:4px 0;color:var(--app-text);">• ${p}</li>`).join('')}</ul>
+          <h4 class="model-desc-pros-title">✓ ADVANTAGES</h4>
+          <ul class="model-desc-list">${info.pros.map(p => `<li>• ${p}</li>`).join('')}</ul>
         </div>
         <div>
-          <h4 style="color:#ef4444;font-family:var(--font-pixel);font-size:10px;margin-bottom:8px;">✗ DISADVANTAGES</h4>
-          <ul style="list-style:none;padding:0;margin:0;">${info.cons.map(c => `<li style="padding:4px 0;color:var(--app-text);">• ${c}</li>`).join('')}</ul>
+          <h4 class="model-desc-cons-title">✗ DISADVANTAGES</h4>
+          <ul class="model-desc-list">${info.cons.map(c => `<li>• ${c}</li>`).join('')}</ul>
         </div>
       </div>
-      <p style="margin-top:16px;color:var(--app-muted);"><strong>Examples:</strong> ${info.examples}</p>
+      <p class="model-desc-examples"><strong>Examples:</strong> ${info.examples}</p>
     `;
     modelStep.note.innerHTML = `<strong>Step:</strong> ${info.title} maps ${userCount} user threads onto ${kernelCount} kernel thread${kernelCount === 1 ? '' : 's'}.`;
     recordThreadCompletion(70);
@@ -351,9 +351,9 @@
         await explainThreadStep(`Worker ${threadIdx + 1} takes ${task.name} from the shared queue; remaining queued tasks: ${tasks.length}.`, poolStep);
 
         const body = $id(`poolWorker-${threadIdx}`);
-        body.innerHTML = `<div class="pool-active-task" style="background:${task.color}20;border-color:${task.color}">
-          <strong style="color:${task.color}">${task.name}</strong>
-          <span class="pool-progress-bar"><span class="pool-progress-fill" style="background:${task.color}"></span></span>
+        body.innerHTML = `<div class="pool-active-task" style="--task-color:${task.color};background:color-mix(in srgb, var(--task-color) 12%, transparent);border-color:var(--task-color)">
+          <strong style="color:var(--task-color)">${task.name}</strong>
+          <span class="pool-progress-bar"><span class="pool-progress-fill" style="background:var(--task-color)"></span></span>
         </div>`;
 
         // Animate progress
@@ -364,7 +364,7 @@
         await delay(task.duration);
         completed++;
 
-        body.innerHTML = `<span class="pool-idle" style="color:#22c55e">✓ Done</span>`;
+        body.innerHTML = `<span class="pool-idle pool-done">✓ Done</span>`;
         await delay(100);
         body.innerHTML = `<span class="pool-idle">Idle</span>`;
       }
@@ -382,7 +382,7 @@
     // Show stats
     poolStats.style.display = '';
     poolStats.innerHTML = `
-      <div class="sim-averages" style="margin-top:20px;">
+      <div class="sim-averages pool-stats-spacing">
         <div class="sim-avg-item"><span>POOL SIZE</span><span>${poolSize}</span></div>
         <div class="sim-avg-item"><span>TASKS</span><span>${taskCount}</span></div>
         <div class="sim-avg-item"><span>COMPLETED</span><span>${completed}</span></div>
@@ -406,8 +406,8 @@
 
   function renderPoolQueue(tasks) {
     poolQueue.innerHTML = tasks.map(t =>
-      `<div class="pool-task-chip" style="border-color:${t.color};color:${t.color}">${t.name}</div>`
-    ).join('') || '<span class="pool-idle" style="opacity:0.4">Queue empty</span>';
+      `<div class="pool-task-chip" style="--task-color:${t.color};border-color:var(--task-color);color:var(--task-color)">${t.name}</div>`
+    ).join('') || '<span class="pool-idle opacity-subtle">Queue empty</span>';
   }
 
   function delay(ms) { return new Promise(r => setTimeout(r, ms)); }

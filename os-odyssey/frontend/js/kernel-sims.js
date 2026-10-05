@@ -36,7 +36,7 @@
       const blockHtml = blocks.map(block => `<span class="fs-block ${block.file ? 'used' : ''}">${block.file ? block.file.slice(0, 2).toUpperCase() : block.id}</span>`).join('');
       viz.innerHTML = `
         <div class="block-row">${blockHtml}</div>
-        <div class="sim-table-wrap" style="margin-top:18px;">
+        <div class="sim-table-wrap mt-18">
           <table class="sim-table">
             <thead><tr><th>Inode</th><th>Name</th><th>Size</th><th>Blocks</th></tr></thead>
             <tbody>${files.map(file => `<tr><td>${file.inode}</td><td>${file.name}</td><td>${file.size}</td><td>${file.blocks.join(', ')}</td></tr>`).join('')}</tbody>
@@ -212,7 +212,7 @@
       hitsEl.textContent = state.hits;
       viz.innerHTML = `
         <div class="vm-row">${state.frames.map(page => `<span class="vm-page ${state.lastHit === page ? 'hit' : ''}">${page}</span>`).join('')}</div>
-        <div class="sim-table-wrap" style="margin-top:18px;">
+        <div class="sim-table-wrap mt-18">
           <table class="sim-table"><thead><tr><th>Page</th><th>Frame</th><th>Valid</th><th>TLB</th></tr></thead>
           <tbody>${state.refs.map(page => `<tr><td>${page}</td><td>${state.frames.includes(page) ? state.frames.indexOf(page) : '-'}</td><td>${state.frames.includes(page) ? '1' : '0'}</td><td>${state.tlb.includes(page) ? 'hit' : '-'}</td></tr>`).join('')}</tbody></table>
         </div>

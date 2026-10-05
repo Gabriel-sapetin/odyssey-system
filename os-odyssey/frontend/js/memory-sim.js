@@ -279,7 +279,7 @@
       const header = document.createElement('div');
       header.className = 'mem-frame-header';
       header.textContent = refs[i];
-      header.style.color = step.fault ? '#ff6b6b' : '#22c55e';
+      header.classList.add(step.fault ? 'color-fault' : 'color-hit');
       col.appendChild(header);
 
       for (let f = 0; f < numFrames; f++) {
@@ -291,7 +291,7 @@
           if (!step.fault && step.frames[f] === refs[i]) cell.classList.add('hit');
         } else {
           cell.textContent = '-';
-          cell.style.opacity = '0.3';
+          cell.classList.add('opacity-low');
         }
         col.appendChild(cell);
       }
@@ -373,8 +373,8 @@
       const header = document.createElement('div');
       header.className = 'mem-frame-header';
       header.textContent = refs[i];
-      if (step.fault) header.style.color = '#ff6b6b';
-      else header.style.color = '#22c55e';
+      if (step.fault) header.classList.add('color-fault');
+      else header.classList.add('color-hit');
       col.appendChild(header);
 
       for (let f = 0; f < numFrames; f++) {
@@ -389,7 +389,7 @@
           }
         } else {
           cell.textContent = '—';
-          cell.style.opacity = '0.3';
+          cell.classList.add('opacity-low');
         }
         col.appendChild(cell);
       }
@@ -583,7 +583,7 @@
         barHTML += `<div class="frag-block frag-free" style="width:${pct}%" data-label="Free: ${freeSize} KB"></div>`;
       }
       const pct = (alloc.size / memorySize) * 100;
-      barHTML += `<div class="frag-block" style="width:${pct}%;background:${alloc.color}" data-label="${alloc.name}: ${alloc.size} KB"></div>`;
+      barHTML += `<div class="frag-block" style="--alloc-color:${alloc.color};width:${pct}%;background:var(--alloc-color)" data-label="${alloc.name}: ${alloc.size} KB"></div>`;
       pos = alloc.start + alloc.size;
     });
 
@@ -614,7 +614,7 @@
     fragProcessList.innerHTML = sorted.map(a => `
       <div class="frag-proc-item">
         <div class="frag-proc-info">
-          <span class="frag-proc-swatch" style="background:${a.color}"></span>
+          <span class="frag-proc-swatch" style="--alloc-color:${a.color};background:var(--alloc-color)"></span>
           <span class="frag-proc-name">${a.name}</span>
           <span class="frag-proc-size">${a.size} KB</span>
           <span class="frag-proc-range">[${a.start}–${a.start + a.size - 1}]</span>

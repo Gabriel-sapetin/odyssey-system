@@ -118,8 +118,8 @@
       return;
     }
     processBody.innerHTML = processes.map((p, i) => `
-      <tr style="border-left: 4px solid ${p.color}">
-        <td><strong style="color:${p.color}">${p.name}</strong></td>
+      <tr class="sim-table-row-colored" style="--row-color:${p.color}">
+        <td><strong class="row-name">${p.name}</strong></td>
         <td>${p.arrival}</td>
         <td>${p.burst}</td>
         <td>${p.priority}</td>
@@ -494,8 +494,8 @@
     });
 
     rqQueue.innerHTML = procs.map(p =>
-      `<div class="rq-item" style="border-color:${p.color};color:${p.color}">${p.name}</div>`
-    ).join('') || '<div class="rq-item" style="opacity:0.3">empty</div>';
+      `<div class="rq-item" style="--proc-color:${p.color};border-color:var(--proc-color);color:var(--proc-color)">${p.name}</div>`
+    ).join('') || '<div class="rq-item opacity-low">empty</div>';
   }
 
   function buildResults(timeline) {
@@ -520,8 +520,8 @@
       totalWaiting += waiting;
 
       resultsBody.innerHTML += `
-        <tr style="border-left: 4px solid ${r.color}">
-          <td><strong style="color:${r.color}">${name}</strong></td>
+        <tr class="sim-table-row-colored" style="--row-color:${r.color}">
+          <td><strong class="row-name">${name}</strong></td>
           <td>${r.arrival}</td>
           <td>${r.burst}</td>
           <td>${r.completion}</td>
@@ -558,26 +558,17 @@
   function buildLegend() {
     ganttLegend.innerHTML = processes.map(p =>
       `<div class="gantt-legend-item">
-        <span class="gantt-legend-swatch" style="background:${p.color}"></span>
+        <span class="gantt-legend-swatch" style="--swatch-color:${p.color};background:var(--swatch-color)"></span>
         ${p.name}
       </div>`
     ).join('') + `
       <div class="gantt-legend-item">
-        <span class="gantt-legend-swatch" style="background:rgba(82,96,122,0.3);border-style:dashed"></span>
+        <span class="gantt-legend-swatch gantt-swatch-idle"></span>
         Idle
       </div>`;
   }
 
-  /* ---- Shake animation style ---- */
-  const shakeStyle = document.createElement('style');
-  shakeStyle.textContent = `
-    @keyframes shake {
-      0%,100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
-    }
-  `;
-  document.head.appendChild(shakeStyle);
+  /* Shake animation is defined in sim.css */
 
   /* ---- Init ---- */
   renderTable();

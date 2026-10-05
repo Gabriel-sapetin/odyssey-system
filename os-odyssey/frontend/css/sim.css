@@ -2052,3 +2052,194 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ================================================================
+   REFACTORED: Utility classes for inline style replacement
+   ================================================================ */
+
+/* ---- Dynamic color via CSS custom properties ---- */
+.color-dynamic { color: var(--dynamic-color); }
+.bg-dynamic { background: var(--dynamic-color); }
+.border-dynamic { border-color: var(--dynamic-color); }
+.border-left-dynamic { border-left-color: var(--dynamic-color); }
+
+/* ---- IVT Table (boot-sim) ---- */
+.ivt-row { border-left: 4px solid var(--irq-color); }
+.ivt-irq-num { color: var(--irq-color); }
+.ivt-isr-code { color: #8af1ff; }
+
+/* ---- IRQ Log Lines (boot-sim) ---- */
+.irq-tag { color: var(--irq-color); }
+
+/* ---- Status Colors ---- */
+.color-booting { color: #f5a623; }
+.color-online { color: #22c55e; }
+.color-fault { color: #ff6b6b; }
+.color-hit { color: #22c55e; }
+.color-success { color: #8ef76e; }
+.color-error { color: #ef4444; }
+.color-info { color: #8af1ff; }
+.color-muted { color: var(--app-muted); }
+
+/* ---- Visibility Utility ---- */
+.is-hidden { display: none; }
+.opacity-low { opacity: 0.3; }
+.opacity-subtle { opacity: 0.4; }
+
+/* ---- Process / Scheduling table rows with dynamic color ---- */
+.sim-table-row-colored {
+  border-left: 4px solid var(--row-color);
+}
+.sim-table-row-colored .row-name {
+  color: var(--row-color);
+}
+
+/* ---- PCB Card dynamic colors ---- */
+.pcb-card[style] { border-color: var(--proc-color); }
+.pcb-header-dynamic {
+  background: color-mix(in srgb, var(--proc-color) 12%, transparent);
+  border-bottom-color: var(--proc-color);
+}
+.pcb-name-dynamic { color: var(--proc-color); }
+
+/* ---- State proc chip dynamic color ---- */
+.state-proc-chip-dynamic { background: var(--proc-color); }
+
+/* ---- Ready Queue Item dynamic ---- */
+.rq-item-dynamic {
+  border-color: var(--proc-color);
+  color: var(--proc-color);
+}
+
+/* ---- Gantt legend swatch ---- */
+.gantt-swatch-dynamic { background: var(--swatch-color); }
+.gantt-swatch-idle {
+  background: rgba(82, 96, 122, 0.3);
+  border-style: dashed;
+}
+
+/* ---- Syscall table styles ---- */
+.syscall-row-colored {
+  border-left: 4px solid var(--call-color);
+  animation: panelSlideIn 0.3s ease both;
+}
+.syscall-name { color: var(--call-color); }
+.syscall-cat-chip {
+  border-color: var(--call-color);
+  color: var(--call-color);
+}
+.syscall-args {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+.syscall-ret { color: #8ef76e; }
+
+/* ---- Thread Model Description Panel ---- */
+.model-desc-title {
+  color: var(--orange);
+  font-family: var(--font-pixel);
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.model-desc-text {
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+.model-desc-columns {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.model-desc-pros-title {
+  color: #22c55e;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  margin-bottom: 8px;
+}
+.model-desc-cons-title {
+  color: #ef4444;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  margin-bottom: 8px;
+}
+.model-desc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.model-desc-list li {
+  padding: 4px 0;
+  color: var(--app-text);
+}
+.model-desc-examples {
+  margin-top: 16px;
+  color: var(--app-muted);
+}
+
+/* ---- Thread Block dynamic ---- */
+.thread-block-dynamic {
+  background: var(--task-color);
+  min-width: 60px;
+}
+
+/* ---- User/Kernel Thread dynamic ---- */
+.user-thread-dynamic {
+  border-color: var(--thread-color);
+}
+.user-thread-dynamic span {
+  color: var(--thread-color);
+}
+
+/* ---- Pool task chip dynamic ---- */
+.pool-task-chip-dynamic {
+  border-color: var(--task-color);
+  color: var(--task-color);
+}
+
+/* ---- Pool active task dynamic ---- */
+.pool-active-task-dynamic {
+  background: color-mix(in srgb, var(--task-color) 12%, transparent);
+  border-color: var(--task-color);
+}
+.pool-active-task-dynamic strong {
+  color: var(--task-color);
+}
+.pool-progress-fill-dynamic {
+  background: var(--task-color);
+}
+
+/* ---- Pool Done State ---- */
+.pool-done { color: #22c55e; }
+
+/* ---- Pool Stats spacing ---- */
+.pool-stats-spacing { margin-top: 20px; }
+
+/* ---- Frag block dynamic ---- */
+.frag-block-dynamic {
+  background: var(--alloc-color);
+}
+
+/* ---- Frag swatch dynamic ---- */
+.frag-swatch-dynamic {
+  background: var(--alloc-color);
+}
+
+/* ---- Table margin-top utility ---- */
+.mt-18 { margin-top: 18px; }
+
+/* ---- Shake Animation (was injected by scheduling-sim.js) ---- */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* ---- Overlay fade transition ---- */
+.overlay-fade-out {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.overlay-fade-out-fast {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}

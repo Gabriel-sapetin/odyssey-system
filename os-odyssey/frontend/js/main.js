@@ -634,6 +634,47 @@
 
     loadLeaderboard(displayUser);
 
+    // ── Role-based navigation links ──
+    // Inject links for admin/professor/student pages based on user role
+    (function injectRoleNav() {
+      const role = displayUser.role || 'student';
+      const navLinks = document.querySelector('.app-nav-links');
+      if (!navLinks) return;
+
+      // Remove any previously injected role links
+      navLinks.querySelectorAll('.role-nav-link').forEach(el => el.remove());
+
+      // Find the insertion point (before theme toggle)
+      const themeToggle = navLinks.querySelector('.app-theme-toggle');
+      const insertBefore = themeToggle || navLinks.firstChild;
+
+      if (role === 'admin') {
+        const adminLink = document.createElement('a');
+        adminLink.href = 'admin.html';
+        adminLink.className = 'role-nav-link';
+        adminLink.textContent = '🛡️ Admin';
+        navLinks.insertBefore(adminLink, insertBefore);
+
+        const profLink = document.createElement('a');
+        profLink.href = 'professor.html';
+        profLink.className = 'role-nav-link';
+        profLink.textContent = '📚 Classes';
+        navLinks.insertBefore(profLink, insertBefore);
+      } else if (role === 'professor') {
+        const profLink = document.createElement('a');
+        profLink.href = 'professor.html';
+        profLink.className = 'role-nav-link';
+        profLink.textContent = '📚 My Classes';
+        navLinks.insertBefore(profLink, insertBefore);
+      } else {
+        const classLink = document.createElement('a');
+        classLink.href = 'classroom.html';
+        classLink.className = 'role-nav-link';
+        classLink.textContent = '🏫 Classes';
+        navLinks.insertBefore(classLink, insertBefore);
+      }
+    })();
+
     // Set personalized welcome text for typewriter
     const typewriterEl = document.getElementById('typewriterText');
     if (typewriterEl) {

@@ -230,7 +230,7 @@
       if (!queue) return;
       const procs = processes.filter(p => p.state === state);
       queue.innerHTML = procs.map(p =>
-        `<div class="state-proc-chip" style="background:${p.color}">${p.name}</div>`
+        `<div class="state-proc-chip" style="--proc-color:${p.color};background:var(--proc-color)">${p.name}</div>`
       ).join('') || '<span class="state-empty">—</span>';
     });
 
@@ -254,9 +254,9 @@
     }
 
     pcbGrid.innerHTML = processes.map(p => `
-      <div class="pcb-card" style="border-color:${p.color}">
-        <div class="pcb-header" style="background:${p.color}20;border-bottom-color:${p.color}">
-          <strong style="color:${p.color}">${p.name}</strong>
+      <div class="pcb-card" style="--proc-color:${p.color};border-color:var(--proc-color)">
+        <div class="pcb-header" style="background:color-mix(in srgb, var(--proc-color) 12%, transparent);border-bottom-color:var(--proc-color)">
+          <strong style="color:var(--proc-color)">${p.name}</strong>
           <span class="pcb-state-badge pcb-${p.state}">${p.state.toUpperCase()}</span>
         </div>
         <div class="pcb-body">

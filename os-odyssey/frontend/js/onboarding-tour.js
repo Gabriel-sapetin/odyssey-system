@@ -139,8 +139,7 @@
       document.body.appendChild(overlay);
 
       document.getElementById('tourStartBtn').addEventListener('click', () => {
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.3s ease';
+        overlay.classList.add('overlay-fade-out');
         setTimeout(() => {
           overlay.remove();
           this.start();
@@ -148,8 +147,7 @@
       });
 
       document.getElementById('tourDismissBtn').addEventListener('click', () => {
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.3s ease';
+        overlay.classList.add('overlay-fade-out');
         setTimeout(() => {
           overlay.remove();
           this.markCompleted();
@@ -474,8 +472,7 @@
       document.body.appendChild(overlay);
 
       document.getElementById('tourCompleteClose').addEventListener('click', () => {
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.3s ease';
+        overlay.classList.add('overlay-fade-out');
         setTimeout(() => {
           overlay.remove();
           this.addReplayButton();
@@ -484,8 +481,7 @@
 
       overlay.addEventListener('click', (e) => {
         if (e.target === overlay) {
-          overlay.style.opacity = '0';
-          overlay.style.transition = 'opacity 0.3s ease';
+          overlay.classList.add('overlay-fade-out');
           setTimeout(() => {
             overlay.remove();
             this.addReplayButton();

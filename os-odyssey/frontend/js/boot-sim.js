@@ -106,10 +106,10 @@
   /* ---- Render IVT ---- */
   function renderIVT() {
     ivtBody.innerHTML = IRQ_TABLE.map(r => `
-      <tr id="ivtRow-${r.irq}" style="border-left:4px solid ${r.color}">
-        <td><strong style="color:${r.color}">${r.irq}</strong></td>
+      <tr id="ivtRow-${r.irq}" class="ivt-row" style="--irq-color:${r.color}">
+        <td><strong class="ivt-irq-num">${r.irq}</strong></td>
         <td>${r.device}</td>
-        <td><code style="color:#8af1ff">${r.isr}</code></td>
+        <td><code class="ivt-isr-code">${r.isr}</code></td>
         <td><span class="irq-status" id="irqStatus-${r.irq}">Idle</span></td>
         <td><strong id="irqCount-${r.irq}">${r.count}</strong></td>
       </tr>
@@ -156,7 +156,8 @@
     startBtn.disabled = true;
     startBtn.textContent = '⏳ Booting...';
     statusLabel.textContent = '● Booting...';
-    statusLabel.style.color = '#f5a623';
+    statusLabel.className = 'color-booting';
+    statusLabel.style.color = '';
     bootConsole.innerHTML = '';
 
     const speed = SPEEDS[speedSelect.value] || 250;
@@ -176,7 +177,8 @@
 
     // Boot complete!
     statusLabel.textContent = '● System ONLINE';
-    statusLabel.style.color = '#22c55e';
+    statusLabel.className = 'color-online';
+    statusLabel.style.color = '';
     booted = true;
     booting = false;
     startBtn.disabled = false;
@@ -242,14 +244,14 @@
     bootStepNote.innerHTML = `<strong>Interrupt step:</strong> ${irq.device} raised IRQ ${irq.irq}; the CPU saves user state and jumps to ISR ${irq.isr}.`;
     const logLine = document.createElement('div');
     logLine.className = 'boot-line boot-info';
-    logLine.innerHTML = `<span style="color:${irq.color}">[IRQ ${irq.irq}]</span> ${irq.device} → CPU saved state → jumping to ISR at <code style="color:#8af1ff">${irq.isr}</code>`;
+    logLine.innerHTML = `<span class="irq-tag" style="--irq-color:${irq.color}">[IRQ ${irq.irq}]</span> ${irq.device} → CPU saved state → jumping to ISR at <code class="ivt-isr-code">${irq.isr}</code>`;
     interruptLog.appendChild(logLine);
 
     await delay(600);
 
     const doneLine = document.createElement('div');
     doneLine.className = 'boot-line boot-success';
-    doneLine.innerHTML = `<span style="color:${irq.color}">[IRQ ${irq.irq}]</span> ISR complete → restoring state → returning to user program`;
+    doneLine.innerHTML = `<span class="irq-tag" style="--irq-color:${irq.color}">[IRQ ${irq.irq}]</span> ISR complete → restoring state → returning to user program`;
     interruptLog.appendChild(doneLine);
     interruptLog.scrollTop = interruptLog.scrollHeight;
 

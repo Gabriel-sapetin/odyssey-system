@@ -201,14 +201,14 @@
   function addSyscallRow(num, call) {
     const color = CAT_COLORS[call.cat];
     const row = document.createElement('tr');
-    row.style.borderLeft = `4px solid ${color}`;
-    row.style.animation = 'panelSlideIn 0.3s ease both';
+    row.className = 'syscall-row-colored';
+    row.style.setProperty('--call-color', color);
     row.innerHTML = `
       <td>${num}</td>
-      <td><strong style="color:${color}">${call.name}</strong></td>
-      <td><span class="stat-chip" style="border-color:${color};color:${color}">${call.cat}</span></td>
-      <td><code style="font-size:12px;color:var(--app-muted)">${call.args}</code></td>
-      <td><code style="color:#8ef76e">${call.ret}</code></td>
+      <td><strong class="syscall-name">${call.name}</strong></td>
+      <td><span class="stat-chip syscall-cat-chip">${call.cat}</span></td>
+      <td><code class="syscall-args">${call.args}</code></td>
+      <td><code class="syscall-ret">${call.ret}</code></td>
       <td>Kernel</td>
     `;
     syscallBody.appendChild(row);

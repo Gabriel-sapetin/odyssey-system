@@ -30,7 +30,7 @@ from app.config import settings
 from app.middleware.rate_limiter import limiter
 from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.middleware.request_id import RequestIDMiddleware
-from app.routers import auth, profile, progress, modules, stats, health
+from app.routers import auth, profile, progress, modules, stats, health, admin, classrooms
 from app.services.thread_pool import pool
 
 # ─── Logging ────────────────────────────────────────────
@@ -174,6 +174,8 @@ app.include_router(profile.router, prefix="/api/profile", tags=["Profile"])
 app.include_router(progress.router, prefix="/api/progress", tags=["Progress"])
 app.include_router(modules.router, prefix="/api/modules", tags=["Modules"])
 app.include_router(stats.router, prefix="/api/stats", tags=["Stats"])
+app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
+app.include_router(classrooms.router, prefix="/api/classrooms", tags=["Classrooms"])
 
 
 # ─── Root Redirect ──────────────────────────────────────
