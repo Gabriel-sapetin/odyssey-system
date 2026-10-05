@@ -87,8 +87,22 @@
     document.getElementById('backToClasses')?.addEventListener('click', () => {
       document.getElementById('profClassDetail').style.display = 'none';
       document.getElementById('profClassList').style.display = '';
+      document.getElementById('quizPreviewView').style.display = 'none';
+      document.getElementById('aiGeneratingOverlay').style.display = 'none';
       currentClassroomId = null;
       loadClassrooms();
+    });
+
+    // Back from quiz preview
+    document.getElementById('backToQuizList')?.addEventListener('click', () => {
+      document.getElementById('quizPreviewView').style.display = 'none';
+      document.getElementById('profClassDetail').style.display = '';
+      // Reset to quizzes tab
+      document.querySelectorAll('.classroom-inner-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.classroom-inner-panel').forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-inner="quizzes"]').classList.add('active');
+      document.getElementById('inner-quizzes').classList.add('active');
+      loadQuizzes();
     });
 
     // Inner tabs
@@ -406,25 +420,78 @@
       return;
     }
 
-    toast('🤖 Generating quiz with AI… This may take 15-30 seconds.', 'info');
+    // Show AI generating overlay
+    document.getElementById('profClassDetail').style.display = 'none';
+    document.getElementById('quizPreviewView').style.display = 'none';
+    const overlay = document.getElementById('aiGeneratingOverlay');
+    overlay.style.display = '';
+    document.getElementById('aiGenModuleTitle').textContent = `Module: ${moduleTitle} · ${num} questions`;
 
     const data = await api('POST', `/classrooms/${currentClassroomId}/modules/${moduleId}/generate-quiz`, {
       num_questions: num,
       quiz_title: `Quiz: ${moduleTitle}`,
     });
 
+    overlay.style.display = 'none';
+
     if (data && !data.error) {
       toast(`✅ ${data.message} Quiz saved as draft.`, 'success');
-      // Switch to quizzes tab to show the new quiz
-      document.querySelectorAll('.classroom-inner-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.classroom-inner-panel').forEach(p => p.classList.remove('active'));
-      document.querySelector('[data-inner="quizzes"]').classList.add('active');
-      document.getElementById('inner-quizzes').classList.add('active');
-      loadQuizzes();
+      // Show the generated quiz preview
+      showQuizPreview(data.quiz, data.questions);
     } else {
+      // Go back to class detail
+      document.getElementById('profClassDetail').style.display = '';
       toast(data?.error || 'AI quiz generation failed. Try again.', 'error');
     }
   };
+
+  /* ── Quiz Preview ──────────────────────────── */
+  window._previewQuiz = async function (quizId) {
+    const data = await api('GET', `/classrooms/${currentClassroomId}/quizzes/${quizId}`);
+    if (!data || !data.quiz) {
+      toast('Failed to load quiz.', 'error');
+      return;
+    }
+    showQuizPreview(data.quiz, data.quiz.questions || []);
+  };
+
+  function showQuizPreview(quiz, questions) {
+    document.getElementById('profClassDetail').style.display = 'none';
+    document.getElementById('aiGeneratingOverlay').style.display = 'none';
+    const view = document.getElementById('quizPreviewView');
+    view.style.display = '';
+
+    document.getElementById('quizPreviewTitle').textContent = quiz.title || 'Quiz';
+    document.getElementById('quizPreviewMeta').textContent =
+      `${questions.length} questions · ${quiz.is_published ? 'Published' : 'Draft'}${quiz.is_ai_generated ? ' · 🤖 AI Generated' : ''}`;
+
+    // Action buttons
+    document.getElementById('quizPreviewActions').innerHTML = `
+      <button class="admin-btn ${quiz.is_published ? '' : 'primary'}" onclick="window._toggleQuizPub('${quiz.id}', ${!quiz.is_published});document.getElementById('backToQuizList').click()">
+        ${quiz.is_published ? '📥 Unpublish' : '📤 Publish Quiz'}
+      </button>
+    `;
+
+    const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+    document.getElementById('quizPreviewQuestions').innerHTML = questions.map((q, i) => {
+      const options = q.options || [];
+      return `
+        <div class="quiz-preview-card">
+          <div class="qp-number">Question ${i + 1}</div>
+          <div class="qp-text">${esc(q.question_text)}</div>
+          ${options.map((opt, oi) => {
+            const isCorrect = opt === q.correct_answer;
+            return `
+              <div class="qp-option ${isCorrect ? 'correct' : ''}">
+                <span class="qp-marker">${isCorrect ? '✓' : optionLabels[oi] || oi + 1}</span>
+                <span>${esc(opt)}</span>
+              </div>`;
+          }).join('')}
+          ${q.explanation ? `<div class="qp-explanation">💡 ${esc(q.explanation)}</div>` : ''}
+        </div>`;
+    }).join('');
+  }
 
   /* ── Quizzes ───────────────────────────────── */
   async function loadQuizzes() {
@@ -443,14 +510,14 @@
     }
 
     container.innerHTML = data.quizzes.map(q => `
-      <div class="content-card">
+      <div class="content-card" style="cursor:pointer" onclick="window._previewQuiz('${q.id}')">
         <div>
           <h4><span class="status-dot ${q.is_published ? 'published' : 'draft'}"></span>${esc(q.title)}</h4>
-          <div class="content-meta">${q.question_count || 0} questions · ${q.is_published ? 'Published' : 'Draft'}${q.time_limit_minutes ? ` · ${q.time_limit_minutes} min` : ''}</div>
+          <div class="content-meta">${q.question_count || 0} questions · ${q.is_published ? 'Published' : 'Draft'}${q.time_limit_minutes ? ` · ${q.time_limit_minutes} min` : ''}${q.is_ai_generated ? ' · 🤖 AI Generated' : ''}</div>
         </div>
         <div class="admin-actions">
-          <button class="admin-btn" onclick="window._toggleQuizPub('${q.id}', ${!q.is_published})">${q.is_published ? '📥 Unpublish' : '📤 Publish'}</button>
-          <button class="admin-btn danger" onclick="window._deleteQuiz('${q.id}')">🗑️</button>
+          <button class="admin-btn" onclick="event.stopPropagation();window._toggleQuizPub('${q.id}', ${!q.is_published})">${q.is_published ? '📥 Unpublish' : '📤 Publish'}</button>
+          <button class="admin-btn danger" onclick="event.stopPropagation();window._deleteQuiz('${q.id}')">🗑️</button>
         </div>
       </div>
     `).join('');

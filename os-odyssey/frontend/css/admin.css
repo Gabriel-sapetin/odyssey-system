@@ -1009,3 +1009,112 @@
 .light-mode .quiz-question-card .q-text { color: #1a1a2e; }
 .light-mode .quiz-option { color: rgba(0, 0, 0, 0.7); border-color: rgba(0, 0, 0, 0.08); }
 .light-mode .quiz-option:hover { background: rgba(0, 0, 0, 0.03); }
+
+/* ── AI Generation Overlay ──────────────────── */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.7; }
+}
+
+.ai-progress-bar {
+  width: 100%;
+  max-width: 400px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.ai-progress-fill {
+  height: 100%;
+  width: 30%;
+  background: linear-gradient(90deg, #f5a623, #a855f7, #3b82f6);
+  border-radius: 999px;
+  animation: aiProgress 2s ease-in-out infinite;
+}
+
+@keyframes aiProgress {
+  0% { width: 10%; margin-left: 0; }
+  50% { width: 50%; margin-left: 25%; }
+  100% { width: 10%; margin-left: 90%; }
+}
+
+/* ── Quiz Preview Cards ─────────────────────── */
+.quiz-preview-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.quiz-preview-card:hover {
+  border-color: rgba(245, 166, 35, 0.15);
+}
+
+.quiz-preview-card .qp-number {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  color: rgba(255, 255, 255, 0.3);
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+}
+
+.quiz-preview-card .qp-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.8rem;
+  line-height: 1.5;
+}
+
+.quiz-preview-card .qp-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.8rem;
+  margin-bottom: 0.35rem;
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: background 0.15s ease;
+}
+
+.quiz-preview-card .qp-option.correct {
+  background: rgba(74, 222, 128, 0.1);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.quiz-preview-card .qp-option .qp-marker {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.quiz-preview-card .qp-option.correct .qp-marker {
+  background: rgba(74, 222, 128, 0.2);
+}
+
+.quiz-preview-card .qp-explanation {
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  background: rgba(96, 165, 250, 0.06);
+  border-left: 3px solid rgba(96, 165, 250, 0.3);
+  border-radius: 0 8px 8px 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+}

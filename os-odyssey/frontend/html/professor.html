@@ -128,6 +128,35 @@
         </div>
       </div>
     </div>
+
+    <!-- Quiz Detail / Preview View -->
+    <div id="quizPreviewView" style="display:none">
+      <button class="admin-btn" id="backToQuizList" style="margin-bottom:1rem">← Back to Quizzes</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem">
+        <div>
+          <h2 id="quizPreviewTitle" style="font-family:'Nunito',sans-serif;font-weight:800;color:#fff;margin:0"></h2>
+          <p id="quizPreviewMeta" style="font-size:0.78rem;color:rgba(255,255,255,0.4);margin-top:0.25rem;font-family:'Nunito',sans-serif"></p>
+        </div>
+        <div style="display:flex;gap:0.5rem" id="quizPreviewActions"></div>
+      </div>
+      <div id="quizPreviewQuestions"></div>
+    </div>
+
+    <!-- AI Generating Overlay -->
+    <div id="aiGeneratingOverlay" style="display:none">
+      <div style="text-align:center;padding:4rem 2rem">
+        <div style="font-size:4rem;margin-bottom:1.5rem;animation:pulse 1.5s ease-in-out infinite">🤖</div>
+        <h2 style="font-family:'Nunito',sans-serif;font-weight:800;color:#fff;margin-bottom:0.5rem">AI is Generating Your Quiz</h2>
+        <p id="aiGenModuleTitle" style="font-family:'Nunito',sans-serif;font-size:0.9rem;color:rgba(255,255,255,0.5);margin-bottom:2rem"></p>
+        <div class="ai-progress-bar">
+          <div class="ai-progress-fill"></div>
+        </div>
+        <p style="font-family:'Nunito',sans-serif;font-size:0.78rem;color:rgba(255,255,255,0.35);margin-top:1.5rem">
+          Reading module content… Analyzing key concepts… Crafting questions…<br>
+          This may take 15–30 seconds.
+        </p>
+      </div>
+    </div>
   </main>
 
   <!-- Create Classroom Modal -->
