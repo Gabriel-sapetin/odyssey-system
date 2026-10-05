@@ -206,6 +206,11 @@
   color: #fff;
 }
 
+.admin-form-group select option {
+  background: #1a1a2e;
+  color: #fff;
+}
+
 .admin-table-wrap {
   overflow-x: auto;
   border-radius: 14px;

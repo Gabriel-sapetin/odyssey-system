@@ -134,15 +134,67 @@
 
     document.getElementById('addModuleForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const saveBtn = document.getElementById('saveModuleBtn');
+      const statusEl = document.getElementById('modUploadStatus');
+      const fileInput = document.getElementById('modFile');
+      const file = fileInput?.files?.[0];
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Uploading…';
+
+      let file_url = null;
+      let file_name = null;
+
+      // Upload PDF to Supabase Storage if selected
+      if (file) {
+        if (file.size > 10 * 1024 * 1024) {
+          toast('File too large. Max 10MB.', 'error');
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Module';
+          return;
+        }
+
+        statusEl.textContent = '📤 Uploading PDF…';
+        statusEl.style.color = '#60a5fa';
+
+        const ext = file.name.split('.').pop();
+        const path = `classrooms/${currentClassroomId}/${Date.now()}_${file.name}`;
+
+        const { data: uploadData, error: uploadError } = await supa.storage
+          .from('classroom-files')
+          .upload(path, file, { contentType: 'application/pdf', upsert: false });
+
+        if (uploadError) {
+          statusEl.textContent = '❌ Upload failed: ' + (uploadError.message || 'Unknown error');
+          statusEl.style.color = '#f87171';
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Module';
+          return;
+        }
+
+        // Get public URL
+        const { data: urlData } = supa.storage.from('classroom-files').getPublicUrl(path);
+        file_url = urlData?.publicUrl || null;
+        file_name = file.name;
+
+        statusEl.textContent = '✅ Uploaded!';
+        statusEl.style.color = '#4ade80';
+      }
+
       const body = {
         title: document.getElementById('modTitle').value.trim(),
         description: document.getElementById('modDesc').value.trim() || null,
-        content: document.getElementById('modContent').value || null,
+        content: null,
+        file_url: file_url,
+        file_name: file_name,
         order_index: parseInt(document.getElementById('modOrder').value) || 1,
         is_published: document.getElementById('modPublished').checked,
       };
 
       const data = await api('POST', `/classrooms/${currentClassroomId}/modules`, body);
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save Module';
+
       if (data && !data.error) {
         toast('Module created!', 'success');
         document.getElementById('addModuleModal').classList.remove('visible');
@@ -311,18 +363,23 @@
       return;
     }
 
-    container.innerHTML = data.modules.map(m => `
-      <div class="content-card">
-        <div>
+    container.innerHTML = data.modules.map(m => {
+      const hasPdf = m.file_url && m.file_name;
+      const fileInfo = hasPdf ? `📄 ${esc(m.file_name)}` : 'Text content';
+      return `
+      <div class="content-card" style="flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
           <h4><span class="status-dot ${m.is_published ? 'published' : 'draft'}"></span>${esc(m.title)}</h4>
-          <div class="content-meta">${m.is_published ? 'Published' : 'Draft'} · Order: ${m.order_index}</div>
+          <div class="content-meta">${m.is_published ? 'Published' : 'Draft'} · Order: ${m.order_index} · ${fileInfo}</div>
+          ${hasPdf ? `<a href="${m.file_url}" target="_blank" style="font-size:0.72rem;color:#60a5fa;text-decoration:none">🔗 View PDF</a>` : ''}
         </div>
-        <div class="admin-actions">
+        <div class="admin-actions" style="flex-wrap:wrap;gap:0.3rem">
+          <button class="admin-btn success" onclick="window._aiGenerateQuiz('${m.id}', '${esc(m.title)}')" title="AI Generate Quiz">🤖 AI Quiz</button>
           <button class="admin-btn" onclick="window._toggleModPub('${m.id}', ${!m.is_published})">${m.is_published ? '📥 Unpublish' : '📤 Publish'}</button>
           <button class="admin-btn danger" onclick="window._deleteModule('${m.id}')">🗑️</button>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
   window._toggleModPub = async function (modId, published) {
@@ -336,6 +393,37 @@
     await api('DELETE', `/classrooms/${currentClassroomId}/modules/${modId}`);
     toast('Module deleted.', 'success');
     loadModules();
+  };
+
+  /* ── AI Quiz Generation ────────────────────── */
+  window._aiGenerateQuiz = async function (moduleId, moduleTitle) {
+    const numQ = prompt(`🤖 AI Quiz Generator\n\nGenerate a quiz from "${moduleTitle}".\n\nHow many questions? (3-20)`, '10');
+    if (!numQ) return;
+
+    const num = parseInt(numQ);
+    if (isNaN(num) || num < 3 || num > 20) {
+      toast('Please enter a number between 3 and 20.', 'error');
+      return;
+    }
+
+    toast('🤖 Generating quiz with AI… This may take 15-30 seconds.', 'info');
+
+    const data = await api('POST', `/classrooms/${currentClassroomId}/modules/${moduleId}/generate-quiz`, {
+      num_questions: num,
+      quiz_title: `Quiz: ${moduleTitle}`,
+    });
+
+    if (data && !data.error) {
+      toast(`✅ ${data.message} Quiz saved as draft.`, 'success');
+      // Switch to quizzes tab to show the new quiz
+      document.querySelectorAll('.classroom-inner-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.classroom-inner-panel').forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-inner="quizzes"]').classList.add('active');
+      document.getElementById('inner-quizzes').classList.add('active');
+      loadQuizzes();
+    } else {
+      toast(data?.error || 'AI quiz generation failed. Try again.', 'error');
+    }
   };
 
   /* ── Quizzes ───────────────────────────────── */

@@ -214,15 +214,18 @@
       return;
     }
 
-    container.innerHTML = data.modules.map(m => `
+    container.innerHTML = data.modules.map(m => {
+      const hasPdf = m.file_url && m.file_name;
+      return `
       <div class="content-card" style="cursor:pointer" onclick="window._openModule('${m.id}')">
         <div>
-          <h4>📖 ${esc(m.title)}</h4>
+          <h4>${hasPdf ? '📄' : '📖'} ${esc(m.title)}</h4>
           ${m.description ? `<div class="content-meta">${esc(m.description)}</div>` : ''}
+          ${hasPdf ? `<div style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.2rem">${esc(m.file_name)}</div>` : ''}
         </div>
-        <div class="admin-btn" style="flex-shrink:0">Read →</div>
-      </div>
-    `).join('');
+        <div class="admin-btn" style="flex-shrink:0">${hasPdf ? 'Open PDF →' : 'Read →'}</div>
+      </div>`;
+    }).join('');
   }
 
   window._openModule = async function (modId) {
@@ -235,8 +238,22 @@
     hideAll();
     show('studentModuleView');
 
-    document.getElementById('moduleViewTitle').textContent = data.module.title;
-    document.getElementById('moduleViewContent').textContent = data.module.content || 'No content available.';
+    const mod = data.module;
+    document.getElementById('moduleViewTitle').textContent = mod.title;
+
+    const contentEl = document.getElementById('moduleViewContent');
+
+    if (mod.file_url) {
+      // Display embedded PDF viewer
+      contentEl.innerHTML = `
+        <div style="margin-bottom:1rem">
+          <a href="${mod.file_url}" target="_blank" class="admin-btn primary" style="display:inline-block;text-decoration:none">📥 Download PDF — ${esc(mod.file_name || 'file.pdf')}</a>
+        </div>
+        <iframe src="${mod.file_url}" style="width:100%;height:75vh;border:1px solid rgba(255,255,255,0.1);border-radius:12px;background:#fff" allowfullscreen></iframe>
+      `;
+    } else {
+      contentEl.textContent = mod.content || 'No content available.';
+    }
   };
 
   /* ── Quizzes ───────────────────────────────── */

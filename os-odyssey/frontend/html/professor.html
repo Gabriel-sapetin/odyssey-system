@@ -167,8 +167,10 @@
           <input type="text" id="modDesc" maxlength="500" />
         </div>
         <div class="admin-form-group">
-          <label for="modContent">Content (supports text/markdown)</label>
-          <textarea id="modContent" rows="8" placeholder="Write your lesson content here…"></textarea>
+          <label for="modFile">📄 Upload PDF</label>
+          <input type="file" id="modFile" accept=".pdf" style="padding:0.5rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Nunito',sans-serif;width:100%;box-sizing:border-box" />
+          <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.3rem">Upload a PDF lesson file (max 10MB)</p>
+          <div id="modUploadStatus" style="font-size:0.78rem;margin-top:0.3rem;font-family:'Nunito',sans-serif"></div>
         </div>
         <div class="admin-form-group">
           <label for="modOrder">Order Index</label>
@@ -181,7 +183,7 @@
         </div>
         <div class="admin-form-actions">
           <button type="button" class="admin-btn" onclick="document.getElementById('addModuleModal').classList.remove('visible')">Cancel</button>
-          <button type="submit" class="admin-btn primary">Save Module</button>
+          <button type="submit" class="admin-btn primary" id="saveModuleBtn">Save Module</button>
         </div>
       </form>
     </div>

@@ -38,5 +38,8 @@ class Settings:
     # Thread pool
     WORKER_THREADS: int = int(os.getenv("WORKER_THREADS", "4"))
 
+    # AI (Google Gemini)
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+
 
 settings = Settings()

@@ -97,6 +97,8 @@ class CreateModule(BaseModel):
     title: str
     description: Optional[str] = None
     content: Optional[str] = None
+    file_url: Optional[str] = None
+    file_name: Optional[str] = None
     order_index: Optional[int] = 1
     is_published: Optional[bool] = False
 
@@ -113,6 +115,8 @@ class UpdateModule(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     content: Optional[str] = None
+    file_url: Optional[str] = None
+    file_name: Optional[str] = None
     order_index: Optional[int] = None
     is_published: Optional[bool] = None
 
@@ -652,6 +656,8 @@ async def create_module(
             "title": body.title,
             "description": body.description,
             "content": body.content,
+            "file_url": body.file_url,
+            "file_name": body.file_name,
             "order_index": body.order_index,
             "is_published": body.is_published,
         }).execute()
@@ -1239,3 +1245,125 @@ async def get_quiz_results(
     except Exception as exc:
         logger.error("Get quiz results error: %s", exc)
         raise HTTPException(status_code=500, detail="Failed to fetch results.")
+
+
+# ─── AI Quiz Generation ─────────────────────────────────
+
+class GenerateQuizRequest(BaseModel):
+    num_questions: Optional[int] = 10
+    quiz_title: Optional[str] = None
+
+
+@router.post("/{classroom_id}/modules/{module_id}/generate-quiz")
+@limiter.limit("5/minute")
+async def ai_generate_quiz(
+    request: Request,
+    classroom_id: str,
+    module_id: str,
+    body: GenerateQuizRequest,
+    user=Depends(require_professor),
+):
+    """Generate quiz questions from a module's content using AI (Google Gemini)."""
+    try:
+        from app.services.ai_quiz import generate_quiz_from_content, extract_text_from_pdf_url
+
+        admin_client = get_admin_client()
+
+        # Verify ownership
+        classroom = (
+            admin_client.table("classrooms")
+            .select("professor_id")
+            .eq("id", classroom_id)
+            .single()
+            .execute()
+        )
+
+        if not classroom.data:
+            raise HTTPException(status_code=404, detail="Classroom not found.")
+
+        if not _is_admin(user) and not _is_classroom_owner(classroom.data, user["id"]):
+            raise HTTPException(status_code=403, detail="Not the owner.")
+
+        # Get module content
+        module = (
+            admin_client.table("classroom_modules")
+            .select("title, content, file_url")
+            .eq("id", module_id)
+            .eq("classroom_id", classroom_id)
+            .single()
+            .execute()
+        )
+
+        if not module.data:
+            raise HTTPException(status_code=404, detail="Module not found.")
+
+        content = module.data.get("content", "")
+        file_url = module.data.get("file_url")
+        module_title = module.data.get("title", "")
+
+        # If module has a PDF, extract text from it
+        if file_url and (not content or len(content.strip()) < 50):
+            content = await extract_text_from_pdf_url(file_url)
+
+        if not content or len(content.strip()) < 50:
+            raise HTTPException(
+                status_code=400,
+                detail="Module has no content to generate quiz from. Upload a PDF or add text content first.",
+            )
+
+        num_q = min(max(body.num_questions or 10, 3), 20)
+
+        questions = await generate_quiz_from_content(
+            content=content,
+            num_questions=num_q,
+            module_title=module_title,
+        )
+
+        # Auto-create the quiz with generated questions
+        quiz_title = body.quiz_title or f"Quiz: {module_title}"
+
+        quiz_result = admin_client.table("classroom_quizzes").insert({
+            "classroom_id": classroom_id,
+            "module_id": module_id,
+            "title": quiz_title,
+            "description": f"AI-generated quiz based on '{module_title}'",
+            "is_ai_generated": True,
+            "is_published": False,
+        }).execute()
+
+        if not quiz_result.data:
+            raise HTTPException(status_code=500, detail="Failed to create quiz.")
+
+        quiz_id = quiz_result.data[0]["id"]
+
+        # Insert questions
+        for q in questions:
+            q["quiz_id"] = quiz_id
+
+        admin_client.table("classroom_quiz_questions").insert(questions).execute()
+
+        log_audit_event(
+            user_id=user["id"],
+            action="ai_generate_quiz",
+            detail={
+                "classroom_id": classroom_id,
+                "module_id": module_id,
+                "module_title": module_title,
+                "questions_generated": len(questions),
+            },
+            request=request,
+        )
+
+        return {
+            "message": f"Generated {len(questions)} questions!",
+            "quiz": quiz_result.data[0],
+            "questions": questions,
+        }
+
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        logger.error("AI quiz generation error: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to generate quiz.")

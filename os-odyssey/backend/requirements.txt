@@ -24,3 +24,6 @@ python-json-logger==3.3.0
 
 # ─── Input Validation / Sanitization ────────────────────
 bleach==6.2.0
+
+# ─── AI / PDF ───────────────────────────────────────────
+pypdf==5.1.0
