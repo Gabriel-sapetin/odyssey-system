@@ -30,3 +30,5 @@ services:
         value: "2"
       - key: TURNSTILE_SECRET_KEY
         sync: false
+      - key: GEMINI_API_KEY
+        sync: false
