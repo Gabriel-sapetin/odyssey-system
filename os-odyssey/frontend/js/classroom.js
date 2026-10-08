@@ -244,12 +244,26 @@
     const contentEl = document.getElementById('moduleViewContent');
 
     if (mod.file_url) {
-      // Display embedded PDF viewer
+      // Display embedded PDF viewer with fallback controls
       contentEl.innerHTML = `
-        <div style="margin-bottom:1rem">
-          <a href="${mod.file_url}" target="_blank" class="admin-btn primary" style="display:inline-block;text-decoration:none">📥 Download PDF — ${esc(mod.file_name || 'file.pdf')}</a>
+        <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap">
+          <a href="${mod.file_url}" target="_blank" class="admin-btn primary" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none">
+            📖 Open in Full Window / New Tab
+          </a>
+          <a href="${mod.file_url}" download="${esc(mod.file_name || 'module.pdf')}" class="admin-btn secondary" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none">
+            📥 Download PDF — ${esc(mod.file_name || 'module.pdf')}
+          </a>
         </div>
-        <iframe src="${mod.file_url}" style="width:100%;height:75vh;border:1px solid rgba(255,255,255,0.1);border-radius:12px;background:#fff" allowfullscreen></iframe>
+        <div style="position:relative;width:100%;height:80vh;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.15);background:#0f172a;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
+          <object data="${mod.file_url}#toolbar=1" type="application/pdf" style="width:100%;height:100%">
+            <iframe src="${mod.file_url}#toolbar=1" style="width:100%;height:100%;border:none;background:#fff" allowfullscreen>
+              <div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.8)">
+                <p style="margin-bottom:1rem">Your browser does not support embedded PDF preview.</p>
+                <a href="${mod.file_url}" target="_blank" class="admin-btn primary" style="text-decoration:none">Open PDF directly</a>
+              </div>
+            </iframe>
+          </object>
+        </div>
       `;
     } else {
       contentEl.textContent = mod.content || 'No content available.';
