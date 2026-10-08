@@ -205,27 +205,40 @@
 
     const data = await api('GET', `/classrooms/${currentClassroomId}/modules`);
     if (!data || data.error) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load lessons</div></div>';
+      container.innerHTML = '<div class="admin-empty"><div class="empty-text">Failed to load lessons</div></div>';
       return;
     }
 
     if (!data.modules || data.modules.length === 0) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-icon">📝</div><div class="empty-text">No lessons available yet.</div></div>';
+      container.innerHTML = '<div class="admin-empty"><div class="empty-text">No lessons available yet.</div></div>';
       return;
     }
 
-    container.innerHTML = data.modules.map(m => {
+    const cardsHtml = data.modules.map(m => {
       const hasPdf = m.file_url && m.file_name;
+      const badge = hasPdf
+        ? '<span class="lesson-badge pdf">PDF Document</span>'
+        : '<span class="lesson-badge">Lesson Material</span>';
+      const actionText = hasPdf ? 'Open PDF' : 'Read Lesson';
+
       return `
-      <div class="content-card" style="cursor:pointer" onclick="window._openModule('${m.id}')">
-        <div>
-          <h4>${hasPdf ? '📄' : '📖'} ${esc(m.title)}</h4>
-          ${m.description ? `<div class="content-meta">${esc(m.description)}</div>` : ''}
-          ${hasPdf ? `<div style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.2rem">${esc(m.file_name)}</div>` : ''}
+        <div class="student-lesson-card" onclick="window._openModule('${m.id}')">
+          <div class="student-lesson-top">
+            <div class="student-lesson-header">
+              ${badge}
+            </div>
+            <h4 class="lesson-card-title">${esc(m.title)}</h4>
+            ${m.description ? `<div class="lesson-card-desc">${esc(m.description)}</div>` : ''}
+            ${hasPdf ? `<div class="lesson-card-file">${esc(m.file_name)}</div>` : ''}
+          </div>
+          <div class="student-lesson-bottom">
+            <button class="lesson-action-btn" type="button">${actionText}</button>
+          </div>
         </div>
-        <div class="admin-btn" style="flex-shrink:0">${hasPdf ? 'Open PDF →' : 'Read →'}</div>
-      </div>`;
+      `;
     }).join('');
+
+    container.innerHTML = `<div class="student-lesson-grid">${cardsHtml}</div>`;
   }
 
   window._downloadPdfFile = async function (btn, url, fileName) {
