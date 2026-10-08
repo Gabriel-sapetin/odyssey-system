@@ -312,36 +312,66 @@
 
     const data = await api('GET', `/classrooms/${currentClassroomId}/quizzes`);
     if (!data || data.error) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load quizzes</div></div>';
+      container.innerHTML = '<div class="admin-empty"><div class="empty-text">Failed to load quizzes</div></div>';
       return;
     }
 
     if (!data.quizzes || data.quizzes.length === 0) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-icon">📋</div><div class="empty-text">No quizzes available yet.</div></div>';
+      container.innerHTML = '<div class="admin-empty"><div class="empty-text">No quizzes available yet.</div></div>';
       return;
     }
 
-    container.innerHTML = data.quizzes.map(q => {
+    const cardsHtml = data.quizzes.map(q => {
       const attempted = q.last_attempt;
-      let statusHtml = '';
+      let scoreHtml = '';
+      let actionBtn = '';
+
       if (attempted) {
         const pct = attempted.max_score ? Math.round((attempted.score / attempted.max_score) * 100) : 0;
-        statusHtml = `<span class="rank-badge ${pct >= 80 ? 'Gold' : pct >= 50 ? 'Silver' : 'Bronze'}">${pct}% (${attempted.score}/${attempted.max_score})</span>`;
+        scoreHtml = `
+          <div class="quiz-score-display">
+            <span class="quiz-score-label">Total Score</span>
+            <span class="quiz-score-val">${attempted.score} / ${attempted.max_score} (${pct}%)</span>
+          </div>
+        `;
+        actionBtn = `
+          <button class="quiz-action-btn completed" disabled title="Already completed (1 attempt only)">Completed</button>
+        `;
       } else {
-        statusHtml = '<span style="font-size:0.72rem;color:rgba(255,255,255,0.35)">Not attempted</span>';
+        scoreHtml = `
+          <div class="quiz-score-placeholder">
+            <span class="quiz-score-label">Attempt</span>
+            <span style="font-size:0.75rem;color:rgba(255,255,255,0.4)">1 Attempt Allowed</span>
+          </div>
+        `;
+        actionBtn = `
+          <button class="quiz-action-btn take-quiz" onclick="window._openQuiz('${q.id}')">Take Quiz</button>
+        `;
       }
 
+      const timeMeta = q.time_limit_minutes ? ` · ${q.time_limit_minutes} min` : '';
+      const statusBadge = attempted
+        ? '<span class="quiz-status-badge completed">Completed</span>'
+        : '<span class="quiz-status-badge">Available</span>';
+
       return `
-        <div class="content-card" style="cursor:pointer" onclick="window._openQuiz('${q.id}')">
-          <div>
-            <h4>📋 ${esc(q.title)}</h4>
-            <div class="content-meta">${q.question_count || 0} questions${q.time_limit_minutes ? ` · ${q.time_limit_minutes} min` : ''}</div>
-            <div style="margin-top:0.35rem">${statusHtml}</div>
+        <div class="student-quiz-card ${attempted ? 'completed' : ''}">
+          <div class="student-quiz-top">
+            <div class="student-quiz-header">
+              ${statusBadge}
+            </div>
+            <h4 class="quiz-card-title">${esc(q.title)}</h4>
+            <div class="quiz-card-meta">${q.question_count || 0} questions${timeMeta}</div>
           </div>
-          <div class="admin-btn" style="flex-shrink:0">${attempted ? 'Retake →' : 'Start →'}</div>
+          <div class="student-quiz-bottom">
+            ${scoreHtml}
+            ${actionBtn}
+          </div>
         </div>
       `;
     }).join('');
+
+    container.innerHTML = `<div class="student-quiz-grid">${cardsHtml}</div>`;
   }
 
   /* ── Take Quiz ─────────────────────────────── */
@@ -351,6 +381,12 @@
     const data = await api('GET', `/classrooms/${currentClassroomId}/quizzes/${quizId}`);
     if (!data || !data.quiz) {
       toast('Failed to load quiz.', 'error');
+      return;
+    }
+
+    if (data.already_attempted) {
+      toast('You have already completed this quiz. Only 1 attempt is allowed.', 'error');
+      loadQuizzes();
       return;
     }
 
@@ -367,7 +403,7 @@
     const questions = quiz.questions || [];
 
     if (questions.length === 0) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-icon">📋</div><div class="empty-text">This quiz has no questions yet.</div></div>';
+      container.innerHTML = '<div class="admin-empty"><div class="empty-text">This quiz has no questions yet.</div></div>';
       document.getElementById('quizSubmitArea').style.display = 'none';
       return;
     }
@@ -438,15 +474,26 @@
             ${data.score} / ${data.max_score} correct
           </p>
           <p style="font-family:'Nunito',sans-serif;font-size:0.85rem;color:rgba(255,255,255,0.5)">
-            ${pct >= 80 ? '🎉 Excellent work!' : pct >= 50 ? '👍 Good effort, keep studying!' : '📚 Review the material and try again!'}
+            ${pct >= 80 ? 'Excellent work!' : pct >= 50 ? 'Good effort!' : 'Quiz completed.'}
           </p>
-          <button class="admin-btn primary" style="margin-top:1.5rem" onclick="window._openQuiz('${quizId}')">Retake Quiz</button>
+          <button class="admin-btn primary" style="margin-top:1.5rem" onclick="window._backToQuizzes()">Back to Quizzes</button>
         </div>
       `;
     } else {
       toast(data?.error || 'Failed to submit quiz.', 'error');
     }
   }
+
+  window._backToQuizzes = function () {
+    const backBtn = document.getElementById('backToClassQuizzes');
+    if (backBtn) {
+      backBtn.click();
+    } else {
+      hide('studentQuizView');
+      show('studentClassDetail');
+      loadQuizzes();
+    }
+  };
 
   /* ── View Helpers ──────────────────────────── */
   function hideAll() {

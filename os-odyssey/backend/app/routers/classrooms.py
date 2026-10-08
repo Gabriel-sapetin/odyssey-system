@@ -994,16 +994,22 @@ async def get_quiz(
         quiz_questions = questions.data or []
 
         # Strip answers for students who haven't submitted yet
+        has_submitted = False
+        last_attempt_data = None
         if user.get("role") == "student":
             attempt = (
                 admin_client.table("classroom_quiz_attempts")
-                .select("id")
+                .select("id, score, max_score, submitted_at")
                 .eq("quiz_id", quiz_id)
                 .eq("student_id", user["id"])
                 .not_.is_("submitted_at", "null")
+                .order("submitted_at", desc=True)
+                .limit(1)
                 .execute()
             )
             has_submitted = bool(attempt.data)
+            if has_submitted:
+                last_attempt_data = attempt.data[0]
 
             if not has_submitted:
                 for q in quiz_questions:
@@ -1012,7 +1018,11 @@ async def get_quiz(
 
         quiz.data["questions"] = quiz_questions
 
-        return {"quiz": quiz.data}
+        return {
+            "quiz": quiz.data,
+            "already_attempted": has_submitted,
+            "last_attempt": last_attempt_data,
+        }
 
     except HTTPException:
         raise
@@ -1138,6 +1148,22 @@ async def submit_quiz(
     """Submit quiz answers. Grades automatically."""
     try:
         admin_client = get_admin_client()
+
+        # Enforce 1 attempt rule for students
+        if user.get("role") == "student":
+            existing = (
+                admin_client.table("classroom_quiz_attempts")
+                .select("id")
+                .eq("quiz_id", quiz_id)
+                .eq("student_id", user["id"])
+                .limit(1)
+                .execute()
+            )
+            if existing.data:
+                raise HTTPException(
+                    status_code=400,
+                    detail="You have already completed this quiz. Only 1 attempt is allowed."
+                )
 
         # Get questions with correct answers
         questions = (
