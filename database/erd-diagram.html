@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OS Odyssey — Entity-Relationship Diagram</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      text-align: center;
+      padding: 2rem 1rem 1rem;
+      max-width: 800px;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #7c3aed, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    header p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      color: #94a3b8;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-existing { background: #22c55e; }
+    .dot-classroom { background: #f59e0b; }
+    .dot-audit { background: #ef4444; }
+    #erd-container {
+      width: 100%;
+      overflow-x: auto;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+    }
+    .mermaid {
+      background: #1e1e2e;
+      border-radius: 12px;
+      padding: 2rem;
+      border: 1px solid #2d2d3f;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #475569;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>OS Odyssey — Entity-Relationship Diagram</h1>
+    <p>Complete backend schema: 18 entities including the Admin/Professor/Classroom feature</p>
+  </header>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot dot-existing"></span> Core System (12 tables)</span>
+    <span class="legend-item"><span class="legend-dot dot-classroom"></span> Classroom Feature (6 new tables)</span>
+    <span class="legend-item"><span class="legend-dot dot-audit"></span> Security Audit</span>
+  </div>
+
+  <div id="erd-container">
+    <pre class="mermaid">
+erDiagram
+    users ||--|| profiles : "has profile"
+    users ||--o{ quiz_attempts : "takes"
+    users ||--o{ simulation_completions : "completes"
+    users ||--o{ user_badges : "earns"
+    users ||--o{ security_audit_log : "is audited"
+    modules ||--|| quizzes : "has quiz"
+    quizzes ||--o{ questions : "contains"
+    quizzes ||--o{ quiz_attempts : "attempted in"
+    badges ||--o{ user_badges : "awarded as"
+    simulations ||--o{ simulation_completions : "completed as"
+    modules ||--o{ user_progress : "tracks"
+    users ||--o{ user_progress : "progresses"
+    profiles ||--o{ classrooms : "professor owns"
+    classrooms ||--o{ classroom_members : "has enrollments"
+    profiles ||--o{ classroom_members : "student joins"
+    classrooms ||--o{ classroom_modules : "contains modules"
+    classrooms ||--o{ classroom_quizzes : "contains quizzes"
+    classroom_modules ||--o{ classroom_quizzes : "linked to"
+    classroom_quizzes ||--o{ classroom_quiz_questions : "has questions"
+    classroom_quizzes ||--o{ classroom_quiz_attempts : "has attempts"
+    profiles ||--o{ classroom_quiz_attempts : "student submits"
+
+    users {
+        uuid id PK
+        text email
+        timestamptz created_at
+    }
+
+    profiles {
+        uuid id FK
+        text email
+        text username
+        text character
+        text avatar
+        int level
+        int xp
+        text role
+        text rank
+        int badges
+        int streak
+        text completed_modules
+        text earned_badges
+        date last_active_date
+        timestamptz created_at
+    }
+
+    modules {
+        bigserial module_id PK
+        text title
+        text description
+        int module_order
+        int statements
+    }
+
+    quizzes {
+        bigserial quiz_id PK
+        bigint module_id FK
+        text title
+        int total_questions
+    }
+
+    questions {
+        bigserial question_id PK
+        bigint quiz_id FK
+        text question_text
+        text question_type
+        jsonb options
+        int correct_answer_index
+        text correct_label
+        text explanation
+    }
+
+    quiz_attempts {
+        bigserial attempt_id PK
+        uuid user_id FK
+        bigint quiz_id FK
+        int score
+        int total_questions
+        boolean passed
+        timestamptz attempted_at
+    }
+
+    simulations {
+        bigserial simulation_id PK
+        text title
+        text description
+        text topic
+        int max_bonus_xp
+    }
+
+    simulation_completions {
+        bigserial completion_id PK
+        uuid user_id FK
+        bigint simulation_id FK
+        int best_score
+        int bonus_xp
+        timestamptz completed_at
+        timestamptz last_played_at
+    }
+
+    badges {
+        bigserial badge_id PK
+        text name
+        text description
+        text icon
+        text color
+        text trigger_id
+    }
+
+    user_badges {
+        bigserial user_badge_id PK
+        uuid user_id FK
+        bigint badge_id FK
+        timestamptz earned_at
+    }
+
+    user_progress {
+        bigserial progress_id PK
+        uuid user_id FK
+        bigint module_id FK
+        decimal progress_percentage
+        boolean completed
+        timestamptz updated_at
+    }
+
+    security_audit_log {
+        bigserial id PK
+        uuid user_id FK
+        text action
+        jsonb detail
+        text ip_address
+        text user_agent
+        timestamptz created_at
+    }
+
+    classrooms {
+        uuid id PK
+        uuid professor_id FK
+        text name
+        text description
+        text join_code
+        boolean is_active
+        int max_students
+        timestamptz created_at
+    }
+
+    classroom_members {
+        uuid id PK
+        uuid classroom_id FK
+        uuid student_id FK
+        timestamptz joined_at
+    }
+
+    classroom_modules {
+        uuid id PK
+        uuid classroom_id FK
+        text title
+        text description
+        text content
+        int order_index
+        boolean is_published
+        timestamptz created_at
+    }
+
+    classroom_quizzes {
+        uuid id PK
+        uuid classroom_id FK
+        uuid module_id FK
+        text title
+        text description
+        boolean is_ai_generated
+        int time_limit_minutes
+        boolean is_published
+        timestamptz created_at
+    }
+
+    classroom_quiz_questions {
+        uuid id PK
+        uuid quiz_id FK
+        text question_text
+        text question_type
+        jsonb options
+        text correct_answer
+        text explanation
+        int order_index
+        int points
+    }
+
+    classroom_quiz_attempts {
+        uuid id PK
+        uuid quiz_id FK
+        uuid student_id FK
+        jsonb answers
+        int score
+        int max_score
+        timestamptz started_at
+        timestamptz submitted_at
+    }
+    </pre>
+  </div>
+
+  <footer>
+    OS Odyssey Backend Schema Design &bull; 2026
+  </footer>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      er: {
+        layoutDirection: 'TB',
+        minEntityWidth: 100,
+        minEntityHeight: 25,
+        entityPadding: 15,
+        useMaxWidth: false,
+      },
+      themeVariables: {
+        primaryColor: '#7c3aed',
+        lineColor: '#6366f1',
+        textColor: '#e2e8f0',
+      }
+    });
+  </script>
+</body>
+</html>

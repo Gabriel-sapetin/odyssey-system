@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>OS Odyssey - Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../../assets/favicon.png" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+</head>
+
+<body class="app-page dashboard-page">
+  <nav class="app-nav">
+    <a href="index.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png"
+        alt="OS Odyssey penguin mascot" />
+      OS ODYSSEY
+    </a>
+    <button class="app-nav-mobile-toggle" type="button" aria-label="Toggle mobile menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="app-nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="admin.html" class="active">Admin</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+        <span class="toggle-icon sun-icon">☀️</span>
+        <span class="toggle-icon moon-icon">🌙</span>
+      </button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="admin-shell" id="adminShell">
+    <!-- Header -->
+    <div class="admin-header">
+      <h1> Admin Dashboard <span class="admin-role-badge">ADMIN</span></h1>
+    </div>
+
+    <!-- Tabs -->
+    <div class="admin-tabs" id="adminTabs">
+      <button class="admin-tab active" data-tab="overview">
+        <span class="admin-tab-icon"></span> Overview
+      </button>
+      <button class="admin-tab" data-tab="users">
+        <span class="admin-tab-icon"></span> Users
+      </button>
+      <button class="admin-tab" data-tab="classrooms">
+        <span class="admin-tab-icon"></span> Classrooms
+      </button>
+      <button class="admin-tab" data-tab="audit">
+        <span class="admin-tab-icon"></span> Audit Log
+      </button>
+    </div>
+
+    <!-- ═══ Overview Panel ═══ -->
+    <div class="admin-panel active" id="panel-overview">
+      <div class="admin-stats-grid" id="statsGrid">
+        <div class="admin-stat-card">
+          <div class="stat-icon"></div>
+          <div class="stat-value" id="statTotalUsers">—</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="stat-icon"></div>
+          <div class="stat-value" id="statStudents">—</div>
+          <div class="stat-label">Students</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="stat-icon"></div>
+          <div class="stat-value" id="statProfessors">—</div>
+          <div class="stat-label">Professors</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="stat-icon"></div>
+          <div class="stat-value" id="statAvgXp">—</div>
+          <div class="stat-label">Avg XP</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="stat-icon"></div>
+          <div class="stat-value" id="statClassrooms">—</div>
+          <div class="stat-label">Classrooms</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="stat-icon"></div>
+          <div class="stat-value" id="statAdmins">—</div>
+          <div class="stat-label">Admins</div>
+        </div>
+      </div>
+
+      <!-- Recent Audit on Overview -->
+      <div class="admin-section-header">
+        <h2>Recent Activity</h2>
+      </div>
+      <div class="admin-table-wrap">
+        <div id="recentAuditList"></div>
+      </div>
+    </div>
+
+    <!-- ═══ Users Panel ═══ -->
+    <div class="admin-panel" id="panel-users">
+      <div class="admin-toolbar">
+        <input class="admin-search" type="text" id="userSearch" placeholder="Search by username or email…" />
+        <select class="admin-filter-select" id="roleFilter">
+          <option value="">All Roles</option>
+          <option value="student">Students</option>
+          <option value="professor">Professors</option>
+          <option value="admin">Admins</option>
+        </select>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="usersTable">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>XP</th>
+              <th>Level</th>
+              <th>Rank</th>
+              <th>Streak</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="admin-pagination" id="usersPagination"></div>
+    </div>
+
+    <!-- ═══ Classrooms Panel ═══ -->
+    <div class="admin-panel" id="panel-classrooms">
+      <div class="admin-section-header">
+        <h2>All Classrooms</h2>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="classroomsTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Professor</th>
+              <th>Join Code</th>
+              <th>Students</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="classroomsTableBody">
+          </tbody>
+        </table>
+      </div>
+      <div class="admin-pagination" id="classroomsPagination"></div>
+    </div>
+
+    <!-- ═══ Audit Log Panel ═══ -->
+    <div class="admin-panel" id="panel-audit">
+      <div class="admin-toolbar">
+        <select class="admin-filter-select" id="auditActionFilter">
+          <option value="">All Actions</option>
+          <option value="complete_module">Module Completion</option>
+          <option value="award_badge">Badge Award</option>
+          <option value="quiz_xp">Quiz XP</option>
+          <option value="update_streak">Streak Update</option>
+          <option value="profile_update">Profile Update</option>
+          <option value="admin_role_change">Role Change</option>
+          <option value="admin_delete_user">User Deletion</option>
+          <option value="admin_reset_xp">XP Reset</option>
+          <option value="create_classroom">Classroom Created</option>
+          <option value="delete_classroom">Classroom Deleted</option>
+        </select>
+      </div>
+
+      <div class="admin-table-wrap">
+        <div id="auditLogList"></div>
+      </div>
+      <div class="admin-pagination" id="auditPagination"></div>
+    </div>
+  </main>
+
+  <!-- Edit User Modal -->
+  <div class="admin-modal-overlay" id="editUserModal">
+    <div class="admin-modal" style="position:relative;">
+      <button class="admin-modal-close" id="editUserClose">✕</button>
+      <h2>✏️ Edit User</h2>
+      <form id="editUserForm">
+        <input type="hidden" id="editUserId" />
+        <div class="admin-form-group">
+          <label for="editUsername">Username</label>
+          <input type="text" id="editUsername" maxlength="50" />
+        </div>
+        <div class="admin-form-group">
+          <label for="editRole">Role</label>
+          <select id="editRole">
+            <option value="student">Student</option>
+            <option value="professor">Professor</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="admin-form-group">
+          <label for="editXp">XP</label>
+          <input type="number" id="editXp" min="0" />
+        </div>
+        <div class="admin-form-actions">
+          <button type="button" class="admin-btn" id="editUserCancel">Cancel</button>
+          <button type="submit" class="admin-btn primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="admin-toast" id="adminToast"></div>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/admin.js"></script>
+</body>
+
+</html>
