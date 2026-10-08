@@ -143,7 +143,7 @@
     }
 
     feedback.textContent = 'Joining…';
-    feedback.style.color = 'rgba(255,255,255,0.5)';
+    feedback.style.color = 'var(--accent, #f5a623)';
 
     const data = await api('POST', '/classrooms/join', { join_code: code });
 
@@ -182,7 +182,7 @@
     grid.innerHTML = data.classrooms.map(c => `
       <div class="classroom-card" onclick="window._openStudentClass('${c.id}')">
         <h3>${esc(c.name)}</h3>
-        ${c.description ? `<p style="font-size:0.78rem;color:rgba(255,255,255,0.45);margin-top:0.2rem">${esc(c.description)}</p>` : ''}
+        ${c.description ? `<p class="classroom-card-desc">${esc(c.description)}</p>` : ''}
         <div class="classroom-meta">
           <span>👤 Prof. ${esc(c.professor_username || 'Unknown')}</span>
           <span>👥 ${c.member_count || 0} students</span>

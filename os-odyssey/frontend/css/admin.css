@@ -712,33 +712,45 @@
 }
 
 .classroom-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(13, 20, 38, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
-  padding: 1.25rem;
-  transition: transform 0.2s, border-color 0.2s;
+  padding: 1.35rem 1.4rem;
+  transition: all 0.25s ease;
   cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
 }
 
 .classroom-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-4px);
+  border-color: rgba(245, 166, 35, 0.45);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4), 0 0 15px rgba(245, 166, 35, 0.15);
 }
 
 .classroom-card h3 {
   font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: #fff;
   margin-bottom: 0.35rem;
+  line-height: 1.3;
+}
+
+.classroom-card .classroom-card-desc {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.45;
+  margin-top: 0.3rem;
 }
 
 .classroom-card .classroom-meta {
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.65);
   display: flex;
-  gap: 1rem;
-  margin-top: 0.5rem;
+  gap: 1.2rem;
+  margin-top: 0.75rem;
+  align-items: center;
 }
 
 .classroom-card .join-code {
@@ -849,29 +861,64 @@
 .status-dot.published { background: #22c55e; }
 .status-dot.draft { background: rgba(255, 255, 255, 0.2); }
 
-/* ── Join Code Input ─────────────────────────────── */
+/* ── Join Code Section ───────────────────────────── */
+.join-code-subtitle {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--app-muted, rgba(255, 255, 255, 0.7));
+  margin-bottom: 0.6rem;
+}
+
 .join-code-input-group {
   display: flex;
-  gap: 0.5rem;
-  max-width: 350px;
+  gap: 0.6rem;
+  max-width: 380px;
 }
 
 .join-code-input-group input {
   flex: 1;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(18, 27, 48, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
   border-radius: 10px;
-  padding: 0.65rem 1rem;
+  padding: 0.7rem 1.1rem;
   color: #fff;
   font-family: 'Press Start 2P', monospace;
   font-size: 0.75rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   outline: none;
+  transition: all 0.2s ease;
+}
+
+.join-code-input-group input::placeholder {
+  color: rgba(255, 255, 255, 0.38);
 }
 
 .join-code-input-group input:focus {
-  border-color: var(--accent);
+  border-color: var(--accent, #f5a623);
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.2);
+  background: rgba(25, 38, 66, 0.95);
+}
+
+.join-code-input-group .admin-btn.primary {
+  background: linear-gradient(135deg, #f5a623, #e8900c);
+  color: #1a1a2e;
+  font-weight: 800;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 12px rgba(245, 166, 35, 0.25);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.join-code-input-group .admin-btn.primary:hover {
+  background: linear-gradient(135deg, #fbbf24, #f5a623);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(245, 166, 35, 0.4);
 }
 
 /* ── Quiz Taking UI ──────────────────────────────── */
@@ -1001,8 +1048,17 @@
 .light-mode .admin-form-group select,
 .light-mode .admin-form-group textarea { background: rgba(0, 0, 0, 0.03); border-color: rgba(0, 0, 0, 0.1); color: #1a1a2e; }
 .light-mode .admin-section-header h2 { color: #1a1a2e; }
-.light-mode .classroom-card { background: rgba(0, 0, 0, 0.02); border-color: rgba(0, 0, 0, 0.06); }
-.light-mode .classroom-card h3 { color: #1a1a2e; }
+.light-mode .join-code-subtitle { color: var(--app-muted, #5a6478); }
+.light-mode .join-code-input-group input { background: #ffffff; border-color: rgba(0, 0, 0, 0.16); color: #1a1a2e; }
+.light-mode .join-code-input-group input::placeholder { color: rgba(0, 0, 0, 0.38); }
+.light-mode .join-code-input-group input:focus { border-color: var(--accent, #f5a623); box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15); }
+.light-mode .classroom-card { background: #ffffff; border-color: rgba(0, 0, 0, 0.1); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); }
+.light-mode .classroom-card:hover { border-color: rgba(245, 166, 35, 0.6); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
+.light-mode .classroom-card h3 { color: #1a1f36; }
+.light-mode .classroom-card .classroom-card-desc,
+.light-mode .classroom-card p { color: #5a6478; }
+.light-mode .classroom-card .classroom-meta { color: #64748b; }
+.light-mode .admin-empty { color: #64748b; }
 .light-mode .content-card { background: rgba(0, 0, 0, 0.02); border-color: rgba(0, 0, 0, 0.06); }
 .light-mode .content-card h4 { color: #1a1a2e; }
 .light-mode .quiz-question-card { background: rgba(0, 0, 0, 0.02); border-color: rgba(0, 0, 0, 0.06); }
