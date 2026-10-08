@@ -999,7 +999,7 @@ async def get_quiz(
         if user.get("role") == "student":
             attempt = (
                 admin_client.table("classroom_quiz_attempts")
-                .select("id, score, max_score, submitted_at")
+                .select("id, score, max_score, submitted_at, answers")
                 .eq("quiz_id", quiz_id)
                 .eq("student_id", user["id"])
                 .not_.is_("submitted_at", "null")

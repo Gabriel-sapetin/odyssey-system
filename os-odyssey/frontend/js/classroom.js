@@ -486,6 +486,7 @@
     hide('classroomHubView');
     hide('classroomLessonView');
     hide('classroomQuizView');
+    hide('quizReviewScreen');
 
     // Deselect outline active styles
     document.querySelectorAll('.course-outline-item, .course-outline-subitem').forEach(el => el.classList.remove('active'));
@@ -585,12 +586,17 @@
           </div>
           <div class="assessment-card-body">
             ${isAttempted ? `
-              <div class="assessment-completed-box">
-                <div class="score-pill-row">
-                  <span class="status-pill-green">COMPLETED</span>
-                  <span class="score-text">Total Score: <strong>${attempted.score} / ${attempted.max_score} (${pct}%)</strong></span>
+              <div class="assessment-completed-box" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+                <div>
+                  <div class="score-pill-row">
+                    <span class="status-pill-green">COMPLETED</span>
+                    <span class="score-text">Total Score: <strong>${attempted.score} / ${attempted.max_score} (${pct}%)</strong></span>
+                  </div>
+                  <p class="score-policy-msg">Assessment finalized · 1 of 1 attempt used.</p>
                 </div>
-                <p class="score-policy-msg">Assessment finalized · 1 of 1 attempt used.</p>
+                <button class="admin-btn secondary" type="button" style="padding:0.6rem 1.4rem;font-weight:700;font-size:0.85rem;" onclick="window._reviewQuiz('${quiz.id}', '${modId}')">
+                  Review Quiz
+                </button>
               </div>
             ` : `
               <div class="assessment-pending-box">
@@ -691,15 +697,17 @@
           <p style="font-size:0.85rem;color:#64748b;margin-bottom:1.5rem;">
             You have already used your 1 allowed attempt for this quiz.
           </p>
-          <div style="display:flex;gap:12px;justify-content:center;">
-            ${currentModuleId ? `<button class="admin-btn primary" type="button" onclick="window._openModule('${currentModuleId}', true)">Back to Lesson</button>` : ''}
-            <button class="admin-btn" type="button" onclick="showCanvasView('hub')">Course Outline</button>
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+            <button class="admin-btn secondary" type="button" style="padding:0.75rem 1.8rem;" onclick="window._reviewQuiz('${quizId}', '${currentModuleId}')">Review Quiz</button>
+            ${currentModuleId ? `<button class="admin-btn primary" type="button" style="padding:0.75rem 1.8rem;" onclick="window._openModule('${currentModuleId}', true)">Back to Lesson</button>` : ''}
+            <button class="admin-btn" type="button" style="padding:0.75rem 1.8rem;" onclick="showCanvasView('hub')">Course Outline</button>
           </div>
         </div>
       `;
 
       hide('quizTakingScreen');
       hide('quizResultArea');
+      hide('quizReviewScreen');
       show('quizBriefingScreen');
       return;
     }
@@ -717,6 +725,7 @@
 
     hide('quizTakingScreen');
     hide('quizResultArea');
+    hide('quizReviewScreen');
     show('quizBriefingScreen');
   };
 
@@ -826,6 +835,7 @@
             Notice: Only 1 attempt is allowed. Your grade is finalized.
           </p>
           <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+            <button class="admin-btn secondary" type="button" style="padding:0.8rem 2.2rem;" onclick="window._reviewQuiz('${quizId}', '${currentModuleId || ''}')">Review Quiz</button>
             ${currentModuleId ? `<button class="admin-btn primary" type="button" style="padding:0.8rem 2.2rem;" onclick="window._openModule('${currentModuleId}', true)">Back to Lesson</button>` : ''}
             <button class="admin-btn" type="button" style="padding:0.8rem 2.2rem;" onclick="showCanvasView('hub')">
               Course Outline
@@ -834,6 +844,9 @@
         </div>
       `;
 
+      // Clear answers in memory
+      currentQuizAnswers = {};
+
       // Refresh sidebar and progress panel
       renderSidebarOutline();
       renderProgressCard();
@@ -841,6 +854,149 @@
       toast(data?.error || 'Failed to submit quiz.', 'error');
     }
   }
+
+  /* ── Review Quiz (Read-Only) ────────────────── */
+  window._reviewQuiz = async function (quizId, sourceModuleId = null) {
+    const targetModId = sourceModuleId || currentModuleId || null;
+    showCanvasView('quiz');
+
+    hide('quizBriefingScreen');
+    hide('quizTakingScreen');
+    hide('quizResultArea');
+
+    const reviewScreen = document.getElementById('quizReviewScreen');
+    show('quizReviewScreen');
+    reviewScreen.innerHTML = `
+      <div style="text-align:center;padding:3rem;color:#64748b;">
+        <div style="font-size:1.5rem;margin-bottom:0.5rem;">⏳</div>
+        <div>Loading quiz review...</div>
+      </div>
+    `;
+
+    const data = await api('GET', `/classrooms/${currentClassroomId}/quizzes/${quizId}`);
+    if (!data || !data.quiz) {
+      toast('Failed to load quiz review.', 'error');
+      showCanvasView('hub');
+      return;
+    }
+
+    const quiz = data.quiz;
+    const questions = quiz.questions || [];
+    const lastAttempt = data.last_attempt || quizzesList.find(q => q.id === quizId)?.last_attempt || {};
+    const studentAnswers = lastAttempt.answers || {};
+
+    const score = lastAttempt.score ?? 0;
+    const maxScore = lastAttempt.max_score ?? questions.length;
+    const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+
+    // Update breadcrumb and status badge
+    const breadcrumb = document.getElementById('quizBreadcrumb');
+    if (breadcrumb) breadcrumb.textContent = `Review: ${quiz.title}`;
+
+    const statusPill = document.getElementById('quizAttemptStatusPill');
+    if (statusPill) {
+      statusPill.textContent = 'Review Mode (Read-Only)';
+      statusPill.className = 'quiz-status-badge completed';
+    }
+
+    const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+    reviewScreen.innerHTML = `
+      <div class="quiz-review-header-card">
+        <div class="quiz-review-header-left">
+          <h3>${esc(quiz.title)} &mdash; Review</h3>
+          <p>Completed assessment review &middot; Submitted answers and correct solutions (Read-Only)</p>
+        </div>
+        <div class="quiz-review-score-pill">
+          Score: ${score} / ${maxScore} (${pct}%)
+        </div>
+      </div>
+
+      ${questions.length === 0 ? `
+        <div style="text-align:center;padding:2rem;color:#64748b;">No questions found for this quiz.</div>
+      ` : questions.map((q, i) => {
+        const studentAns = studentAnswers[q.id] !== undefined ? studentAnswers[q.id] : (studentAnswers[String(q.id)] ?? null);
+        const correctAns = q.correct_answer;
+
+        const isAnswered = studentAns !== null && studentAns !== undefined && String(studentAns).trim() !== '';
+        const isCorrect = isAnswered && correctAns !== null && correctAns !== undefined &&
+          String(studentAns).trim().toLowerCase() === String(correctAns).trim().toLowerCase();
+
+        let verdictHtml = '';
+        if (!isAnswered) {
+          verdictHtml = '<span class="quiz-review-verdict unanswered">— Unanswered</span>';
+        } else if (isCorrect) {
+          verdictHtml = '<span class="quiz-review-verdict correct">✓ Correct</span>';
+        } else {
+          verdictHtml = '<span class="quiz-review-verdict incorrect">✗ Incorrect</span>';
+        }
+
+        return `
+          <div class="quiz-review-question-card">
+            <div class="quiz-review-q-top">
+              <span class="quiz-review-q-num">QUESTION ${i + 1} OF ${questions.length}</span>
+              ${verdictHtml}
+            </div>
+            <div class="q-text" style="font-size:1.05rem;font-weight:700;color:#0f172a;line-height:1.5;margin-bottom:1.25rem;">
+              ${esc(q.question_text)}
+            </div>
+            <div class="quiz-review-options-list">
+              ${(q.options || []).map((opt, oi) => {
+                const isStudentPick = isAnswered && String(studentAns).trim().toLowerCase() === String(opt).trim().toLowerCase();
+                const isRightAnswer = correctAns !== null && correctAns !== undefined && String(correctAns).trim().toLowerCase() === String(opt).trim().toLowerCase();
+
+                let optClass = 'quiz-review-option';
+                let tagHtml = '';
+
+                if (isRightAnswer && isStudentPick) {
+                  optClass += ' is-correct';
+                  tagHtml = '<span class="quiz-review-tag correct">Your Answer ✓ (Correct)</span>';
+                } else if (isRightAnswer) {
+                  optClass += ' is-correct';
+                  tagHtml = '<span class="quiz-review-tag correct">Correct Answer</span>';
+                } else if (isStudentPick) {
+                  optClass += ' is-wrong-student';
+                  tagHtml = '<span class="quiz-review-tag wrong">Your Answer ✗</span>';
+                }
+
+                return `
+                  <div class="${optClass}">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                      <span class="option-marker" style="width:26px;height:26px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#475569;flex-shrink:0;">
+                        ${optionLabels[oi] || oi + 1}
+                      </span>
+                      <span>${esc(opt)}</span>
+                    </div>
+                    ${tagHtml}
+                  </div>
+                `;
+              }).join('')}
+              ${(!q.options || q.options.length === 0) ? `
+                <div style="font-size:0.9rem;color:#475569;margin-bottom:8px;">
+                  <strong>Your Answer:</strong> ${studentAns ? esc(studentAns) : '<em>No answer submitted</em>'}
+                </div>
+                ${correctAns ? `
+                  <div style="font-size:0.9rem;color:#15803d;margin-bottom:8px;">
+                    <strong>Correct Answer:</strong> ${esc(correctAns)}
+                  </div>
+                ` : ''}
+              ` : ''}
+            </div>
+            ${q.explanation ? `
+              <div class="review-explanation-box">
+                <strong>Explanation:</strong> ${esc(q.explanation)}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('')}
+
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:2rem;margin-bottom:2rem;flex-wrap:wrap;">
+        ${targetModId ? `<button class="admin-btn primary" type="button" style="padding:0.8rem 2.2rem;" onclick="window._openModule('${targetModId}', true)">Back to Lesson</button>` : ''}
+        <button class="admin-btn" type="button" style="padding:0.8rem 2.2rem;" onclick="showCanvasView('hub')">Course Outline</button>
+      </div>
+    `;
+  };
 
   /* ── Download PDF File Helper ──────────────── */
   window._downloadPdfFile = async function (btn, url, fileName) {
