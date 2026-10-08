@@ -68,7 +68,12 @@
           </span>
         </label>
         <!-- Cloudflare Turnstile widget (managed mode — invisible when possible) -->
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAADRz9Gh8vifnrdDN" data-theme="dark" data-size="flexible"></div>
+        <div id="cfTurnstileWidget" class="cf-turnstile" data-sitekey="0x4AAAAAADRz9Gh8vifnrdDN" data-theme="dark" data-size="flexible"></div>
+        <script>
+          if (['localhost', '127.0.0.1', ''].includes(window.location.hostname)) {
+            document.getElementById('cfTurnstileWidget').setAttribute('data-sitekey', '1x00000000000000000000AA');
+          }
+        </script>
         <button class="btn btn-cta auth-submit" data-auth-mode="signup" data-loading-text="Creating account..."
           data-redirect="character-select.html" type="submit">Sign up for free</button>
         <p class="auth-login">

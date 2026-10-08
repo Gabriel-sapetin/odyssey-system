@@ -1356,10 +1356,11 @@
 
       // ── Cloudflare Turnstile verification ──
       const turnstileWidget = document.querySelector('.cf-turnstile');
+      const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
       let turnstileToken = null;
       if (turnstileWidget && typeof turnstile !== 'undefined') {
         turnstileToken = turnstile.getResponse(turnstileWidget);
-        if (!turnstileToken) {
+        if (!turnstileToken && !isLocal) {
           showAuthError('Please complete the security check.');
           return;
         }

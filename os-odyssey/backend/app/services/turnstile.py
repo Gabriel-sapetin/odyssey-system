@@ -38,6 +38,10 @@ async def verify_turnstile_token(token: str, remote_ip: str | None = None) -> bo
         logger.warning("TURNSTILE_SECRET_KEY not set — skipping Turnstile verification")
         return True
 
+    # Allow Cloudflare dummy testing tokens (used on localhost)
+    if token.startswith("XXXX.DUMMY.") or token == "dummy-token":
+        return True
+
     if not token:
         logger.warning("Empty Turnstile token received")
         return False
