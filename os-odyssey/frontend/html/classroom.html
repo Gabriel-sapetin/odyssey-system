@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="../css/admin.css" />
 </head>
 
-<body class="app-page dashboard-page">
+<body class="app-page dashboard-page course-page">
   <nav class="app-nav">
     <a href="index.html" class="app-brand">
       <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png"
@@ -61,58 +61,169 @@
       <div class="classroom-grid" id="studentClassroomGrid"></div>
     </div>
 
-    <!-- Classroom Detail View -->
+    <!-- Classroom Detail View (Cisco NetAcad Course Player) -->
     <div id="studentClassDetail" style="display:none">
-      <div class="classroom-detail-header">
-        <div>
-          <button class="admin-btn" id="backToStudentClasses" style="margin-bottom:0.5rem">← Back</button>
-          <h1 id="studentClassDetailName"></h1>
-          <div style="margin-top:0.25rem;font-size:0.78rem;color:rgba(255,255,255,0.4)" id="studentClassDetailMeta">
+      <section class="netacad-course standalone">
+        <!-- Shell Header (Cisco NetAcad header) -->
+        <header class="netacad-shell-header">
+          <div class="course-shell-brand">
+            <button class="netacad-back-link" id="backToStudentClasses" type="button" title="Back to My Classrooms">
+              ← Back
+            </button>
+            <div class="netacad-brand-lockup">
+              <span class="netacad-brand-mark">OS</span>
+              <div>
+                <strong id="studentClassDetailName">Classroom</strong>
+                <span id="studentClassDetailMeta">Prof. Aldren Lorens · 3 students</span>
+              </div>
+            </div>
+          </div>
+          <nav class="course-shell-nav" aria-label="Classroom navigation">
+            <button class="netacad-nav-tab active" id="navOutlineTab" type="button">Course Outline</button>
+            <button class="netacad-nav-tab" id="navResourcesTab" type="button">Resources</button>
+            <button class="classroom-leave-link" id="leaveClassBtn" type="button">Leave Class</button>
+          </nav>
+        </header>
+
+        <!-- 2-Column Workspace -->
+        <div class="netacad-workspace" id="classroomWorkspace">
+          <!-- Left Sidebar (Curriculum Tree) -->
+          <aside class="netacad-sidebar" id="classroomSidebar">
+            <div class="netacad-tabs">
+              <button class="active" id="sidebarTabOutline" type="button">Course Outline</button>
+              <button id="sidebarTabResources" type="button">Resources</button>
+            </div>
+            <label class="netacad-search">
+              <span>Search course outline</span>
+              <input type="search" id="sidebarSearchInput" placeholder="Search lessons & quizzes..." />
+            </label>
+
+            <!-- Outline Tree -->
+            <div class="course-outline-list" id="sidebarOutlineList"></div>
+            <!-- Resources List -->
+            <div class="course-outline-list" id="sidebarResourcesList" style="display:none"></div>
+          </aside>
+
+          <!-- Main Content Canvas -->
+          <div class="netacad-reader-canvas">
+            <!-- View 1: Classroom Learning Path & Progress (Overview) -->
+            <article class="netacad-reader-preview" id="classroomHubView">
+              <div class="reader-topline">
+                <span id="hubBreadcrumb">Course Outline</span>
+                <span id="hubTopStatus">Classroom Overview</span>
+              </div>
+              <div class="reader-progress-strip" aria-hidden="true">
+                <span id="classroomOverallProgress" style="width: 0%"></span>
+              </div>
+              <div class="reader-content-split">
+                <div>
+                  <p class="section-kicker">LEARNING PATH</p>
+                  <h1 id="hubCourseTitle">Classroom Modules</h1>
+                  <p id="hubCourseDesc">
+                    Welcome to this classroom. Review the available lessons and materials below, and take the assigned quizzes to assess your understanding.
+                  </p>
+                  <div class="reader-actions" id="hubQuickActions"></div>
+                </div>
+
+                <!-- Right Side: 'Your Progress' Card (Picture 2 replica) -->
+                <div class="reader-topic-stack" id="classroomProgressCard" aria-label="Classroom progress"></div>
+              </div>
+            </article>
+
+            <!-- View 2: Lesson / Document Reader (Picture 1 & Picture 3 replica) -->
+            <article class="netacad-reader-preview" id="classroomLessonView" style="display:none">
+              <div class="reader-topline">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <button class="reader-back-btn" id="readerBackToHub" type="button">← Outline</button>
+                  <span id="lessonBreadcrumb">Lesson</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <button class="admin-btn" id="readerDownloadBtn" style="font-size:0.75rem;padding:0.4rem 0.8rem;display:none;">Download PDF</button>
+                  <a class="admin-btn secondary" id="readerOpenTabBtn" target="_blank" style="font-size:0.75rem;padding:0.4rem 0.8rem;text-decoration:none;display:none;">Open in New Tab</a>
+                </div>
+              </div>
+              <div class="reader-progress-strip" aria-hidden="true"><span style="width: 100%"></span></div>
+
+              <div class="reader-lesson-canvas-body">
+                <div class="lesson-heading">
+                  <div>
+                    <h2 id="lessonViewTitle">Lesson Title</h2>
+                  </div>
+                  <span class="module-status-pill" id="lessonTypePill">Lesson Material</span>
+                </div>
+                <div id="lessonViewContent"></div>
+              </div>
+
+              <!-- Reader Footer Nav: Prev / Next -->
+              <div class="reader-footer-nav" id="readerFooterNav">
+                <button class="admin-btn" id="prevLessonBtn" type="button">← Previous Lesson</button>
+                <button class="admin-btn primary" id="nextLessonBtn" type="button">Next Lesson →</button>
+              </div>
+            </article>
+
+            <!-- View 3: Assessment / Quiz View (Cisco NetAcad Assessment Style) -->
+            <article class="netacad-reader-preview" id="classroomQuizView" style="display:none">
+              <div class="reader-topline">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <button class="reader-back-btn" id="quizBackToHub" type="button">← Outline</button>
+                  <span id="quizBreadcrumb">Assessment</span>
+                </div>
+                <span id="quizAttemptStatusPill" class="quiz-status-badge">1 Attempt</span>
+              </div>
+              <div class="reader-progress-strip" aria-hidden="true"><span style="width: 100%"></span></div>
+
+              <div class="reader-quiz-canvas-body">
+                <!-- Quiz Briefing Screen -->
+                <div id="quizBriefingScreen">
+                  <div class="lesson-heading">
+                    <div>
+                      <h2 id="quizBriefingTitle">Quiz Title</h2>
+                    </div>
+                    <span class="module-status-pill" id="quizBriefingPill">Assessment</span>
+                  </div>
+                  <p id="quizBriefingDesc" style="font-size:0.95rem;color:#4b5563;line-height:1.6;margin-bottom:1.5rem;"></p>
+
+                  <div class="quiz-briefing-grid">
+                    <div class="briefing-box">
+                      <span class="briefing-label">QUESTIONS</span>
+                      <strong class="briefing-val" id="quizBriefingQuestions">0</strong>
+                    </div>
+                    <div class="briefing-box">
+                      <span class="briefing-label">TIME LIMIT</span>
+                      <strong class="briefing-val" id="quizBriefingTime">Untimed</strong>
+                    </div>
+                    <div class="briefing-box">
+                      <span class="briefing-label">ATTEMPTS</span>
+                      <strong class="briefing-val">1 Attempt Only</strong>
+                    </div>
+                    <div class="briefing-box">
+                      <span class="briefing-label">STATUS</span>
+                      <strong class="briefing-val" id="quizBriefingStatus">Available</strong>
+                    </div>
+                  </div>
+
+                  <div class="quiz-policy-notice">
+                    <strong>Assessment Policy:</strong> This quiz permits exactly 1 attempt. Once submitted, your score will be permanently recorded. Ensure you are ready before proceeding.
+                  </div>
+
+                  <div id="quizBriefingActionArea" style="margin-top:2rem;"></div>
+                </div>
+
+                <!-- Questions Container (during active taking) -->
+                <div id="quizTakingScreen" style="display:none">
+                  <div id="quizQuestionsContainer"></div>
+                  <div id="quizSubmitArea" style="margin-top:2rem;text-align:center">
+                    <button class="admin-btn primary" id="submitQuizBtn" style="padding:0.85rem 2.5rem;font-size:0.95rem">Submit Quiz</button>
+                  </div>
+                </div>
+
+                <!-- Quiz Result Screen -->
+                <div id="quizResultArea" style="display:none"></div>
+              </div>
+            </article>
           </div>
         </div>
-        <button class="admin-btn danger" id="leaveClassBtn">Leave Classroom</button>
-      </div>
-
-      <!-- Inner tabs: Modules, Quizzes -->
-      <div class="classroom-inner-tabs" id="studentInnerTabs">
-        <button class="classroom-inner-tab active" data-stab="modules"> Lessons</button>
-        <button class="classroom-inner-tab" data-stab="quizzes"> Quizzes</button>
-      </div>
-
-      <!-- Modules panel -->
-      <div class="classroom-inner-panel active" id="student-modules">
-        <div id="studentModulesList"></div>
-      </div>
-
-      <!-- Quizzes panel -->
-      <div class="classroom-inner-panel" id="student-quizzes">
-        <div id="studentQuizzesList"></div>
-      </div>
-    </div>
-
-    <!-- Module Content View -->
-    <div id="studentModuleView" style="display:none">
-      <button class="admin-btn" id="backToClassModules" style="margin-bottom:1rem">← Back to Lessons</button>
-      <h2 id="moduleViewTitle" style="font-family:'Nunito',sans-serif;font-weight:800;margin-bottom:1rem;color:#fff">
-      </h2>
-      <div id="moduleViewContent"
-        style="font-family:'Nunito',sans-serif;font-size:0.9rem;color:rgba(255,255,255,0.8);line-height:1.7;white-space:pre-wrap">
-      </div>
-    </div>
-
-    <!-- Quiz Taking View -->
-    <div id="studentQuizView" style="display:none">
-      <button class="admin-btn" id="backToClassQuizzes" style="margin-bottom:1rem">← Back to Quizzes</button>
-      <h2 id="quizViewTitle" style="font-family:'Nunito',sans-serif;font-weight:800;margin-bottom:0.5rem;color:#fff">
-      </h2>
-      <p id="quizViewDesc"
-        style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:1.5rem;font-family:'Nunito',sans-serif"></p>
-      <div id="quizQuestionsContainer"></div>
-      <div id="quizSubmitArea" style="margin-top:1.5rem;text-align:center">
-        <button class="admin-btn primary" id="submitQuizBtn" style="padding:0.8rem 2rem;font-size:0.9rem">Submit
-          Quiz</button>
-      </div>
-      <div id="quizResultArea" style="display:none"></div>
+      </section>
     </div>
   </main>
 

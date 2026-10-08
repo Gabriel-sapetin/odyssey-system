@@ -1,13 +1,20 @@
 /**
- * OS Odyssey — Student Classroom JS
- * ───────────────────────────────────
- * Join classrooms, view lessons, take quizzes.
+ * OS Odyssey — Student Classroom JS (Cisco NetAcad Architecture)
+ * ─────────────────────────────────────────────────────────────
+ * Cisco NetAcad LMS layout with persistent Course Outline sidebar,
+ * Learning Path Hub with "Your Progress" Card, Integrated PDF/Notes
+ * Reader, and Assessment Player with single-attempt enforcement.
  */
 (function () {
   'use strict';
 
   const BACKEND_API = 'https://os-odyssey-api.onrender.com/api';
   let currentClassroomId = null;
+  let classroomData = null;
+  let modulesList = [];
+  let quizzesList = [];
+  let viewedModuleIds = new Set();
+  let currentLessonIndex = -1;
   let currentQuizAnswers = {};
 
   async function getSession() {
@@ -50,9 +57,9 @@
       if (e.key === 'Enter') joinClassroom();
     });
 
-    // Back to class list
+    // Back to class list from shell header
     document.getElementById('backToStudentClasses')?.addEventListener('click', () => {
-      hideAll();
+      hide('studentClassDetail');
       show('studentClassList');
       currentClassroomId = null;
       loadClassrooms();
@@ -66,7 +73,7 @@
       const data = await api('DELETE', `/classrooms/${currentClassroomId}/leave`);
       if (data && !data.error) {
         toast('Left classroom.', 'success');
-        hideAll();
+        hide('studentClassDetail');
         show('studentClassList');
         currentClassroomId = null;
         loadClassrooms();
@@ -75,36 +82,41 @@
       }
     });
 
-    // Inner tabs
-    document.querySelectorAll('.classroom-inner-tab[data-stab]').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.classroom-inner-tab[data-stab]').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.classroom-inner-panel').forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        const panel = document.getElementById(`student-${tab.dataset.stab}`);
-        if (panel) panel.classList.add('active');
+    // Sidebar tabs: Outline vs Resources
+    document.getElementById('sidebarTabOutline')?.addEventListener('click', () => switchSidebarTab('outline'));
+    document.getElementById('sidebarTabResources')?.addEventListener('click', () => switchSidebarTab('resources'));
 
-        if (tab.dataset.stab === 'modules') loadModules();
-        if (tab.dataset.stab === 'quizzes') loadQuizzes();
-      });
+    // Top shell nav tabs
+    document.getElementById('navOutlineTab')?.addEventListener('click', () => {
+      switchSidebarTab('outline');
+      showCanvasView('hub');
+    });
+    document.getElementById('navResourcesTab')?.addEventListener('click', () => {
+      switchSidebarTab('resources');
+      showCanvasView('hub');
     });
 
-    // Back from module view
-    document.getElementById('backToClassModules')?.addEventListener('click', () => {
-      hide('studentModuleView');
-      show('studentClassDetail');
+    // Sidebar search filter
+    document.getElementById('sidebarSearchInput')?.addEventListener('input', (e) => {
+      filterSidebar(e.target.value.toLowerCase().trim());
     });
 
-    // Back from quiz view
-    document.getElementById('backToClassQuizzes')?.addEventListener('click', () => {
-      hide('studentQuizView');
-      show('studentClassDetail');
-      // Reset to quizzes tab
-      document.querySelectorAll('.classroom-inner-tab[data-stab]').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.classroom-inner-panel').forEach(p => p.classList.remove('active'));
-      document.querySelector('[data-stab="quizzes"]').classList.add('active');
-      document.getElementById('student-quizzes').classList.add('active');
-      loadQuizzes();
+    // Return to hub from reader/quiz
+    document.getElementById('readerBackToHub')?.addEventListener('click', () => showCanvasView('hub'));
+    document.getElementById('quizBackToHub')?.addEventListener('click', () => showCanvasView('hub'));
+
+    // Lesson reader Prev/Next navigation
+    document.getElementById('prevLessonBtn')?.addEventListener('click', () => {
+      if (currentLessonIndex > 0) {
+        window._openModule(modulesList[currentLessonIndex - 1].id);
+      }
+    });
+    document.getElementById('nextLessonBtn')?.addEventListener('click', () => {
+      if (currentLessonIndex < modulesList.length - 1) {
+        window._openModule(modulesList[currentLessonIndex + 1].id);
+      } else {
+        showCanvasView('hub');
+      }
     });
 
     // Submit quiz
@@ -130,7 +142,7 @@
 
     if (data && !data.error) {
       if (data.already_enrolled) {
-        feedback.textContent = 'ℹ️ You\'re already enrolled in this classroom.';
+        feedback.textContent = 'ℹ️ You are already enrolled in this classroom.';
         feedback.style.color = '#60a5fa';
       } else {
         feedback.textContent = `✅ ${data.message}`;
@@ -172,75 +184,584 @@
     `).join('');
   }
 
-  /* ── Open Classroom ────────────────────────── */
+  /* ── Open Classroom (Cisco NetAcad Architecture) ────────── */
   window._openStudentClass = async function (id) {
     currentClassroomId = id;
-    hideAll();
+    hide('studentClassList');
     show('studentClassDetail');
 
-    const data = await api('GET', `/classrooms/${id}`);
-    if (!data || !data.classroom) {
+    // Load saved viewed lessons for this classroom from localStorage
+    try {
+      const saved = localStorage.getItem(`odyssey_viewed_${id}`);
+      viewedModuleIds = saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch { viewedModuleIds = new Set(); }
+
+    // Fetch classroom info, modules, and quizzes in parallel
+    const [classRes, modRes, quizRes] = await Promise.all([
+      api('GET', `/classrooms/${id}`),
+      api('GET', `/classrooms/${id}/modules`),
+      api('GET', `/classrooms/${id}/quizzes`)
+    ]);
+
+    if (!classRes || !classRes.classroom) {
       toast('Failed to load classroom.', 'error');
       return;
     }
 
-    const c = data.classroom;
-    document.getElementById('studentClassDetailName').textContent = c.name;
+    classroomData = classRes.classroom;
+    modulesList = modRes?.modules || [];
+    quizzesList = quizRes?.quizzes || [];
+
+    // Header info
+    document.getElementById('studentClassDetailName').textContent = classroomData.name;
     document.getElementById('studentClassDetailMeta').textContent =
-      `Prof. ${c.professor_username || 'Unknown'} · ${c.member_count || 0} students`;
+      `Prof. ${classroomData.professor_username || 'Instructor'} · ${classroomData.member_count || 0} students`;
 
-    // Reset to modules tab
-    document.querySelectorAll('.classroom-inner-tab[data-stab]').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.classroom-inner-panel').forEach(p => p.classList.remove('active'));
-    document.querySelector('[data-stab="modules"]').classList.add('active');
-    document.getElementById('student-modules').classList.add('active');
-
-    loadModules();
+    // Render components
+    renderSidebarOutline();
+    renderSidebarResources();
+    renderClassroomHub();
+    showCanvasView('hub');
   };
 
-  /* ── Modules ───────────────────────────────── */
-  async function loadModules() {
-    const container = document.getElementById('studentModulesList');
-    container.innerHTML = '<div class="admin-loading"><div class="admin-spinner"></div></div>';
+  /* ── Sidebar Tab Management ────────────────── */
+  function switchSidebarTab(tab) {
+    const outlineBtn = document.getElementById('sidebarTabOutline');
+    const resBtn = document.getElementById('sidebarTabResources');
+    const outlineList = document.getElementById('sidebarOutlineList');
+    const resList = document.getElementById('sidebarResourcesList');
+    const navOutline = document.getElementById('navOutlineTab');
+    const navRes = document.getElementById('navResourcesTab');
 
-    const data = await api('GET', `/classrooms/${currentClassroomId}/modules`);
-    if (!data || data.error) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-text">Failed to load lessons</div></div>';
-      return;
+    if (tab === 'outline') {
+      outlineBtn?.classList.add('active');
+      resBtn?.classList.remove('active');
+      navOutline?.classList.add('active');
+      navRes?.classList.remove('active');
+      show('sidebarOutlineList');
+      hide('sidebarResourcesList');
+    } else {
+      resBtn?.classList.add('active');
+      outlineBtn?.classList.remove('active');
+      navRes?.classList.add('active');
+      navOutline?.classList.remove('active');
+      show('sidebarResourcesList');
+      hide('sidebarOutlineList');
     }
-
-    if (!data.modules || data.modules.length === 0) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-text">No lessons available yet.</div></div>';
-      return;
-    }
-
-    const cardsHtml = data.modules.map(m => {
-      const hasPdf = m.file_url && m.file_name;
-      const badge = hasPdf
-        ? '<span class="lesson-badge pdf">PDF Document</span>'
-        : '<span class="lesson-badge">Lesson Material</span>';
-      const actionText = hasPdf ? 'Open PDF' : 'Read Lesson';
-
-      return `
-        <div class="student-lesson-card" onclick="window._openModule('${m.id}')">
-          <div class="student-lesson-top">
-            <div class="student-lesson-header">
-              ${badge}
-            </div>
-            <h4 class="lesson-card-title">${esc(m.title)}</h4>
-            ${m.description ? `<div class="lesson-card-desc">${esc(m.description)}</div>` : ''}
-            ${hasPdf ? `<div class="lesson-card-file">${esc(m.file_name)}</div>` : ''}
-          </div>
-          <div class="student-lesson-bottom">
-            <button class="lesson-action-btn" type="button">${actionText}</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    container.innerHTML = `<div class="student-lesson-grid">${cardsHtml}</div>`;
   }
 
+  /* ── Render Sidebar Outline ────────────────── */
+  function renderSidebarOutline() {
+    const list = document.getElementById('sidebarOutlineList');
+    if (!list) return;
+
+    if (modulesList.length === 0 && quizzesList.length === 0) {
+      list.innerHTML = '<div style="padding:1.5rem;text-align:center;color:#64748b;font-size:0.85rem;">No curriculum items available yet.</div>';
+      return;
+    }
+
+    let html = '';
+
+    // Lessons in outline
+    modulesList.forEach((m, idx) => {
+      const hasPdf = m.file_url && m.file_name;
+      const isViewed = viewedModuleIds.has(m.id);
+      const checkText = isViewed ? '✓' : String(idx + 1);
+      const circleClass = isViewed ? 'outline-badge-circle completed' : 'outline-badge-circle';
+      const badgeText = hasPdf ? 'PDF' : 'NOTES';
+
+      html += `
+        <button class="course-outline-item" id="sidebar-mod-${m.id}" type="button" onclick="window._openModule('${m.id}')">
+          <span class="${circleClass}">${checkText}</span>
+          <div>
+            <strong>${esc(m.title)}</strong>
+            <em>${hasPdf ? esc(m.file_name) : (m.description ? esc(m.description) : 'Lesson Material')}</em>
+          </div>
+          <span class="course-outline-badge ${isViewed ? 'completed' : ''}">${badgeText}</span>
+        </button>
+      `;
+    });
+
+    // Quizzes in outline
+    quizzesList.forEach((q, idx) => {
+      const attempted = q.last_attempt;
+      const isCompleted = Boolean(attempted);
+      const pct = attempted?.max_score ? Math.round((attempted.score / attempted.max_score) * 100) : 0;
+      const checkText = isCompleted ? '✓' : `Q${idx + 1}`;
+      const circleClass = isCompleted ? 'outline-badge-circle completed' : 'outline-badge-circle quiz';
+      const badgeText = isCompleted ? `${pct}%` : 'QUIZ';
+
+      html += `
+        <button class="course-outline-item quiz-item" id="sidebar-quiz-${q.id}" type="button" onclick="window._openQuiz('${q.id}')">
+          <span class="${circleClass}">${checkText}</span>
+          <div>
+            <strong>${esc(q.title)}</strong>
+            <em>${isCompleted ? `Score: ${attempted.score}/${attempted.max_score}` : `${q.question_count || 0} questions · 1 attempt`}</em>
+          </div>
+          <span class="course-outline-badge ${isCompleted ? 'completed' : ''}">${badgeText}</span>
+        </button>
+      `;
+    });
+
+    list.innerHTML = html;
+  }
+
+  /* ── Render Sidebar Resources ──────────────── */
+  function renderSidebarResources() {
+    const list = document.getElementById('sidebarResourcesList');
+    if (!list) return;
+
+    const pdfModules = modulesList.filter(m => m.file_url && m.file_name);
+
+    if (pdfModules.length === 0) {
+      list.innerHTML = '<div style="padding:1.5rem;text-align:center;color:#64748b;font-size:0.85rem;">No downloadable PDF resources uploaded yet.</div>';
+      return;
+    }
+
+    list.innerHTML = pdfModules.map(m => `
+      <div class="course-outline-item" style="cursor:default">
+        <span class="outline-badge-circle">📥</span>
+        <div>
+          <strong>${esc(m.title)}</strong>
+          <em>${esc(m.file_name)}</em>
+        </div>
+        <button class="admin-btn primary" type="button" style="padding:4px 8px;font-size:0.75rem;" onclick="window._downloadPdfFile(this, '${m.file_url}', '${esc(m.file_name)}')">
+          Download
+        </button>
+      </div>
+    `).join('');
+  }
+
+  /* ── Filter Sidebar Items ──────────────────── */
+  function filterSidebar(query) {
+    document.querySelectorAll('.course-outline-item').forEach(el => {
+      const text = el.textContent.toLowerCase();
+      el.style.display = text.includes(query) ? '' : 'none';
+    });
+  }
+
+  /* ── Render Classroom Hub (Picture 2 Architecture) ──── */
+  function renderClassroomHub() {
+    document.getElementById('hubCourseTitle').textContent = `${classroomData.name} - Curriculum`;
+    document.getElementById('hubCourseDesc').textContent =
+      classroomData.description || 'Welcome to this classroom. Review the available lessons and materials below, and take the assigned quizzes to assess your understanding.';
+
+    // Quick Action Launch Buttons
+    const actionArea = document.getElementById('hubQuickActions');
+    let actionsHtml = '';
+
+    modulesList.forEach((m, idx) => {
+      const isViewed = viewedModuleIds.has(m.id);
+      const label = isViewed ? `✓ Review Lesson ${idx + 1}` : `Start Lesson ${idx + 1}`;
+      const btnClass = isViewed ? 'module-completed' : 'secondary';
+      actionsHtml += `
+        <button class="lesson-button ${btnClass}" type="button" onclick="window._openModule('${m.id}')">${label}</button>
+      `;
+    });
+
+    quizzesList.forEach((q, idx) => {
+      const isCompleted = Boolean(q.last_attempt);
+      const label = isCompleted ? `✓ Completed Quiz ${idx + 1}` : `Take Quiz ${idx + 1}`;
+      const btnClass = isCompleted ? 'module-completed' : 'primary';
+      actionsHtml += `
+        <button class="lesson-button ${btnClass}" type="button" onclick="window._openQuiz('${q.id}')">${label}</button>
+      `;
+    });
+
+    actionArea.innerHTML = actionsHtml || '<p style="color:#64748b;font-size:0.9rem;">No lessons or quizzes uploaded yet.</p>';
+
+    // Render "Your Progress" Card (matching Picture 2)
+    renderProgressCard();
+  }
+
+  /* ── Render "Your Progress" Card ───────────── */
+  function renderProgressCard() {
+    const card = document.getElementById('classroomProgressCard');
+    if (!card) return;
+
+    const totalLessons = modulesList.length;
+    const completedLessons = modulesList.filter(m => viewedModuleIds.has(m.id)).length;
+    const totalQuizzes = quizzesList.length;
+    const completedQuizzes = quizzesList.filter(q => Boolean(q.last_attempt)).length;
+
+    const totalTasks = totalLessons + totalQuizzes;
+    const completedTasks = completedLessons + completedQuizzes;
+    const overallPct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    // Update overall top progress bar
+    const topBar = document.getElementById('classroomOverallProgress');
+    if (topBar) topBar.style.width = `${overallPct}%`;
+
+    // Compute average score of attempted quizzes
+    let avgScoreText = '—';
+    const scoredQuizzes = quizzesList.filter(q => q.last_attempt && q.last_attempt.max_score);
+    if (scoredQuizzes.length > 0) {
+      const sumPct = scoredQuizzes.reduce((acc, q) => acc + (q.last_attempt.score / q.last_attempt.max_score), 0);
+      avgScoreText = `${Math.round((sumPct / scoredQuizzes.length) * 100)}%`;
+    }
+
+    let checklistHtml = '';
+
+    modulesList.forEach((m, idx) => {
+      const isDone = viewedModuleIds.has(m.id);
+      checklistHtml += `
+        <button class="progress-module-row ${isDone ? 'completed' : ''}" type="button" onclick="window._openModule('${m.id}')">
+          <span class="progress-module-info">
+            <strong>Lesson ${idx + 1}</strong>
+            <em>${esc(m.title)}</em>
+          </span>
+          <span class="progress-module-status" style="color: ${isDone ? '#16a34a' : '#64748b'}">
+            ${isDone ? '✓ Completed' : 'Pending'}
+          </span>
+        </button>
+      `;
+    });
+
+    quizzesList.forEach((q, idx) => {
+      const isDone = Boolean(q.last_attempt);
+      const scoreLabel = isDone
+        ? `✓ ${q.last_attempt.score}/${q.last_attempt.max_score} (${Math.round((q.last_attempt.score / q.last_attempt.max_score) * 100)}%)`
+        : 'Take Quiz';
+
+      checklistHtml += `
+        <button class="progress-module-row ${isDone ? 'completed' : ''}" type="button" onclick="window._openQuiz('${q.id}')">
+          <span class="progress-module-info">
+            <strong>Quiz ${idx + 1}</strong>
+            <em>${esc(q.title)}</em>
+          </span>
+          <span class="progress-module-status" style="color: ${isDone ? '#16a34a' : '#2563eb'}">
+            ${scoreLabel}
+          </span>
+        </button>
+      `;
+    });
+
+    card.innerHTML = `
+      <div class="progress-panel-header">
+        <span class="progress-panel-title">Your Progress</span>
+        <span class="progress-panel-overall">${overallPct}% Complete</span>
+      </div>
+      <div class="progress-panel-bar-wrap">
+        <div class="progress-panel-bar" style="width: ${overallPct}%"></div>
+      </div>
+      <div class="progress-panel-stats-row">
+        <div class="progress-stat-mini">
+          <span class="progress-stat-num">${completedLessons} / ${totalLessons}</span>
+          <span class="progress-stat-label">Lessons Done</span>
+        </div>
+        <div class="progress-stat-mini">
+          <span class="progress-stat-num">${completedQuizzes} / ${totalQuizzes}</span>
+          <span class="progress-stat-label">Quizzes Done</span>
+        </div>
+        <div class="progress-stat-mini">
+          <span class="progress-stat-num">${avgScoreText}</span>
+          <span class="progress-stat-label">Avg Score</span>
+        </div>
+      </div>
+      ${checklistHtml}
+    `;
+  }
+
+  /* ── Show Canvas View ──────────────────────── */
+  function showCanvasView(view) {
+    hide('classroomHubView');
+    hide('classroomLessonView');
+    hide('classroomQuizView');
+
+    // Deselect outline active styles
+    document.querySelectorAll('.course-outline-item').forEach(el => el.classList.remove('active'));
+
+    if (view === 'hub') {
+      show('classroomHubView');
+    } else if (view === 'lesson') {
+      show('classroomLessonView');
+    } else if (view === 'quiz') {
+      show('classroomQuizView');
+    }
+  }
+
+  /* ── Open Lesson Reader (Picture 1 & 3 Architecture) ──── */
+  window._openModule = async function (modId) {
+    const data = await api('GET', `/classrooms/${currentClassroomId}/modules/${modId}`);
+    if (!data || !data.module) {
+      toast('Failed to load lesson.', 'error');
+      return;
+    }
+
+    const mod = data.module;
+    currentLessonIndex = modulesList.findIndex(m => m.id === modId);
+
+    showCanvasView('lesson');
+
+    // Mark active in sidebar
+    const activeSidebarItem = document.getElementById(`sidebar-mod-${modId}`);
+    activeSidebarItem?.classList.add('active');
+
+    // Breadcrumb & title
+    document.getElementById('lessonBreadcrumb').textContent = `Lesson: ${mod.title}`;
+    document.getElementById('lessonViewTitle').textContent = mod.title;
+
+    const typePill = document.getElementById('lessonTypePill');
+    const dlBtn = document.getElementById('readerDownloadBtn');
+    const tabBtn = document.getElementById('readerOpenTabBtn');
+    const contentEl = document.getElementById('lessonViewContent');
+
+    if (mod.file_url) {
+      const fileName = mod.file_name || 'lesson.pdf';
+      typePill.textContent = 'PDF Document';
+      typePill.style.color = '#ef4444';
+
+      dlBtn.style.display = 'inline-block';
+      dlBtn.textContent = 'Download PDF';
+      dlBtn.onclick = () => window._downloadPdfFile(dlBtn, mod.file_url, fileName);
+
+      tabBtn.style.display = 'inline-block';
+      tabBtn.href = mod.file_url;
+
+      contentEl.innerHTML = `
+        <div style="position:relative;width:100%;height:75vh;border-radius:8px;overflow:hidden;border:1px solid #cbd5e1;background:#0f172a;box-shadow:0 4px 20px rgba(0,0,0,0.08);margin-top:1rem;">
+          <object data="${mod.file_url}#toolbar=1" type="application/pdf" style="width:100%;height:100%">
+            <iframe src="${mod.file_url}#toolbar=1" style="width:100%;height:100%;border:none;background:#fff" allowfullscreen>
+              <div style="padding:2rem;text-align:center;color:#64748b;">
+                <p style="margin-bottom:1rem">PDF preview not supported in this frame.</p>
+                <button type="button" onclick="window._downloadPdfFile(this, '${mod.file_url}', '${esc(fileName)}')" class="admin-btn primary">Download PDF</button>
+              </div>
+            </iframe>
+          </object>
+        </div>
+      `;
+    } else {
+      typePill.textContent = 'Lesson Notes';
+      typePill.style.color = '#3b82f6';
+      dlBtn.style.display = 'none';
+      tabBtn.style.display = 'none';
+
+      contentEl.innerHTML = `
+        <div style="font-family:'Nunito',sans-serif;font-size:1.05rem;color:#1e293b;line-height:1.8;white-space:pre-wrap;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:2rem;margin-top:1rem;">
+          ${esc(mod.content || 'No text content available for this lesson.')}
+        </div>
+      `;
+    }
+
+    // Prev / Next button state
+    const prevBtn = document.getElementById('prevLessonBtn');
+    const nextBtn = document.getElementById('nextLessonBtn');
+    if (prevBtn) prevBtn.disabled = currentLessonIndex <= 0;
+    if (nextBtn) {
+      nextBtn.textContent = currentLessonIndex < modulesList.length - 1 ? 'Next Lesson →' : 'Back to Outline →';
+    }
+
+    // Mark as viewed
+    if (!viewedModuleIds.has(modId)) {
+      viewedModuleIds.add(modId);
+      try {
+        localStorage.setItem(`odyssey_viewed_${currentClassroomId}`, JSON.stringify([...viewedModuleIds]));
+      } catch {}
+      renderSidebarOutline();
+      renderProgressCard();
+    }
+  };
+
+  /* ── Open Quiz Assessment (Cisco NetAcad Assessment Style) ── */
+  window._openQuiz = async function (quizId) {
+    currentQuizAnswers = {};
+
+    const data = await api('GET', `/classrooms/${currentClassroomId}/quizzes/${quizId}`);
+    if (!data || !data.quiz) {
+      toast('Failed to load quiz.', 'error');
+      return;
+    }
+
+    const quiz = data.quiz;
+    const attempted = data.last_attempt || quizzesList.find(q => q.id === quizId)?.last_attempt;
+
+    showCanvasView('quiz');
+
+    // Mark active in sidebar
+    const activeSidebarItem = document.getElementById(`sidebar-quiz-${quizId}`);
+    activeSidebarItem?.classList.add('active');
+
+    // Breadcrumb
+    document.getElementById('quizBreadcrumb').textContent = `Assessment: ${quiz.title}`;
+
+    const statusPill = document.getElementById('quizAttemptStatusPill');
+    const briefingTitle = document.getElementById('quizBriefingTitle');
+    const briefingDesc = document.getElementById('quizBriefingDesc');
+    const briefingQuestions = document.getElementById('quizBriefingQuestions');
+    const briefingTime = document.getElementById('quizBriefingTime');
+    const briefingStatus = document.getElementById('quizBriefingStatus');
+    const briefingActions = document.getElementById('quizBriefingActionArea');
+
+    briefingTitle.textContent = quiz.title;
+    briefingDesc.textContent = quiz.description || 'Complete this assessment to test your understanding of the covered lessons.';
+    briefingQuestions.textContent = (quiz.questions || []).length;
+    briefingTime.textContent = quiz.time_limit_minutes ? `${quiz.time_limit_minutes} Mins` : 'Untimed';
+
+    // Check if already attempted (Single Attempt Rule)
+    if (attempted || data.already_attempted) {
+      const att = attempted || data.last_attempt;
+      const pct = att?.max_score ? Math.round((att.score / att.max_score) * 100) : 0;
+
+      statusPill.textContent = 'Completed (1 of 1 attempt used)';
+      statusPill.className = 'quiz-status-badge completed';
+      briefingStatus.textContent = `Completed (${pct}%)`;
+
+      // Show completed summary card
+      briefingActions.innerHTML = `
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:1.5rem;text-align:center;">
+          <h3 style="color:#16a34a;margin-bottom:0.5rem;font-size:1.2rem;">Assessment Finalized</h3>
+          <p style="font-size:1.1rem;font-weight:800;color:#1e293b;margin-bottom:0.5rem;">
+            Total Score: ${att.score} / ${att.max_score} (${pct}%)
+          </p>
+          <p style="font-size:0.85rem;color:#64748b;margin-bottom:1.5rem;">
+            You have already used your 1 allowed attempt for this quiz.
+          </p>
+          <button class="admin-btn primary" type="button" onclick="showCanvasView('hub')">Return to Course Outline</button>
+        </div>
+      `;
+
+      hide('quizTakingScreen');
+      hide('quizResultArea');
+      show('quizBriefingScreen');
+      return;
+    }
+
+    // Unattempted: Show "Take Quiz" briefing
+    statusPill.textContent = '1 Attempt Allowed';
+    statusPill.className = 'quiz-status-badge';
+    briefingStatus.textContent = 'Available';
+
+    briefingActions.innerHTML = `
+      <button class="admin-btn primary" type="button" style="padding:0.85rem 2.5rem;font-size:0.95rem;" onclick="window._startTakingQuiz('${quizId}')">
+        Take Quiz
+      </button>
+    `;
+
+    hide('quizTakingScreen');
+    hide('quizResultArea');
+    show('quizBriefingScreen');
+  };
+
+  /* ── Start Taking Quiz ─────────────────────── */
+  window._startTakingQuiz = async function (quizId) {
+    const data = await api('GET', `/classrooms/${currentClassroomId}/quizzes/${quizId}`);
+    if (!data || !data.quiz) {
+      toast('Failed to start quiz.', 'error');
+      return;
+    }
+
+    const quiz = data.quiz;
+    const questions = quiz.questions || [];
+
+    if (questions.length === 0) {
+      toast('This quiz has no questions yet.', 'info');
+      return;
+    }
+
+    hide('quizBriefingScreen');
+    show('quizTakingScreen');
+    hide('quizResultArea');
+
+    document.getElementById('submitQuizBtn').dataset.quizId = quizId;
+
+    const container = document.getElementById('quizQuestionsContainer');
+    const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+    container.innerHTML = questions.map((q, i) => `
+      <div class="quiz-question-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:1.5rem;margin-bottom:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+        <div class="q-number" style="font-size:0.75rem;font-weight:800;color:#64748b;letter-spacing:0.5px;margin-bottom:0.5rem;">QUESTION ${i + 1} OF ${questions.length}</div>
+        <div class="q-text" style="font-size:1.05rem;font-weight:700;color:#0f172a;line-height:1.5;margin-bottom:1.25rem;">${esc(q.question_text)}</div>
+        ${(q.options || []).map((opt, oi) => `
+          <div class="quiz-option" data-qid="${q.id}" data-answer="${esc(opt)}" onclick="window._selectAnswer(this)" style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all 0.15s ease;">
+            <span class="option-marker" style="width:26px;height:26px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#475569;">${optionLabels[oi] || oi + 1}</span>
+            <span style="font-size:0.92rem;color:#1e293b;">${esc(opt)}</span>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  };
+
+  window._selectAnswer = function (el) {
+    const qid = el.dataset.qid;
+    const answer = el.dataset.answer;
+
+    el.parentElement.querySelectorAll(`.quiz-option[data-qid="${qid}"]`).forEach(o => {
+      o.style.borderColor = '#e2e8f0';
+      o.style.background = '#ffffff';
+      const marker = o.querySelector('.option-marker');
+      if (marker) { marker.style.background = '#f1f5f9'; marker.style.color = '#475569'; }
+    });
+
+    el.style.borderColor = '#3b82f6';
+    el.style.background = '#eff6ff';
+    const activeMarker = el.querySelector('.option-marker');
+    if (activeMarker) { activeMarker.style.background = '#3b82f6'; activeMarker.style.color = '#ffffff'; }
+
+    currentQuizAnswers[qid] = answer;
+  };
+
+  /* ── Submit Quiz ───────────────────────────── */
+  async function submitQuiz() {
+    const quizId = document.getElementById('submitQuizBtn').dataset.quizId;
+    if (!quizId) return;
+
+    if (Object.keys(currentQuizAnswers).length === 0) {
+      toast('Please answer at least one question.', 'error');
+      return;
+    }
+
+    const data = await api('POST', `/classrooms/${currentClassroomId}/quizzes/${quizId}/submit`, {
+      answers: currentQuizAnswers,
+    });
+
+    if (data && !data.error) {
+      hide('quizTakingScreen');
+      const resultArea = document.getElementById('quizResultArea');
+      show('quizResultArea');
+
+      const pct = data.percentage || 0;
+      let color = pct >= 80 ? '#16a34a' : pct >= 50 ? '#f59e0b' : '#ef4444';
+
+      // Update quiz record in quizzesList
+      const targetQuiz = quizzesList.find(q => q.id === quizId);
+      if (targetQuiz) {
+        targetQuiz.last_attempt = {
+          score: data.score,
+          max_score: data.max_score,
+          submitted_at: new Date().toISOString()
+        };
+      }
+
+      resultArea.innerHTML = `
+        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:2.5rem;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.06);margin-top:1.5rem;">
+          <div style="width:100px;height:100px;border-radius:50%;border:4px solid ${color};display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1.5rem;">
+            <div style="font-size:1.6rem;font-weight:900;color:${color}">${pct}%</div>
+            <div style="font-size:0.65rem;font-weight:800;color:#64748b;">SCORE</div>
+          </div>
+          <h3 style="font-size:1.3rem;font-weight:800;color:#0f172a;margin-bottom:0.5rem;">
+            ${data.score} / ${data.max_score} Correct
+          </h3>
+          <p style="font-size:0.9rem;color:#64748b;margin-bottom:1.5rem;">
+            ${pct >= 80 ? 'Excellent work! Assessment completed successfully.' : pct >= 50 ? 'Good effort! Review the lesson materials.' : 'Assessment completed.'}
+          </p>
+          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:2rem;">
+            Notice: Only 1 attempt is allowed. Your grade is finalized.
+          </p>
+          <button class="admin-btn primary" type="button" style="padding:0.8rem 2.2rem;" onclick="showCanvasView('hub')">
+            Back to Course Outline
+          </button>
+        </div>
+      `;
+
+      // Refresh sidebar and progress panel
+      renderSidebarOutline();
+      renderProgressCard();
+    } else {
+      toast(data?.error || 'Failed to submit quiz.', 'error');
+    }
+  }
+
+  /* ── Download PDF File Helper ──────────────── */
   window._downloadPdfFile = async function (btn, url, fileName) {
     const originalText = btn.innerHTML;
     try {
@@ -271,247 +792,11 @@
       console.warn('Direct blob download failed, falling back:', err);
       btn.innerHTML = originalText;
       btn.style.pointerEvents = '';
-      // Direct navigation fallback
       window.open(url, '_blank');
     }
   };
 
-  window._openModule = async function (modId) {
-    const data = await api('GET', `/classrooms/${currentClassroomId}/modules/${modId}`);
-    if (!data || !data.module) {
-      toast('Failed to load module.', 'error');
-      return;
-    }
-
-    hideAll();
-    show('studentModuleView');
-
-    const mod = data.module;
-    document.getElementById('moduleViewTitle').textContent = mod.title;
-
-    const contentEl = document.getElementById('moduleViewContent');
-
-    if (mod.file_url) {
-      const fileName = mod.file_name || 'module.pdf';
-      contentEl.innerHTML = `
-        <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap">
-          <button type="button" onclick="window._downloadPdfFile(this, '${mod.file_url}', '${esc(fileName)}')" class="admin-btn primary" style="display:inline-flex;align-items:center;gap:0.5rem;cursor:pointer">
-            📥 Download to Device (${esc(fileName)})
-          </button>
-          <a href="${mod.file_url}" target="_blank" class="admin-btn secondary" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none">
-            ↗️ Open in New Tab
-          </a>
-        </div>
-        <div style="position:relative;width:100%;height:80vh;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.15);background:#0f172a;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
-          <object data="${mod.file_url}#toolbar=1" type="application/pdf" style="width:100%;height:100%">
-            <iframe src="${mod.file_url}#toolbar=1" style="width:100%;height:100%;border:none;background:#fff" allowfullscreen>
-              <div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.8)">
-                <p style="margin-bottom:1rem">Your browser does not support embedded PDF preview.</p>
-                <button type="button" onclick="window._downloadPdfFile(this, '${mod.file_url}', '${esc(fileName)}')" class="admin-btn primary">Download PDF</button>
-              </div>
-            </iframe>
-          </object>
-        </div>
-      `;
-    } else {
-      contentEl.textContent = mod.content || 'No content available.';
-    }
-  };
-
-  /* ── Quizzes ───────────────────────────────── */
-  async function loadQuizzes() {
-    const container = document.getElementById('studentQuizzesList');
-    container.innerHTML = '<div class="admin-loading"><div class="admin-spinner"></div></div>';
-
-    const data = await api('GET', `/classrooms/${currentClassroomId}/quizzes`);
-    if (!data || data.error) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-text">Failed to load quizzes</div></div>';
-      return;
-    }
-
-    if (!data.quizzes || data.quizzes.length === 0) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-text">No quizzes available yet.</div></div>';
-      return;
-    }
-
-    const cardsHtml = data.quizzes.map(q => {
-      const attempted = q.last_attempt;
-      let scoreHtml = '';
-      let actionBtn = '';
-
-      if (attempted) {
-        const pct = attempted.max_score ? Math.round((attempted.score / attempted.max_score) * 100) : 0;
-        scoreHtml = `
-          <div class="quiz-score-display">
-            <span class="quiz-score-label">Total Score</span>
-            <span class="quiz-score-val">${attempted.score} / ${attempted.max_score} (${pct}%)</span>
-          </div>
-        `;
-        actionBtn = `
-          <button class="quiz-action-btn completed" disabled title="Already completed (1 attempt only)">Completed</button>
-        `;
-      } else {
-        scoreHtml = `
-          <div class="quiz-score-placeholder">
-            <span class="quiz-score-label">Attempt</span>
-            <span style="font-size:0.75rem;color:rgba(255,255,255,0.4)">1 Attempt Allowed</span>
-          </div>
-        `;
-        actionBtn = `
-          <button class="quiz-action-btn take-quiz" onclick="window._openQuiz('${q.id}')">Take Quiz</button>
-        `;
-      }
-
-      const timeMeta = q.time_limit_minutes ? ` · ${q.time_limit_minutes} min` : '';
-      const statusBadge = attempted
-        ? '<span class="quiz-status-badge completed">Completed</span>'
-        : '<span class="quiz-status-badge">Available</span>';
-
-      return `
-        <div class="student-quiz-card ${attempted ? 'completed' : ''}">
-          <div class="student-quiz-top">
-            <div class="student-quiz-header">
-              ${statusBadge}
-            </div>
-            <h4 class="quiz-card-title">${esc(q.title)}</h4>
-            <div class="quiz-card-meta">${q.question_count || 0} questions${timeMeta}</div>
-          </div>
-          <div class="student-quiz-bottom">
-            ${scoreHtml}
-            ${actionBtn}
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    container.innerHTML = `<div class="student-quiz-grid">${cardsHtml}</div>`;
-  }
-
-  /* ── Take Quiz ─────────────────────────────── */
-  window._openQuiz = async function (quizId) {
-    currentQuizAnswers = {};
-
-    const data = await api('GET', `/classrooms/${currentClassroomId}/quizzes/${quizId}`);
-    if (!data || !data.quiz) {
-      toast('Failed to load quiz.', 'error');
-      return;
-    }
-
-    if (data.already_attempted) {
-      toast('You have already completed this quiz. Only 1 attempt is allowed.', 'error');
-      loadQuizzes();
-      return;
-    }
-
-    hideAll();
-    show('studentQuizView');
-
-    const quiz = data.quiz;
-    document.getElementById('quizViewTitle').textContent = quiz.title;
-    document.getElementById('quizViewDesc').textContent = quiz.description || '';
-    document.getElementById('quizSubmitArea').style.display = '';
-    document.getElementById('quizResultArea').style.display = 'none';
-
-    const container = document.getElementById('quizQuestionsContainer');
-    const questions = quiz.questions || [];
-
-    if (questions.length === 0) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-text">This quiz has no questions yet.</div></div>';
-      document.getElementById('quizSubmitArea').style.display = 'none';
-      return;
-    }
-
-    // Store quiz ID for submission
-    document.getElementById('submitQuizBtn').dataset.quizId = quizId;
-
-    container.innerHTML = questions.map((q, i) => {
-      const options = q.options || [];
-      const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-
-      return `
-        <div class="quiz-question-card">
-          <div class="q-number">QUESTION ${i + 1}</div>
-          <div class="q-text">${esc(q.question_text)}</div>
-          ${options.map((opt, oi) => `
-            <div class="quiz-option" data-qid="${q.id}" data-answer="${esc(opt)}" onclick="window._selectAnswer(this)">
-              <span class="option-marker">${optionLabels[oi] || oi + 1}</span>
-              <span>${esc(opt)}</span>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }).join('');
-  };
-
-  window._selectAnswer = function (el) {
-    const qid = el.dataset.qid;
-    const answer = el.dataset.answer;
-
-    // Deselect siblings
-    el.parentElement.querySelectorAll(`.quiz-option[data-qid="${qid}"]`).forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
-
-    currentQuizAnswers[qid] = answer;
-  };
-
-  async function submitQuiz() {
-    const quizId = document.getElementById('submitQuizBtn').dataset.quizId;
-    if (!quizId) return;
-
-    if (Object.keys(currentQuizAnswers).length === 0) {
-      toast('Please answer at least one question.', 'error');
-      return;
-    }
-
-    const data = await api('POST', `/classrooms/${currentClassroomId}/quizzes/${quizId}/submit`, {
-      answers: currentQuizAnswers,
-    });
-
-    if (data && !data.error) {
-      document.getElementById('quizSubmitArea').style.display = 'none';
-      const resultArea = document.getElementById('quizResultArea');
-      resultArea.style.display = '';
-
-      const pct = data.percentage || 0;
-      let color = '#ef4444';
-      if (pct >= 80) color = '#22c55e';
-      else if (pct >= 50) color = '#f59e0b';
-
-      resultArea.innerHTML = `
-        <div class="quiz-result">
-          <div class="score-circle" style="border-color:${color}">
-            <div class="score-value" style="color:${color}">${pct}%</div>
-            <div class="score-label">SCORE</div>
-          </div>
-          <p style="font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;margin:1rem 0 0.5rem">
-            ${data.score} / ${data.max_score} correct
-          </p>
-          <p style="font-family:'Nunito',sans-serif;font-size:0.85rem;color:rgba(255,255,255,0.5)">
-            ${pct >= 80 ? 'Excellent work!' : pct >= 50 ? 'Good effort!' : 'Quiz completed.'}
-          </p>
-          <button class="admin-btn primary" style="margin-top:1.5rem" onclick="window._backToQuizzes()">Back to Quizzes</button>
-        </div>
-      `;
-    } else {
-      toast(data?.error || 'Failed to submit quiz.', 'error');
-    }
-  }
-
-  window._backToQuizzes = function () {
-    const backBtn = document.getElementById('backToClassQuizzes');
-    if (backBtn) {
-      backBtn.click();
-    } else {
-      hide('studentQuizView');
-      show('studentClassDetail');
-      loadQuizzes();
-    }
-  };
-
   /* ── View Helpers ──────────────────────────── */
-  function hideAll() {
-    ['studentClassList', 'studentClassDetail', 'studentModuleView', 'studentQuizView'].forEach(id => hide(id));
-  }
   function show(id) { const el = document.getElementById(id); if (el) el.style.display = ''; }
   function hide(id) { const el = document.getElementById(id); if (el) el.style.display = 'none'; }
 

@@ -1505,3 +1505,260 @@
   color: rgba(0, 0, 0, 0.4);
 }
 
+/* ── Cisco NetAcad Classroom Integration Styles ───────── */
+#studentClassDetail .netacad-course.standalone {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  margin-top: 1rem;
+  border: 1px solid #d9e1ea;
+  background: #ffffff;
+}
+
+.netacad-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #1e293b;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.netacad-back-link:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.netacad-nav-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #4b5563;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.netacad-nav-tab:hover {
+  color: #0b6fb3;
+}
+
+.netacad-nav-tab.active {
+  color: #2f7d32;
+  border-bottom-color: #69b84f;
+}
+
+.classroom-leave-link {
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.classroom-leave-link:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
+
+.reader-back-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.reader-back-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.reader-lesson-canvas-body {
+  padding: clamp(24px, 4vw, 48px);
+  color: #202833;
+  min-height: 520px;
+}
+
+.reader-lesson-canvas-body h2 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.reader-quiz-canvas-body {
+  padding: clamp(24px, 4vw, 48px);
+  max-width: 840px;
+  margin: 0 auto;
+  color: #202833;
+}
+
+.reader-quiz-canvas-body h2 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.quiz-briefing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin: 1.5rem 0;
+}
+
+.briefing-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.briefing-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.briefing-val {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.quiz-policy-notice {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b;
+  color: #92400e;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-top: 1rem;
+}
+
+.reader-footer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px solid #e5ebf1;
+  background: #f8fafc;
+}
+
+/* Sidebar item styling for outline tree */
+.course-outline-item {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid #e5ebf1;
+  background: transparent;
+  color: #202833;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.course-outline-item:hover,
+.course-outline-item.active {
+  background: #e9f8e4;
+}
+
+.course-outline-item.quiz-item:hover,
+.course-outline-item.quiz-item.active {
+  background: #eff6ff;
+}
+
+.course-outline-item strong {
+  display: block;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.course-outline-item em {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.course-outline-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: #4b5563;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #e2e8f0;
+}
+
+.course-outline-badge.completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.outline-badge-circle {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 999px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.outline-badge-circle.completed {
+  border-color: #22c55e;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.outline-badge-circle.quiz {
+  border-color: #3b82f6;
+  color: #2563eb;
+}
+
