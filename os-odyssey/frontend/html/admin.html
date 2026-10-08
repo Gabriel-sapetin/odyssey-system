@@ -4,11 +4,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>OS Odyssey - Admin Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
   <link rel="stylesheet" href="../css/styles.css" />
   <link rel="stylesheet" href="../css/admin.css" />
@@ -17,7 +20,8 @@
 <body class="app-page dashboard-page">
   <nav class="app-nav">
     <a href="index.html" class="app-brand">
-      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png"
+        alt="OS Odyssey penguin mascot" />
       OS ODYSSEY
     </a>
     <button class="app-nav-mobile-toggle" type="button" aria-label="Toggle mobile menu">
@@ -38,22 +42,22 @@
   <main class="admin-shell" id="adminShell">
     <!-- Header -->
     <div class="admin-header">
-      <h1>🛡️ Admin Dashboard <span class="admin-role-badge">ADMIN</span></h1>
+      <h1> Admin Dashboard <span class="admin-role-badge">ADMIN</span></h1>
     </div>
 
     <!-- Tabs -->
     <div class="admin-tabs" id="adminTabs">
       <button class="admin-tab active" data-tab="overview">
-        <span class="admin-tab-icon">📊</span> Overview
+        <span class="admin-tab-icon"></span> Overview
       </button>
       <button class="admin-tab" data-tab="users">
-        <span class="admin-tab-icon">👥</span> Users
+        <span class="admin-tab-icon"></span> Users
       </button>
       <button class="admin-tab" data-tab="classrooms">
-        <span class="admin-tab-icon">🏫</span> Classrooms
+        <span class="admin-tab-icon"></span> Classrooms
       </button>
       <button class="admin-tab" data-tab="audit">
-        <span class="admin-tab-icon">📋</span> Audit Log
+        <span class="admin-tab-icon"></span> Audit Log
       </button>
     </div>
 
@@ -61,32 +65,32 @@
     <div class="admin-panel active" id="panel-overview">
       <div class="admin-stats-grid" id="statsGrid">
         <div class="admin-stat-card">
-          <div class="stat-icon">👥</div>
+          <div class="stat-icon"></div>
           <div class="stat-value" id="statTotalUsers">—</div>
           <div class="stat-label">Total Users</div>
         </div>
         <div class="admin-stat-card">
-          <div class="stat-icon">🎓</div>
+          <div class="stat-icon"></div>
           <div class="stat-value" id="statStudents">—</div>
           <div class="stat-label">Students</div>
         </div>
         <div class="admin-stat-card">
-          <div class="stat-icon">📚</div>
+          <div class="stat-icon"></div>
           <div class="stat-value" id="statProfessors">—</div>
           <div class="stat-label">Professors</div>
         </div>
         <div class="admin-stat-card">
-          <div class="stat-icon">⚡</div>
+          <div class="stat-icon"></div>
           <div class="stat-value" id="statAvgXp">—</div>
           <div class="stat-label">Avg XP</div>
         </div>
         <div class="admin-stat-card">
-          <div class="stat-icon">🏫</div>
+          <div class="stat-icon"></div>
           <div class="stat-value" id="statClassrooms">—</div>
           <div class="stat-label">Classrooms</div>
         </div>
         <div class="admin-stat-card">
-          <div class="stat-icon">🛡️</div>
+          <div class="stat-icon"></div>
           <div class="stat-value" id="statAdmins">—</div>
           <div class="stat-label">Admins</div>
         </div>

@@ -652,25 +652,25 @@
         const adminLink = document.createElement('a');
         adminLink.href = 'admin.html';
         adminLink.className = 'role-nav-link';
-        adminLink.textContent = '🛡️ Admin';
+        adminLink.textContent = 'Admin';
         navLinks.insertBefore(adminLink, insertBefore);
 
         const profLink = document.createElement('a');
         profLink.href = 'professor.html';
         profLink.className = 'role-nav-link';
-        profLink.textContent = '📚 Classes';
+        profLink.textContent = 'Classes';
         navLinks.insertBefore(profLink, insertBefore);
       } else if (role === 'professor') {
         const profLink = document.createElement('a');
         profLink.href = 'professor.html';
         profLink.className = 'role-nav-link';
-        profLink.textContent = '📚 My Classes';
+        profLink.textContent = 'My Classes';
         navLinks.insertBefore(profLink, insertBefore);
       } else {
         const classLink = document.createElement('a');
         classLink.href = 'classroom.html';
         classLink.className = 'role-nav-link';
-        classLink.textContent = '🏫 Classes';
+        classLink.textContent = 'Classes';
         navLinks.insertBefore(classLink, insertBefore);
       }
     })();
@@ -912,7 +912,7 @@
   /* ---- Mobile Menu Toggle ---- */
   const mobileNavToggle = document.getElementById('mobileNavToggle');
   let navbar = document.querySelector('.navbar');
-  
+
   if (mobileNavToggle && navbar) {
     mobileNavToggle.addEventListener('click', () => {
       navbar.classList.toggle('mobile-menu-open');
@@ -940,7 +940,7 @@
   /* ---- Mobile Menu Toggle for App Nav ---- */
   const appNavMobileToggle = document.querySelector('.app-nav-mobile-toggle');
   const appNav = document.querySelector('.app-nav');
-  
+
   if (appNavMobileToggle && appNav) {
     appNavMobileToggle.addEventListener('click', () => {
       const isOpen = appNav.classList.toggle('mobile-menu-open');

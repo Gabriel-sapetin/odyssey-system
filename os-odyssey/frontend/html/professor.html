@@ -4,10 +4,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
   <title>OS Odyssey - Professor Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
   <link rel="stylesheet" href="../css/styles.css" />
   <link rel="stylesheet" href="../css/admin.css" />
@@ -16,7 +19,8 @@
 <body class="app-page dashboard-page">
   <nav class="app-nav">
     <a href="index.html" class="app-brand">
-      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png"
+        alt="OS Odyssey penguin mascot" />
       OS ODYSSEY
     </a>
     <button class="app-nav-mobile-toggle" type="button" aria-label="Toggle mobile menu">
@@ -38,7 +42,7 @@
     <!-- Class List View -->
     <div id="profClassList">
       <div class="admin-header">
-        <h1>📚 My Classrooms</h1>
+        <h1> My Classrooms</h1>
         <button class="admin-btn primary" id="createClassBtn">+ Create Classroom</button>
       </div>
       <div class="classroom-grid" id="profClassroomGrid"></div>
@@ -56,16 +60,16 @@
           </div>
         </div>
         <div class="admin-actions">
-          <button class="admin-btn danger" id="deleteClassBtn">🗑️ Delete</button>
+          <button class="admin-btn danger" id="deleteClassBtn"> Delete</button>
         </div>
       </div>
 
       <!-- Inner tabs -->
       <div class="classroom-inner-tabs" id="classInnerTabs">
-        <button class="classroom-inner-tab active" data-inner="members">👥 Students</button>
-        <button class="classroom-inner-tab" data-inner="modules">📝 Modules</button>
-        <button class="classroom-inner-tab" data-inner="quizzes">📋 Quizzes</button>
-        <button class="classroom-inner-tab" data-inner="results">📊 Results</button>
+        <button class="classroom-inner-tab active" data-inner="members"> Students</button>
+        <button class="classroom-inner-tab" data-inner="modules"> Modules</button>
+        <button class="classroom-inner-tab" data-inner="quizzes"> Quizzes</button>
+        <button class="classroom-inner-tab" data-inner="results"> Results</button>
       </div>
 
       <!-- Members panel -->
@@ -132,27 +136,35 @@
     <!-- Quiz Detail / Preview View -->
     <div id="quizPreviewView" style="display:none">
       <button class="admin-btn" id="backToQuizList" style="margin-bottom:1rem">← Back to Quizzes</button>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem">
+      <div
+        style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem">
         <div>
           <h2 id="quizPreviewTitle" style="font-family:'Nunito',sans-serif;font-weight:800;color:#fff;margin:0"></h2>
-          <p id="quizPreviewMeta" style="font-size:0.78rem;color:rgba(255,255,255,0.4);margin-top:0.25rem;font-family:'Nunito',sans-serif"></p>
+          <p id="quizPreviewMeta"
+            style="font-size:0.78rem;color:rgba(255,255,255,0.4);margin-top:0.25rem;font-family:'Nunito',sans-serif">
+          </p>
         </div>
         <div style="display:flex;gap:0.5rem" id="quizPreviewActions"></div>
       </div>
       <div id="quizPreviewQuestions"></div>
     </div>
 
-    <!-- AI Generating Overlay -->
-    <div id="aiGeneratingOverlay" style="display:none">
-      <div style="text-align:center;padding:4rem 2rem">
-        <div style="font-size:4rem;margin-bottom:1.5rem;animation:pulse 1.5s ease-in-out infinite">🤖</div>
-        <h2 style="font-family:'Nunito',sans-serif;font-weight:800;color:#fff;margin-bottom:0.5rem">AI is Generating Your Quiz</h2>
-        <p id="aiGenModuleTitle" style="font-family:'Nunito',sans-serif;font-size:0.9rem;color:rgba(255,255,255,0.5);margin-bottom:2rem"></p>
+    <!-- Quiz Generation Overlay -->
+    <div id="aiGeneratingOverlay" style="display:none;width:100%;min-height:60vh;display:none;align-items:center;justify-content:center;flex-direction:column">
+      <div style="text-align:center;padding:4rem 2rem;width:100%">
+        <div style="margin-bottom:1.5rem">
+          <img src="../../assets/penguin-flower-removebg-preview.png"
+            alt="Penguin generating quiz"
+            style="width:96px;height:96px;object-fit:contain;display:block;margin:0 auto;animation:penguinBounce 1.8s ease-in-out infinite;filter:drop-shadow(0 6px 18px rgba(245,166,35,0.35))" />
+        </div>
+        <h2 style="font-family:'Nunito',sans-serif;font-weight:800;color:#fff;margin-bottom:0.5rem">Generating Your Quiz…</h2>
+        <p id="aiGenModuleTitle"
+          style="font-family:'Nunito',sans-serif;font-size:0.9rem;color:rgba(255,255,255,0.5);margin-bottom:2rem"></p>
         <div class="ai-progress-bar">
           <div class="ai-progress-fill"></div>
         </div>
         <p style="font-family:'Nunito',sans-serif;font-size:0.78rem;color:rgba(255,255,255,0.35);margin-top:1.5rem">
-          Reading module content… Analyzing key concepts… Crafting questions…<br>
+          Reading module content… Picking key concepts… Writing questions…<br>
           This may take 15–30 seconds.
         </p>
       </div>
@@ -162,8 +174,9 @@
   <!-- Create Classroom Modal -->
   <div class="admin-modal-overlay" id="createClassModal">
     <div class="admin-modal" style="position:relative">
-      <button class="admin-modal-close" onclick="document.getElementById('createClassModal').classList.remove('visible')">✕</button>
-      <h2>🏫 Create Classroom</h2>
+      <button class="admin-modal-close"
+        onclick="document.getElementById('createClassModal').classList.remove('visible')">✕</button>
+      <h2>Create Classroom</h2>
       <form id="createClassForm">
         <div class="admin-form-group">
           <label for="className">Classroom Name</label>
@@ -174,7 +187,8 @@
           <textarea id="classDesc" placeholder="Brief description of this classroom…" rows="3"></textarea>
         </div>
         <div class="admin-form-actions">
-          <button type="button" class="admin-btn" onclick="document.getElementById('createClassModal').classList.remove('visible')">Cancel</button>
+          <button type="button" class="admin-btn"
+            onclick="document.getElementById('createClassModal').classList.remove('visible')">Cancel</button>
           <button type="submit" class="admin-btn primary">Create</button>
         </div>
       </form>
@@ -184,8 +198,9 @@
   <!-- Add Module Modal -->
   <div class="admin-modal-overlay" id="addModuleModal">
     <div class="admin-modal" style="position:relative">
-      <button class="admin-modal-close" onclick="document.getElementById('addModuleModal').classList.remove('visible')">✕</button>
-      <h2>📝 Add Module</h2>
+      <button class="admin-modal-close"
+        onclick="document.getElementById('addModuleModal').classList.remove('visible')">✕</button>
+      <h2>Add Module</h2>
       <form id="addModuleForm">
         <div class="admin-form-group">
           <label for="modTitle">Title</label>
@@ -196,9 +211,11 @@
           <input type="text" id="modDesc" maxlength="500" />
         </div>
         <div class="admin-form-group">
-          <label for="modFile">📄 Upload PDF</label>
-          <input type="file" id="modFile" accept=".pdf" style="padding:0.5rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Nunito',sans-serif;width:100%;box-sizing:border-box" />
-          <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.3rem">Upload a PDF lesson file (max 10MB)</p>
+          <label for="modFile">Upload PDF</label>
+          <input type="file" id="modFile" accept=".pdf"
+            style="padding:0.5rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Nunito',sans-serif;width:100%;box-sizing:border-box" />
+          <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.3rem">Upload a PDF lesson file (max
+            10MB)</p>
           <div id="modUploadStatus" style="font-size:0.78rem;margin-top:0.3rem;font-family:'Nunito',sans-serif"></div>
         </div>
         <div class="admin-form-group">
@@ -211,7 +228,8 @@
           </label>
         </div>
         <div class="admin-form-actions">
-          <button type="button" class="admin-btn" onclick="document.getElementById('addModuleModal').classList.remove('visible')">Cancel</button>
+          <button type="button" class="admin-btn"
+            onclick="document.getElementById('addModuleModal').classList.remove('visible')">Cancel</button>
           <button type="submit" class="admin-btn primary" id="saveModuleBtn">Save Module</button>
         </div>
       </form>
@@ -221,8 +239,9 @@
   <!-- Create Quiz Modal -->
   <div class="admin-modal-overlay" id="addQuizModal">
     <div class="admin-modal" style="position:relative;max-width:620px;">
-      <button class="admin-modal-close" onclick="document.getElementById('addQuizModal').classList.remove('visible')">✕</button>
-      <h2>📋 Create Quiz</h2>
+      <button class="admin-modal-close"
+        onclick="document.getElementById('addQuizModal').classList.remove('visible')">✕</button>
+      <h2>Create Quiz</h2>
       <form id="addQuizForm">
         <div class="admin-form-group">
           <label for="quizTitle">Quiz Title</label>
@@ -249,7 +268,8 @@
         <div id="questionsContainer"></div>
 
         <div class="admin-form-actions">
-          <button type="button" class="admin-btn" onclick="document.getElementById('addQuizModal').classList.remove('visible')">Cancel</button>
+          <button type="button" class="admin-btn"
+            onclick="document.getElementById('addQuizModal').classList.remove('visible')">Cancel</button>
           <button type="submit" class="admin-btn primary">Create Quiz</button>
         </div>
       </form>

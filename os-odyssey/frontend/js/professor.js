@@ -388,9 +388,9 @@
           ${hasPdf ? `<a href="${m.file_url}" target="_blank" style="font-size:0.72rem;color:#60a5fa;text-decoration:none">🔗 View PDF</a>` : ''}
         </div>
         <div class="admin-actions" style="flex-wrap:wrap;gap:0.3rem">
-          <button class="admin-btn success" onclick="window._aiGenerateQuiz('${m.id}', '${esc(m.title)}')" title="AI Generate Quiz">🤖 AI Quiz</button>
-          <button class="admin-btn" onclick="window._toggleModPub('${m.id}', ${!m.is_published})">${m.is_published ? '📥 Unpublish' : '📤 Publish'}</button>
-          <button class="admin-btn danger" onclick="window._deleteModule('${m.id}')">🗑️</button>
+          <button class="admin-btn success" onclick="window._aiGenerateQuiz('${m.id}', '${esc(m.title)}')" title="AI Generate Quiz">AI Quiz</button>
+          <button class="admin-btn" onclick="window._toggleModPub('${m.id}', ${!m.is_published})">${m.is_published ? 'Unpublish' : 'Publish'}</button>
+          <button class="admin-btn danger" onclick="window._deleteModule('${m.id}')">REMOVE</button>
         </div>
       </div>`;
     }).join('');
@@ -463,12 +463,12 @@
 
     document.getElementById('quizPreviewTitle').textContent = quiz.title || 'Quiz';
     document.getElementById('quizPreviewMeta').textContent =
-      `${questions.length} questions · ${quiz.is_published ? 'Published' : 'Draft'}${quiz.is_ai_generated ? ' · 🤖 AI Generated' : ''}`;
+      `${questions.length} questions · ${quiz.is_published ? 'Published' : 'Draft'}${quiz.is_ai_generated ? ' · AI Generated' : ''}`;
 
     // Action buttons
     document.getElementById('quizPreviewActions').innerHTML = `
       <button class="admin-btn ${quiz.is_published ? '' : 'primary'}" onclick="window._toggleQuizPub('${quiz.id}', ${!quiz.is_published});document.getElementById('backToQuizList').click()">
-        ${quiz.is_published ? '📥 Unpublish' : '📤 Publish Quiz'}
+        ${quiz.is_published ? 'Unpublish' : 'Publish Quiz'}
       </button>
     `;
 
@@ -481,13 +481,13 @@
           <div class="qp-number">Question ${i + 1}</div>
           <div class="qp-text">${esc(q.question_text)}</div>
           ${options.map((opt, oi) => {
-            const isCorrect = opt === q.correct_answer;
-            return `
+        const isCorrect = opt === q.correct_answer;
+        return `
               <div class="qp-option ${isCorrect ? 'correct' : ''}">
                 <span class="qp-marker">${isCorrect ? '✓' : optionLabels[oi] || oi + 1}</span>
                 <span>${esc(opt)}</span>
               </div>`;
-          }).join('')}
+      }).join('')}
           ${q.explanation ? `<div class="qp-explanation">💡 ${esc(q.explanation)}</div>` : ''}
         </div>`;
     }).join('');
@@ -513,11 +513,11 @@
       <div class="content-card" style="cursor:pointer" onclick="window._previewQuiz('${q.id}')">
         <div>
           <h4><span class="status-dot ${q.is_published ? 'published' : 'draft'}"></span>${esc(q.title)}</h4>
-          <div class="content-meta">${q.question_count || 0} questions · ${q.is_published ? 'Published' : 'Draft'}${q.time_limit_minutes ? ` · ${q.time_limit_minutes} min` : ''}${q.is_ai_generated ? ' · 🤖 AI Generated' : ''}</div>
+          <div class="content-meta">${q.question_count || 0} questions · ${q.is_published ? 'Published' : 'Draft'}${q.time_limit_minutes ? ` · ${q.time_limit_minutes} min` : ''}${q.is_ai_generated ? ' · AI Generated' : ''}</div>
         </div>
         <div class="admin-actions">
-          <button class="admin-btn" onclick="event.stopPropagation();window._toggleQuizPub('${q.id}', ${!q.is_published})">${q.is_published ? '📥 Unpublish' : '📤 Publish'}</button>
-          <button class="admin-btn danger" onclick="event.stopPropagation();window._deleteQuiz('${q.id}')">🗑️</button>
+          <button class="admin-btn" onclick="event.stopPropagation();window._toggleQuizPub('${q.id}', ${!q.is_published})">${q.is_published ? 'Unpublish' : 'Publish'}</button>
+          <button class="admin-btn danger" onclick="event.stopPropagation();window._deleteQuiz('${q.id}')">REMOVE</button>
         </div>
       </div>
     `).join('');

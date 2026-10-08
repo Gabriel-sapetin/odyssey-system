@@ -1029,7 +1029,7 @@
 .ai-progress-fill {
   height: 100%;
   width: 30%;
-  background: linear-gradient(90deg, #f5a623, #a855f7, #3b82f6);
+  background: linear-gradient(90deg, #f5a623, #fbbf24);
   border-radius: 999px;
   animation: aiProgress 2s ease-in-out infinite;
 }
@@ -1038,6 +1038,11 @@
   0% { width: 10%; margin-left: 0; }
   50% { width: 50%; margin-left: 25%; }
   100% { width: 10%; margin-left: 90%; }
+}
+
+@keyframes penguinBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.04); }
 }
 
 /* ── Quiz Preview Cards ─────────────────────── */
