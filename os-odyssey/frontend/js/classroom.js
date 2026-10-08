@@ -228,6 +228,41 @@
     }).join('');
   }
 
+  window._downloadPdfFile = async function (btn, url, fileName) {
+    const originalText = btn.innerHTML;
+    try {
+      btn.innerHTML = '⏳ Downloading...';
+      btn.style.pointerEvents = 'none';
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName || 'module.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+
+      btn.innerHTML = '✅ Saved to Device!';
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.style.pointerEvents = '';
+      }, 2000);
+    } catch (err) {
+      console.warn('Direct blob download failed, falling back:', err);
+      btn.innerHTML = originalText;
+      btn.style.pointerEvents = '';
+      // Direct navigation fallback
+      window.open(url, '_blank');
+    }
+  };
+
   window._openModule = async function (modId) {
     const data = await api('GET', `/classrooms/${currentClassroomId}/modules/${modId}`);
     if (!data || !data.module) {
@@ -244,14 +279,14 @@
     const contentEl = document.getElementById('moduleViewContent');
 
     if (mod.file_url) {
-      // Display embedded PDF viewer with fallback controls
+      const fileName = mod.file_name || 'module.pdf';
       contentEl.innerHTML = `
         <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap">
-          <a href="${mod.file_url}" target="_blank" class="admin-btn primary" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none">
-            📖 Open in Full Window / New Tab
-          </a>
-          <a href="${mod.file_url}" download="${esc(mod.file_name || 'module.pdf')}" class="admin-btn secondary" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none">
-            📥 Download PDF — ${esc(mod.file_name || 'module.pdf')}
+          <button type="button" onclick="window._downloadPdfFile(this, '${mod.file_url}', '${esc(fileName)}')" class="admin-btn primary" style="display:inline-flex;align-items:center;gap:0.5rem;cursor:pointer">
+            📥 Download to Device (${esc(fileName)})
+          </button>
+          <a href="${mod.file_url}" target="_blank" class="admin-btn secondary" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none">
+            ↗️ Open in New Tab
           </a>
         </div>
         <div style="position:relative;width:100%;height:80vh;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.15);background:#0f172a;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
@@ -259,7 +294,7 @@
             <iframe src="${mod.file_url}#toolbar=1" style="width:100%;height:100%;border:none;background:#fff" allowfullscreen>
               <div style="padding:2rem;text-align:center;color:rgba(255,255,255,0.8)">
                 <p style="margin-bottom:1rem">Your browser does not support embedded PDF preview.</p>
-                <a href="${mod.file_url}" target="_blank" class="admin-btn primary" style="text-decoration:none">Open PDF directly</a>
+                <button type="button" onclick="window._downloadPdfFile(this, '${mod.file_url}', '${esc(fileName)}')" class="admin-btn primary">Download PDF</button>
               </div>
             </iframe>
           </object>
