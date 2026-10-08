@@ -2,8 +2,8 @@
  * OS Odyssey — Student Classroom JS (Cisco NetAcad Architecture)
  * ─────────────────────────────────────────────────────────────
  * Cisco NetAcad LMS layout with persistent Course Outline sidebar,
- * Learning Path Hub with "Your Progress" Card, Integrated PDF/Notes
- * Reader, and Assessment Player with single-attempt enforcement.
+ * modules with nested quizzes, integrated PDF viewer with module
+ * assessment placed directly underneath the PDF, and 1-attempt guard.
  */
 (function () {
   'use strict';
@@ -15,6 +15,7 @@
   let quizzesList = [];
   let viewedModuleIds = new Set();
   let currentLessonIndex = -1;
+  let currentModuleId = null;
   let currentQuizAnswers = {};
 
   async function getSession() {
@@ -103,7 +104,13 @@
 
     // Return to hub from reader/quiz
     document.getElementById('readerBackToHub')?.addEventListener('click', () => showCanvasView('hub'));
-    document.getElementById('quizBackToHub')?.addEventListener('click', () => showCanvasView('hub'));
+    document.getElementById('quizBackToHub')?.addEventListener('click', () => {
+      if (currentModuleId) {
+        window._openModule(currentModuleId, true);
+      } else {
+        showCanvasView('hub');
+      }
+    });
 
     // Lesson reader Prev/Next navigation
     document.getElementById('prevLessonBtn')?.addEventListener('click', () => {
@@ -184,6 +191,32 @@
     `).join('');
   }
 
+  /* ── Find Quiz For Module Helper ───────────── */
+  function findQuizForModule(moduleId) {
+    if (!moduleId) return null;
+    const targetMod = modulesList.find(m => m.id === moduleId);
+    if (!targetMod) return null;
+
+    // 1. Direct module_id foreign key
+    let q = quizzesList.find(quiz => quiz.module_id === moduleId);
+    if (q) return q;
+
+    // 2. Normalized title match
+    const modTitle = targetMod.title.toLowerCase().trim();
+    q = quizzesList.find(quiz => {
+      const cleanQuizTitle = quiz.title.replace(/^quiz:\s*/i, '').toLowerCase().trim();
+      return cleanQuizTitle === modTitle || cleanQuizTitle.includes(modTitle) || modTitle.includes(cleanQuizTitle);
+    });
+    if (q) return q;
+
+    // 3. Match by order index if equal counts
+    const modIdx = modulesList.findIndex(m => m.id === moduleId);
+    if (modIdx !== -1 && quizzesList[modIdx] && !quizzesList[modIdx].module_id) {
+      return quizzesList[modIdx];
+    }
+    return null;
+  }
+
   /* ── Open Classroom (Cisco NetAcad Architecture) ────────── */
   window._openStudentClass = async function (id) {
     currentClassroomId = id;
@@ -228,8 +261,6 @@
   function switchSidebarTab(tab) {
     const outlineBtn = document.getElementById('sidebarTabOutline');
     const resBtn = document.getElementById('sidebarTabResources');
-    const outlineList = document.getElementById('sidebarOutlineList');
-    const resList = document.getElementById('sidebarResourcesList');
     const navOutline = document.getElementById('navOutlineTab');
     const navRes = document.getElementById('navResourcesTab');
 
@@ -250,56 +281,49 @@
     }
   }
 
-  /* ── Render Sidebar Outline ────────────────── */
+  /* ── Render Sidebar Outline (Nested Modules & Quizzes) ── */
   function renderSidebarOutline() {
     const list = document.getElementById('sidebarOutlineList');
     if (!list) return;
 
-    if (modulesList.length === 0 && quizzesList.length === 0) {
-      list.innerHTML = '<div style="padding:1.5rem;text-align:center;color:#64748b;font-size:0.85rem;">No curriculum items available yet.</div>';
+    if (modulesList.length === 0) {
+      list.innerHTML = '<div style="padding:1.5rem;text-align:center;color:#64748b;font-size:0.85rem;">No modules available yet.</div>';
       return;
     }
 
     let html = '';
 
-    // Lessons in outline
     modulesList.forEach((m, idx) => {
       const hasPdf = m.file_url && m.file_name;
       const isViewed = viewedModuleIds.has(m.id);
-      const checkText = isViewed ? '✓' : String(idx + 1);
-      const circleClass = isViewed ? 'outline-badge-circle completed' : 'outline-badge-circle';
+      const quiz = findQuizForModule(m.id);
+
+      const isCompleted = isViewed && (!quiz || Boolean(quiz.last_attempt));
+      const checkText = isCompleted ? '✓' : String(idx + 1);
+      const circleClass = isCompleted ? 'outline-badge-circle completed' : 'outline-badge-circle';
       const badgeText = hasPdf ? 'PDF' : 'NOTES';
 
       html += `
-        <button class="course-outline-item" id="sidebar-mod-${m.id}" type="button" onclick="window._openModule('${m.id}')">
-          <span class="${circleClass}">${checkText}</span>
-          <div>
-            <strong>${esc(m.title)}</strong>
-            <em>${hasPdf ? esc(m.file_name) : (m.description ? esc(m.description) : 'Lesson Material')}</em>
-          </div>
-          <span class="course-outline-badge ${isViewed ? 'completed' : ''}">${badgeText}</span>
-        </button>
-      `;
-    });
-
-    // Quizzes in outline
-    quizzesList.forEach((q, idx) => {
-      const attempted = q.last_attempt;
-      const isCompleted = Boolean(attempted);
-      const pct = attempted?.max_score ? Math.round((attempted.score / attempted.max_score) * 100) : 0;
-      const checkText = isCompleted ? '✓' : `Q${idx + 1}`;
-      const circleClass = isCompleted ? 'outline-badge-circle completed' : 'outline-badge-circle quiz';
-      const badgeText = isCompleted ? `${pct}%` : 'QUIZ';
-
-      html += `
-        <button class="course-outline-item quiz-item" id="sidebar-quiz-${q.id}" type="button" onclick="window._openQuiz('${q.id}')">
-          <span class="${circleClass}">${checkText}</span>
-          <div>
-            <strong>${esc(q.title)}</strong>
-            <em>${isCompleted ? `Score: ${attempted.score}/${attempted.max_score}` : `${q.question_count || 0} questions · 1 attempt`}</em>
-          </div>
-          <span class="course-outline-badge ${isCompleted ? 'completed' : ''}">${badgeText}</span>
-        </button>
+        <div class="sidebar-module-block" id="sidebar-block-${m.id}">
+          <button class="course-outline-item" id="sidebar-mod-${m.id}" type="button" onclick="window._openModule('${m.id}')">
+            <span class="${circleClass}">${checkText}</span>
+            <div>
+              <strong>${esc(m.title)}</strong>
+              <em>${hasPdf ? esc(m.file_name) : (m.description ? esc(m.description) : 'Lesson Material')}${quiz ? ' · Includes Quiz' : ''}</em>
+            </div>
+            <span class="course-outline-badge ${isViewed ? 'completed' : ''}">${badgeText}</span>
+          </button>
+          ${quiz ? `
+            <button class="course-outline-subitem ${quiz.last_attempt ? 'completed' : ''}" id="sidebar-subquiz-${quiz.id}" type="button" onclick="window._openModuleQuiz('${m.id}', '${quiz.id}')">
+              <span class="subitem-marker">└</span>
+              <span class="subitem-icon">${quiz.last_attempt ? '✓' : 'Q'}</span>
+              <span class="subitem-title">Quiz: ${esc(quiz.title.replace(/^quiz:\s*/i, ''))}</span>
+              <span class="subitem-badge ${quiz.last_attempt ? 'completed' : ''}">
+                ${quiz.last_attempt ? `${Math.round((quiz.last_attempt.score / quiz.last_attempt.max_score) * 100)}%` : 'QUIZ'}
+              </span>
+            </button>
+          ` : ''}
+        </div>
       `;
     });
 
@@ -334,7 +358,7 @@
 
   /* ── Filter Sidebar Items ──────────────────── */
   function filterSidebar(query) {
-    document.querySelectorAll('.course-outline-item').forEach(el => {
+    document.querySelectorAll('.sidebar-module-block').forEach(el => {
       const text = el.textContent.toLowerCase();
       el.style.display = text.includes(query) ? '' : 'none';
     });
@@ -346,29 +370,24 @@
     document.getElementById('hubCourseDesc').textContent =
       classroomData.description || 'Welcome to this classroom. Review the available lessons and materials below, and take the assigned quizzes to assess your understanding.';
 
-    // Quick Action Launch Buttons
+    // Quick Action Launch Buttons per module
     const actionArea = document.getElementById('hubQuickActions');
     let actionsHtml = '';
 
     modulesList.forEach((m, idx) => {
       const isViewed = viewedModuleIds.has(m.id);
-      const label = isViewed ? `✓ Review Lesson ${idx + 1}` : `Start Lesson ${idx + 1}`;
-      const btnClass = isViewed ? 'module-completed' : 'secondary';
+      const quiz = findQuizForModule(m.id);
+      const isQuizDone = quiz && Boolean(quiz.last_attempt);
+
+      let label = isViewed ? `✓ Review Module ${idx + 1}` : `Start Module ${idx + 1}`;
+      let btnClass = isViewed && isQuizDone ? 'module-completed' : 'secondary';
+
       actionsHtml += `
         <button class="lesson-button ${btnClass}" type="button" onclick="window._openModule('${m.id}')">${label}</button>
       `;
     });
 
-    quizzesList.forEach((q, idx) => {
-      const isCompleted = Boolean(q.last_attempt);
-      const label = isCompleted ? `✓ Completed Quiz ${idx + 1}` : `Take Quiz ${idx + 1}`;
-      const btnClass = isCompleted ? 'module-completed' : 'primary';
-      actionsHtml += `
-        <button class="lesson-button ${btnClass}" type="button" onclick="window._openQuiz('${q.id}')">${label}</button>
-      `;
-    });
-
-    actionArea.innerHTML = actionsHtml || '<p style="color:#64748b;font-size:0.9rem;">No lessons or quizzes uploaded yet.</p>';
+    actionArea.innerHTML = actionsHtml || '<p style="color:#64748b;font-size:0.9rem;">No modules uploaded yet.</p>';
 
     // Render "Your Progress" Card (matching Picture 2)
     renderProgressCard();
@@ -379,14 +398,18 @@
     const card = document.getElementById('classroomProgressCard');
     if (!card) return;
 
-    const totalLessons = modulesList.length;
-    const completedLessons = modulesList.filter(m => viewedModuleIds.has(m.id)).length;
-    const totalQuizzes = quizzesList.length;
-    const completedQuizzes = quizzesList.filter(q => Boolean(q.last_attempt)).length;
+    const totalModules = modulesList.length;
+    let completedModulesCount = 0;
 
-    const totalTasks = totalLessons + totalQuizzes;
-    const completedTasks = completedLessons + completedQuizzes;
-    const overallPct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    modulesList.forEach(m => {
+      const isViewed = viewedModuleIds.has(m.id);
+      const quiz = findQuizForModule(m.id);
+      if (isViewed && (!quiz || Boolean(quiz.last_attempt))) {
+        completedModulesCount++;
+      }
+    });
+
+    const overallPct = totalModules > 0 ? Math.round((completedModulesCount / totalModules) * 100) : 0;
 
     // Update overall top progress bar
     const topBar = document.getElementById('classroomOverallProgress');
@@ -403,34 +426,30 @@
     let checklistHtml = '';
 
     modulesList.forEach((m, idx) => {
-      const isDone = viewedModuleIds.has(m.id);
+      const isViewed = viewedModuleIds.has(m.id);
+      const quiz = findQuizForModule(m.id);
+      const isQuizDone = quiz && Boolean(quiz.last_attempt);
+      const isModuleDone = isViewed && (!quiz || isQuizDone);
+
+      let statusText = 'Pending';
+      let statusColor = '#64748b';
+
+      if (isModuleDone) {
+        statusText = '✓ Completed';
+        statusColor = '#16a34a';
+      } else if (isViewed && quiz && !isQuizDone) {
+        statusText = 'Quiz Pending';
+        statusColor = '#2563eb';
+      }
+
       checklistHtml += `
-        <button class="progress-module-row ${isDone ? 'completed' : ''}" type="button" onclick="window._openModule('${m.id}')">
+        <button class="progress-module-row ${isModuleDone ? 'completed' : ''}" type="button" onclick="window._openModule('${m.id}')">
           <span class="progress-module-info">
-            <strong>Lesson ${idx + 1}</strong>
+            <strong>Module ${idx + 1}</strong>
             <em>${esc(m.title)}</em>
           </span>
-          <span class="progress-module-status" style="color: ${isDone ? '#16a34a' : '#64748b'}">
-            ${isDone ? '✓ Completed' : 'Pending'}
-          </span>
-        </button>
-      `;
-    });
-
-    quizzesList.forEach((q, idx) => {
-      const isDone = Boolean(q.last_attempt);
-      const scoreLabel = isDone
-        ? `✓ ${q.last_attempt.score}/${q.last_attempt.max_score} (${Math.round((q.last_attempt.score / q.last_attempt.max_score) * 100)}%)`
-        : 'Take Quiz';
-
-      checklistHtml += `
-        <button class="progress-module-row ${isDone ? 'completed' : ''}" type="button" onclick="window._openQuiz('${q.id}')">
-          <span class="progress-module-info">
-            <strong>Quiz ${idx + 1}</strong>
-            <em>${esc(q.title)}</em>
-          </span>
-          <span class="progress-module-status" style="color: ${isDone ? '#16a34a' : '#2563eb'}">
-            ${scoreLabel}
+          <span class="progress-module-status" style="color: ${statusColor}">
+            ${statusText}
           </span>
         </button>
       `;
@@ -446,12 +465,12 @@
       </div>
       <div class="progress-panel-stats-row">
         <div class="progress-stat-mini">
-          <span class="progress-stat-num">${completedLessons} / ${totalLessons}</span>
-          <span class="progress-stat-label">Lessons Done</span>
+          <span class="progress-stat-num">${completedModulesCount} / ${totalModules}</span>
+          <span class="progress-stat-label">Modules Done</span>
         </div>
         <div class="progress-stat-mini">
-          <span class="progress-stat-num">${completedQuizzes} / ${totalQuizzes}</span>
-          <span class="progress-stat-label">Quizzes Done</span>
+          <span class="progress-stat-num">${scoredQuizzes.length} / ${quizzesList.length}</span>
+          <span class="progress-stat-label">Quizzes Taken</span>
         </div>
         <div class="progress-stat-mini">
           <span class="progress-stat-num">${avgScoreText}</span>
@@ -469,7 +488,7 @@
     hide('classroomQuizView');
 
     // Deselect outline active styles
-    document.querySelectorAll('.course-outline-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.course-outline-item, .course-outline-subitem').forEach(el => el.classList.remove('active'));
 
     if (view === 'hub') {
       show('classroomHubView');
@@ -480,8 +499,9 @@
     }
   }
 
-  /* ── Open Lesson Reader (Picture 1 & 3 Architecture) ──── */
-  window._openModule = async function (modId) {
+  /* ── Open Lesson Reader (with Quiz Underneath PDF) ──── */
+  window._openModule = async function (modId, scrollToQuiz = false) {
+    currentModuleId = modId;
     const data = await api('GET', `/classrooms/${currentClassroomId}/modules/${modId}`);
     if (!data || !data.module) {
       toast('Failed to load lesson.', 'error');
@@ -494,8 +514,8 @@
     showCanvasView('lesson');
 
     // Mark active in sidebar
-    const activeSidebarItem = document.getElementById(`sidebar-mod-${modId}`);
-    activeSidebarItem?.classList.add('active');
+    document.querySelectorAll('.course-outline-item, .course-outline-subitem').forEach(el => el.classList.remove('active'));
+    document.getElementById(`sidebar-mod-${modId}`)?.classList.add('active');
 
     // Breadcrumb & title
     document.getElementById('lessonBreadcrumb').textContent = `Lesson: ${mod.title}`;
@@ -505,6 +525,7 @@
     const dlBtn = document.getElementById('readerDownloadBtn');
     const tabBtn = document.getElementById('readerOpenTabBtn');
     const contentEl = document.getElementById('lessonViewContent');
+    const quizArea = document.getElementById('lessonModuleQuizArea');
 
     if (mod.file_url) {
       const fileName = mod.file_name || 'lesson.pdf';
@@ -543,6 +564,49 @@
       `;
     }
 
+    // Populate Respective Quiz Section Underneath PDF (Cisco NetAcad Style)
+    const quiz = findQuizForModule(modId);
+    if (quiz) {
+      const attempted = quiz.last_attempt;
+      const pct = attempted?.max_score ? Math.round((attempted.score / attempted.max_score) * 100) : 0;
+      const isAttempted = Boolean(attempted);
+
+      quizArea.innerHTML = `
+        <div class="cisco-module-assessment-card" id="module-quiz-card-${quiz.id}">
+          <div class="assessment-card-header">
+            <div class="assessment-kicker">MODULE ASSESSMENT</div>
+            <h3 class="assessment-title">${esc(quiz.title)}</h3>
+            <p class="assessment-desc">${esc(quiz.description || 'Test your knowledge on this module. Complete the assessment to finalize your grade.')}</p>
+            <div class="assessment-meta-tags">
+              <span class="meta-tag">${quiz.question_count || 0} Questions</span>
+              <span class="meta-tag">${quiz.time_limit_minutes ? `${quiz.time_limit_minutes} Mins` : 'Untimed'}</span>
+              <span class="meta-tag">1 Attempt Only</span>
+            </div>
+          </div>
+          <div class="assessment-card-body">
+            ${isAttempted ? `
+              <div class="assessment-completed-box">
+                <div class="score-pill-row">
+                  <span class="status-pill-green">COMPLETED</span>
+                  <span class="score-text">Total Score: <strong>${attempted.score} / ${attempted.max_score} (${pct}%)</strong></span>
+                </div>
+                <p class="score-policy-msg">Assessment finalized · 1 of 1 attempt used.</p>
+              </div>
+            ` : `
+              <div class="assessment-pending-box">
+                <p class="policy-warning">Notice: Exactly 1 attempt is allowed. Once submitted, your score will be recorded permanently.</p>
+                <button class="take-quiz-action-btn" type="button" onclick="window._openQuiz('${quiz.id}', '${modId}')">
+                  Take Quiz
+                </button>
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    } else {
+      quizArea.innerHTML = '';
+    }
+
     // Prev / Next button state
     const prevBtn = document.getElementById('prevLessonBtn');
     const nextBtn = document.getElementById('nextLessonBtn');
@@ -560,10 +624,25 @@
       renderSidebarOutline();
       renderProgressCard();
     }
+
+    if (scrollToQuiz) {
+      setTimeout(() => {
+        document.getElementById('lessonModuleQuizArea')?.scrollIntoView({ behavior: 'smooth' });
+      }, 250);
+    }
   };
 
-  /* ── Open Quiz Assessment (Cisco NetAcad Assessment Style) ── */
-  window._openQuiz = async function (quizId) {
+  /* ── Open Module Quiz from Subitem ─────────── */
+  window._openModuleQuiz = function (modId, quizId) {
+    window._openModule(modId, true);
+    // Highlight subitem
+    document.querySelectorAll('.course-outline-subitem').forEach(el => el.classList.remove('active'));
+    document.getElementById(`sidebar-subquiz-${quizId}`)?.classList.add('active');
+  };
+
+  /* ── Open Quiz Assessment Player ───────────── */
+  window._openQuiz = async function (quizId, sourceModuleId = null) {
+    if (sourceModuleId) currentModuleId = sourceModuleId;
     currentQuizAnswers = {};
 
     const data = await api('GET', `/classrooms/${currentClassroomId}/quizzes/${quizId}`);
@@ -576,10 +655,6 @@
     const attempted = data.last_attempt || quizzesList.find(q => q.id === quizId)?.last_attempt;
 
     showCanvasView('quiz');
-
-    // Mark active in sidebar
-    const activeSidebarItem = document.getElementById(`sidebar-quiz-${quizId}`);
-    activeSidebarItem?.classList.add('active');
 
     // Breadcrumb
     document.getElementById('quizBreadcrumb').textContent = `Assessment: ${quiz.title}`;
@@ -616,7 +691,10 @@
           <p style="font-size:0.85rem;color:#64748b;margin-bottom:1.5rem;">
             You have already used your 1 allowed attempt for this quiz.
           </p>
-          <button class="admin-btn primary" type="button" onclick="showCanvasView('hub')">Return to Course Outline</button>
+          <div style="display:flex;gap:12px;justify-content:center;">
+            ${currentModuleId ? `<button class="admin-btn primary" type="button" onclick="window._openModule('${currentModuleId}', true)">Back to Lesson</button>` : ''}
+            <button class="admin-btn" type="button" onclick="showCanvasView('hub')">Course Outline</button>
+          </div>
         </div>
       `;
 
@@ -747,9 +825,12 @@
           <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:2rem;">
             Notice: Only 1 attempt is allowed. Your grade is finalized.
           </p>
-          <button class="admin-btn primary" type="button" style="padding:0.8rem 2.2rem;" onclick="showCanvasView('hub')">
-            Back to Course Outline
-          </button>
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+            ${currentModuleId ? `<button class="admin-btn primary" type="button" style="padding:0.8rem 2.2rem;" onclick="window._openModule('${currentModuleId}', true)">Back to Lesson</button>` : ''}
+            <button class="admin-btn" type="button" style="padding:0.8rem 2.2rem;" onclick="showCanvasView('hub')">
+              Course Outline
+            </button>
+          </div>
         </div>
       `;
 

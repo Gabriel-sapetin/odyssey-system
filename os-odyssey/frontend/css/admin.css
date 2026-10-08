@@ -1762,3 +1762,222 @@
   color: #2563eb;
 }
 
+/* ── Subitems in Course Outline (Quizzes nested inside modules) ── */
+.sidebar-module-block {
+  border-bottom: 1px solid #e5ebf1;
+}
+
+.sidebar-module-block .course-outline-item {
+  border-bottom: none;
+}
+
+.course-outline-subitem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 14px 10px 32px;
+  border: none;
+  background: rgba(0, 0, 0, 0.015);
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Nunito', sans-serif;
+  transition: background 0.15s ease;
+}
+
+.course-outline-subitem:hover {
+  background: #f1f5f9;
+}
+
+.course-outline-subitem.active {
+  background: #eff6ff;
+}
+
+.subitem-marker {
+  color: #94a3b8;
+  font-size: 13px;
+  font-family: monospace;
+}
+
+.subitem-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #93c5fd;
+  background: #eff6ff;
+  color: #2563eb;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.course-outline-subitem.completed .subitem-icon {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.subitem-title {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subitem-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.subitem-badge.completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* ── Cisco Module Assessment Card Underneath PDF ── */
+.cisco-module-assessment-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-top: 1.5rem;
+}
+
+.assessment-card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.assessment-kicker {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #0b6fb3;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.assessment-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.assessment-desc {
+  font-size: 0.88rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+}
+
+.assessment-meta-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.meta-tag {
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.assessment-card-body {
+  padding: 20px 24px;
+}
+
+.assessment-pending-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.policy-warning {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  padding: 10px 14px;
+  border-radius: 6px;
+  flex: 1;
+  min-width: 250px;
+}
+
+.take-quiz-action-btn {
+  padding: 0.8rem 2.2rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  background: #6366f1;
+  color: #ffffff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.take-quiz-action-btn:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.assessment-completed-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+
+.score-pill-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.status-pill-green {
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.score-text {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.score-text strong {
+  color: #16a34a;
+}
+
+.score-policy-msg {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
