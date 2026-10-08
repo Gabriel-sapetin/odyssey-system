@@ -2,8 +2,8 @@
 AI Quiz Generator — Google Gemini
 ──────────────────────────────────
 Reads module content (text or PDF) and generates
-quiz questions using Google's Gemini API with multi-model
-fallback and exponential backoff for transient 503/429 errors.
+quiz questions using Google's Gemini API with dynamic model discovery,
+fallback chain, and exponential backoff for transient 503/429 errors.
 """
 
 import asyncio
@@ -16,13 +16,49 @@ from app.config import settings
 
 logger = logging.getLogger("os-odyssey.ai_quiz")
 
-# Fallback chain of models in order of priority
-MODELS = [
-    "gemini-2.0-flash",
+# Default preferred model candidates
+DEFAULT_MODELS = [
+    "gemini-flash-latest",
     "gemini-1.5-flash",
     "gemini-1.5-flash-latest",
-    "gemini-1.5-pro",
+    "gemini-2.0-flash",
+    "gemini-pro",
 ]
+
+
+async def get_available_models(client: httpx.AsyncClient, api_key: str) -> list[str]:
+    """
+    Query the Gemini API to discover the exact models available for this API key.
+    Returns prioritized list with flash models first.
+    """
+    candidates = list(DEFAULT_MODELS)
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
+        res = await client.get(url, timeout=10.0)
+        if res.status_code == 200:
+            data = res.json()
+            api_models = []
+            for item in data.get("models", []):
+                methods = item.get("supportedGenerationMethods", [])
+                if "generateContent" in methods:
+                    name = item.get("name", "").replace("models/", "").strip()
+                    if name:
+                        api_models.append(name)
+
+            if api_models:
+                logger.info("Discovered %d models from Gemini API: %s", len(api_models), api_models[:6])
+                # Prioritize: gemini-flash-latest, then other flash models, then pro models
+                discovered_flash = [m for m in api_models if "flash" in m]
+                discovered_others = [m for m in api_models if "flash" not in m]
+
+                combined = ["gemini-flash-latest"] + discovered_flash + discovered_others + candidates
+                # Deduplicate while preserving order
+                seen = set()
+                return [m for m in combined if not (m in seen or seen.add(m))]
+    except Exception as exc:
+        logger.warning("Could not dynamically query Gemini models: %s", exc)
+
+    return candidates
 
 
 async def generate_quiz_from_content(
@@ -33,7 +69,7 @@ async def generate_quiz_from_content(
     """
     Send module content to Gemini and get back structured quiz questions.
     Implements retry with exponential backoff for 503/429 errors and falls
-    back to secondary models if the primary model is unavailable.
+    back across available models.
     """
     if not settings.GEMINI_API_KEY:
         raise ValueError("GEMINI_API_KEY is not configured.")
@@ -41,10 +77,11 @@ async def generate_quiz_from_content(
     if not content or len(content.strip()) < 50:
         raise ValueError("Module content is too short to generate a quiz.")
 
-    # Truncate very long content to avoid token limits
-    max_chars = 30000
+    # Truncate content to 15,000 characters (~3,500 words)
+    # Keeping the prompt compact prevents Google 503 capacity sheds on free-tier
+    max_chars = 15000
     if len(content) > max_chars:
-        content = content[:max_chars] + "\n\n[Content truncated...]"
+        content = content[:max_chars] + "\n\n[Content truncated for quiz generation...]"
 
     prompt = f"""You are an expert educational quiz generator for an Operating Systems course.
 
@@ -78,13 +115,17 @@ Example format:
     last_error = None
 
     async with httpx.AsyncClient(timeout=60.0) as client:
-        for model in MODELS:
+        # Discover available models or use defaults
+        models_to_try = await get_available_models(client, settings.GEMINI_API_KEY)
+        logger.info("Attempting quiz generation with models: %s", models_to_try[:5])
+
+        for model in models_to_try:
             api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={settings.GEMINI_API_KEY}"
             max_attempts = 3
 
             for attempt in range(max_attempts):
                 try:
-                    logger.info("Calling Gemini model %s (attempt %d/%d)...", model, attempt + 1, max_attempts)
+                    logger.info("Calling Gemini model '%s' (attempt %d/%d)...", model, attempt + 1, max_attempts)
 
                     response = await client.post(
                         api_url,
@@ -149,43 +190,43 @@ Example format:
                     # Handle 503 (Overloaded) or 429 (Rate limited) with backoff
                     if response.status_code in (503, 429):
                         logger.warning(
-                            "Gemini model %s returned status %d. Attempt %d/%d.",
-                            model, response.status_code, attempt + 1, max_attempts
+                            "Gemini model '%s' returned status %d on attempt %d/%d. Response: %s",
+                            model, response.status_code, attempt + 1, max_attempts, response.text[:200]
                         )
-                        last_error = f"Gemini {model} returned status {response.status_code}"
+                        last_error = f"Gemini {model} is busy (status {response.status_code})"
                         if attempt < max_attempts - 1:
-                            backoff = (1.5 * (2 ** attempt)) + random.uniform(0.2, 0.8)
+                            backoff = (2.0 * (attempt + 1)) + random.uniform(0.5, 1.5)
+                            logger.info("Waiting %.1fs before retrying '%s'...", backoff, model)
                             await asyncio.sleep(backoff)
                             continue
                         else:
-                            # Attempts exhausted for this model, fallback to next model in MODELS list
-                            logger.warning("Exhausted retries for model %s. Trying fallback model...", model)
+                            logger.warning("Exhausted retries for model '%s'. Moving to next model...", model)
                             break
 
-                    # If 404 (model not found) or other error, log and try next model
-                    logger.warning("Gemini model %s returned status %d: %s", model, response.status_code, response.text[:200])
-                    last_error = f"Gemini API returned status {response.status_code}"
+                    # 404 (Not Found) or 400 (Bad Request) - skip to next model immediately
+                    logger.warning("Gemini model '%s' returned status %d. Response: %s", model, response.status_code, response.text[:200])
+                    last_error = f"Gemini model {model} returned status {response.status_code}"
                     break
 
                 except (json.JSONDecodeError, ValueError) as exc:
-                    logger.warning("Model %s response could not be parsed: %s", model, exc)
+                    logger.warning("Model '%s' produced unparseable output: %s", model, exc)
                     last_error = str(exc)
                     break
                 except httpx.TimeoutException:
-                    logger.warning("Model %s request timed out on attempt %d", model, attempt + 1)
-                    last_error = "Gemini request timed out"
+                    logger.warning("Model '%s' request timed out on attempt %d", model, attempt + 1)
+                    last_error = f"Request to model {model} timed out"
                     if attempt < max_attempts - 1:
-                        await asyncio.sleep(1.0)
+                        await asyncio.sleep(1.5)
                         continue
                     break
                 except Exception as exc:
-                    logger.error("Unexpected error with model %s: %s", model, exc)
+                    logger.error("Unexpected error with model '%s': %s", model, exc)
                     last_error = str(exc)
                     break
 
     raise ValueError(
         f"Unable to generate quiz: {last_error or 'Google Gemini is temporarily overloaded'}. "
-        "Please try again in a few moments."
+        "Please try again in a moment."
     )
 
 
