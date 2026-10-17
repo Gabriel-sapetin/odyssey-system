@@ -1,5 +1,5 @@
 /**
- * OS Odyssey — Professor Dashboard JS
+ * Odyssey — Professor Dashboard JS
  * ─────────────────────────────────────
  * Classroom management: create/view classrooms, manage modules,
  * create quizzes with questions, view student results.
@@ -10,6 +10,7 @@
   const BACKEND_API = 'https://os-odyssey-api.onrender.com/api';
   let currentClassroomId = null;
   let questionCount = 0;
+  const currentModulesMap = new Map();
 
   async function getSession() {
     const { data: { session } } = await supa.auth.getSession();
@@ -48,7 +49,28 @@
 
     if (error || !profile) { window.location.href = 'dashboard.html'; return; }
 
-    const role = profile.role;
+    let role = profile?.role || 'student';
+
+    if (role !== 'professor' && role !== 'admin') {
+      // Check if user has an approved instructor application
+      try {
+        const { data: approvedApps } = await supa
+          .from('instructor_applications')
+          .select('id, status')
+          .eq('user_id', session.user.id)
+          .eq('status', 'approved')
+          .limit(1);
+
+        if (approvedApps && approvedApps.length > 0) {
+          role = 'professor';
+          // Auto-promote in profiles table
+          await supa.from('profiles').update({ role: 'professor' }).eq('id', session.user.id);
+        }
+      } catch (e) {
+        console.warn('Could not verify approved instructor application:', e);
+      }
+    }
+
     if (role !== 'professor' && role !== 'admin') {
       toast('Access denied — professors only.', 'error');
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
@@ -59,11 +81,152 @@
     loadClassrooms();
   }
 
+  /* ── Document Text Extraction (PDF & Word DOCX) ──────── */
+  async function extractPdfText(buf) {
+    // 1. Try PDF.js
+    if (window.pdfjsLib) {
+      let pdf = null;
+      try {
+        if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+          try {
+            const workerBlob = new Blob(
+              [`importScripts('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js');`],
+              { type: 'application/javascript' }
+            );
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(workerBlob);
+          } catch {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+          }
+        }
+
+        const loadingTask = window.pdfjsLib.getDocument({
+          data: new Uint8Array(buf),
+          cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+          cMapPacked: true,
+        });
+
+        pdf = await loadingTask.promise;
+        const maxPages = Math.min(pdf.numPages, 40);
+        const parts = [];
+
+        for (let i = 1; i <= maxPages; i++) {
+          try {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            const text = content.items
+              .map(item => (item && typeof item.str === 'string' ? item.str : ''))
+              .filter(s => s.trim().length > 0)
+              .join(' ')
+              .trim();
+            if (text) parts.push(text);
+          } catch (pe) {
+            console.warn(`PDF page ${i} extraction error:`, pe);
+          }
+        }
+
+        const full = parts.join('\n\n').trim();
+        if (full.length >= 50) return full;
+      } catch (err) {
+        console.warn('PDF.js extraction failed, falling back to raw stream parsing:', err);
+      } finally {
+        // Clean up PDF.js document to prevent async error leaks
+        if (pdf) {
+          try { pdf.destroy(); } catch (_) { /* ignore cleanup errors */ }
+        }
+      }
+    }
+
+    // 2. Fallback: Extract text from raw PDF stream
+    try {
+      const bytes = new Uint8Array(buf);
+      let binary = '';
+      const len = bytes.byteLength;
+      const chunk = 8192;
+      for (let i = 0; i < len; i += chunk) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunk, len)));
+      }
+      const matches = binary.match(/\(([^\)\\]*(?:\\.[^\)\\]*)*)\)\s*(?:Tj|'|")/g) || [];
+      const strings = [];
+      for (const m of matches) {
+        const inner = m.replace(/^\(/, '').replace(/\)\s*(?:Tj|'|")$/, '').trim();
+        if (inner.length > 2 && !inner.startsWith('/') && !inner.startsWith('%')) {
+          strings.push(inner);
+        }
+      }
+      const rawText = strings.join(' ').trim();
+      if (rawText.length >= 50) return rawText;
+    } catch (e) {
+      console.warn('Raw PDF stream fallback notice:', e);
+    }
+
+    return '';
+  }
+
+  async function extractDocxText(buf) {
+    if (window.mammoth && typeof window.mammoth.extractRawText === 'function') {
+      try {
+        const resText = await window.mammoth.extractRawText({ arrayBuffer: buf });
+        return (resText?.value || '').trim();
+      } catch (e) {
+        console.warn('Mammoth extraction notice:', e);
+      }
+    }
+    return '';
+  }
+
+  async function extractDocumentText(fileOrUrl, fileName = '') {
+    try {
+      let buf = null;
+      let name = (fileName || '').toLowerCase();
+
+      if (fileOrUrl instanceof Blob || fileOrUrl instanceof File) {
+        name = (fileOrUrl.name || name).toLowerCase();
+        buf = await fileOrUrl.arrayBuffer();
+      } else if (typeof fileOrUrl === 'string' && fileOrUrl) {
+        name = (name || fileOrUrl.split('?')[0]).toLowerCase();
+        const res = await fetch(fileOrUrl);
+        if (!res.ok) return '';
+        buf = await res.arrayBuffer();
+      }
+
+      if (!buf) return '';
+
+      const isWord = name.includes('.docx') || name.includes('.doc');
+      const isPdf = name.includes('.pdf');
+
+      if (isWord) {
+        return await extractDocxText(buf);
+      } else if (isPdf) {
+        return await extractPdfText(buf);
+      } else if (name.endsWith('.txt') || name.endsWith('.md')) {
+        const dec = new TextDecoder('utf-8');
+        return dec.decode(buf).trim();
+      }
+    } catch (err) {
+      console.warn('extractDocumentText error:', err);
+    }
+    return '';
+  }
+
   /* ── Events ────────────────────────────────── */
   function setupEvents() {
     // Create classroom
     document.getElementById('createClassBtn')?.addEventListener('click', () => {
       document.getElementById('createClassModal').classList.add('visible');
+    });
+
+    // Emoji picker
+    document.getElementById('emojiPicker')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('.emoji-pick');
+      if (!btn) return;
+      document.querySelectorAll('.emoji-pick').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+
+    // Subject dropdown — show custom input when "Custom" selected
+    document.getElementById('classSubject')?.addEventListener('change', (e) => {
+      const custom = document.getElementById('classSubjectCustom');
+      if (custom) custom.style.display = e.target.value === 'Custom' ? '' : 'none';
     });
 
     document.getElementById('createClassForm')?.addEventListener('submit', async (e) => {
@@ -72,11 +235,34 @@
       const desc = document.getElementById('classDesc').value.trim();
       if (!name) return;
 
-      const data = await api('POST', '/classrooms/', { name, description: desc || null });
+      // Gather new fields
+      let subject = document.getElementById('classSubject')?.value || 'General';
+      if (subject === 'Custom') {
+        subject = document.getElementById('classSubjectCustom')?.value?.trim() || 'General';
+      }
+      const activeEmoji = document.querySelector('.emoji-pick.active');
+      const theme_emoji = activeEmoji?.dataset?.emoji || '📚';
+      const theme_color = document.getElementById('classThemeColor')?.value || '#6366f1';
+      const ai_persona = document.getElementById('classAiPersona')?.value?.trim() || 'Odyssey Mentor';
+      const ai_subject_context = document.getElementById('classAiContext')?.value?.trim() || null;
+
+      const data = await api('POST', '/classrooms/', {
+        name,
+        description: desc || null,
+        subject,
+        theme_color,
+        theme_emoji,
+        ai_persona,
+        ai_subject_context,
+      });
       if (data && !data.error) {
         toast('Classroom created!', 'success');
         document.getElementById('createClassModal').classList.remove('visible');
         document.getElementById('createClassForm').reset();
+        // Reset emoji picker
+        document.querySelectorAll('.emoji-pick').forEach(b => b.classList.remove('active'));
+        document.querySelector('.emoji-pick[data-emoji="📚"]')?.classList.add('active');
+        document.getElementById('classSubjectCustom').style.display = 'none';
         loadClassrooms();
       } else {
         toast(data?.error || 'Failed to create classroom.', 'error');
@@ -158,8 +344,9 @@
 
       let file_url = null;
       let file_name = null;
+      let extractedContent = null;
 
-      // Upload PDF to Supabase Storage if selected
+      // Upload Document to Supabase Storage if selected
       if (file) {
         if (file.size > 10 * 1024 * 1024) {
           toast('File too large. Max 10MB.', 'error');
@@ -168,18 +355,27 @@
           return;
         }
 
-        statusEl.textContent = '📤 Uploading PDF…';
+        statusEl.textContent = 'Extracting document text…';
+        statusEl.style.color = '#60a5fa';
+        try {
+          extractedContent = await extractDocumentText(file, file.name);
+        } catch (extErr) {
+          console.warn('Initial document text extraction warning:', extErr);
+        }
+
+        statusEl.textContent = 'Uploading document…';
         statusEl.style.color = '#60a5fa';
 
         const ext = file.name.split('.').pop();
         const path = `classrooms/${currentClassroomId}/${Date.now()}_${file.name}`;
+        const mimeType = file.type || (ext.toLowerCase() === 'pdf' ? 'application/pdf' : 'application/octet-stream');
 
         const { data: uploadData, error: uploadError } = await supa.storage
           .from('classroom-files')
-          .upload(path, file, { contentType: 'application/pdf', upsert: false });
+          .upload(path, file, { contentType: mimeType, upsert: false });
 
         if (uploadError) {
-          statusEl.textContent = '❌ Upload failed: ' + (uploadError.message || 'Unknown error');
+          statusEl.textContent = 'Upload failed: ' + (uploadError.message || 'Unknown error');
           statusEl.style.color = '#f87171';
           saveBtn.disabled = false;
           saveBtn.textContent = 'Save Module';
@@ -191,14 +387,14 @@
         file_url = urlData?.publicUrl || null;
         file_name = file.name;
 
-        statusEl.textContent = '✅ Uploaded!';
+        statusEl.textContent = 'Uploaded!';
         statusEl.style.color = '#4ade80';
       }
 
       const body = {
         title: document.getElementById('modTitle').value.trim(),
         description: document.getElementById('modDesc').value.trim() || null,
-        content: null,
+        content: extractedContent ? extractedContent.slice(0, 30000) : null,
         file_url: file_url,
         file_name: file_name,
         order_index: parseInt(document.getElementById('modOrder').value) || 1,
@@ -264,22 +460,23 @@
 
     const data = await api('GET', '/classrooms/');
     if (!data || data.error) {
-      grid.innerHTML = '<div class="admin-empty"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load classrooms</div></div>';
+      grid.innerHTML = '<div class="admin-empty"><div class="empty-text">Failed to load classrooms</div></div>';
       return;
     }
 
     if (!data.classrooms || data.classrooms.length === 0) {
-      grid.innerHTML = '<div class="admin-empty"><div class="empty-icon">🏫</div><div class="empty-text">No classrooms yet. Create one to get started!</div></div>';
+      grid.innerHTML = '<div class="admin-empty"><div class="empty-text">No classrooms yet. Create one to get started!</div></div>';
       return;
     }
 
     grid.innerHTML = data.classrooms.map(c => `
-      <div class="classroom-card" onclick="window._openClass('${c.id}')">
-        <h3>${esc(c.name)}</h3>
+      <div class="classroom-card" onclick="window._openClass('${c.id}')" style="border-left:3px solid ${c.theme_color || '#6366f1'}">
+        <h3>${c.theme_emoji ? c.theme_emoji + ' ' : ''}${esc(c.name)}</h3>
+        <span style="display:inline-block;font-size:0.7rem;padding:0.15rem 0.5rem;border-radius:20px;background:${c.theme_color || '#6366f1'}22;color:${c.theme_color || '#6366f1'};border:1px solid ${c.theme_color || '#6366f1'}44;margin-top:0.3rem;font-family:'Nunito',sans-serif;">${esc(c.subject || 'General')}</span>
         ${c.description ? `<p style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-top:0.2rem">${esc(c.description)}</p>` : ''}
         <div class="classroom-meta">
-          <span>👥 ${c.member_count || 0} students</span>
-          <span>${c.is_active ? '🟢 Active' : '🔴 Archived'}</span>
+          <span>${c.member_count || 0} students</span>
+          <span>${c.is_active ? 'Active' : 'Archived'}</span>
         </div>
         <span class="join-code">${esc(c.join_code)}</span>
       </div>
@@ -321,12 +518,12 @@
 
     const data = await api('GET', `/classrooms/${currentClassroomId}/members`);
     if (!data || data.error) {
-      body.innerHTML = '<tr><td colspan="6"><div class="admin-empty"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load members</div></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="6"><div class="admin-empty"><div class="empty-text">Failed to load members</div></div></td></tr>';
       return;
     }
 
     if (!data.members || data.members.length === 0) {
-      body.innerHTML = '<tr><td colspan="6"><div class="admin-empty"><div class="empty-icon">👻</div><div class="empty-text">No students enrolled yet. Share the join code!</div></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="6"><div class="admin-empty"><div class="empty-text">No students enrolled yet. Share the join code!</div></div></td></tr>';
       return;
     }
 
@@ -368,27 +565,46 @@
 
     const data = await api('GET', `/classrooms/${currentClassroomId}/modules`);
     if (!data || data.error) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load modules</div></div>';
+      container.innerHTML = '<div class="admin-empty"><div class="empty-text">Failed to load modules</div></div>';
       return;
     }
 
     if (!data.modules || data.modules.length === 0) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-icon">📝</div><div class="empty-text">No modules yet. Create your first lesson!</div></div>';
+      currentModulesMap.clear();
+      container.innerHTML = '<div class="admin-empty"><div class="empty-text">No modules yet. Create your first lesson!</div></div>';
       return;
     }
 
+    currentModulesMap.clear();
+    data.modules.forEach(m => currentModulesMap.set(m.id, m));
+
     container.innerHTML = data.modules.map(m => {
-      const hasPdf = m.file_url && m.file_name;
-      const fileInfo = hasPdf ? `📄 ${esc(m.file_name)}` : 'Text content';
+      const hasFile = Boolean(m.file_url);
+      const fileName = m.file_name || (hasFile ? 'Lesson Document' : '');
+      const ext = fileName ? fileName.split('?')[0].split('.').pop().toLowerCase() : '';
+      const isWord = ext === 'docx' || ext === 'doc';
+      const isPdf = ext === 'pdf';
+      const fileBadge = isPdf ? 'PDF' : isWord ? 'DOCX' : (ext ? ext.toUpperCase() : 'DOCUMENT');
+      const btnLabel = isPdf ? 'View PDF' : isWord ? 'View Document' : 'View File';
+
       return `
-      <div class="content-card" style="flex-wrap:wrap">
-        <div style="flex:1;min-width:200px">
-          <h4><span class="status-dot ${m.is_published ? 'published' : 'draft'}"></span>${esc(m.title)}</h4>
-          <div class="content-meta">${m.is_published ? 'Published' : 'Draft'} · Order: ${m.order_index} · ${fileInfo}</div>
-          ${hasPdf ? `<a href="${m.file_url}" target="_blank" style="font-size:0.72rem;color:#60a5fa;text-decoration:none">🔗 View PDF</a>` : ''}
+      <div class="content-card">
+        <div>
+          <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+            <h4>${esc(m.title)}</h4>
+            ${hasFile ? `<span style="font-size:0.65rem;padding:0.12rem 0.45rem;border-radius:4px;background:rgba(56,189,248,0.15);color:#38bdf8;font-weight:700;">${fileBadge}</span>` : ''}
+          </div>
+          <div class="content-meta">${m.is_published ? 'Published' : 'Draft'} · Order: ${m.order_index} · ${esc(fileName || 'Text content')}</div>
+          ${hasFile ? `
+            <div style="margin-top:0.45rem">
+              <button type="button" class="admin-btn" style="padding:0.3rem 0.8rem;font-size:0.75rem;background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid rgba(56,189,248,0.3);border-radius:6px;cursor:pointer;font-weight:700;" onclick="window._openDocViewer('${esc(m.file_url)}', '${esc(fileName)}', '${esc(m.title)}')">
+                ${btnLabel}
+              </button>
+            </div>
+          ` : ''}
         </div>
-        <div class="admin-actions" style="flex-wrap:wrap;gap:0.3rem">
-          <button class="admin-btn success" onclick="window._aiGenerateQuiz('${m.id}', '${esc(m.title)}')" title="AI Generate Quiz">AI Quiz</button>
+        <div class="admin-actions">
+          <button class="admin-btn success" onclick="window._aiGenerateQuiz('${m.id}', '${esc(m.title)}', '${esc(m.file_url || '')}', '${esc(fileName)}')" title="AI Generate Quiz">AI Quiz</button>
           <button class="admin-btn" onclick="window._toggleModPub('${m.id}', ${!m.is_published})">${m.is_published ? 'Unpublish' : 'Publish'}</button>
           <button class="admin-btn danger" onclick="window._deleteModule('${m.id}')">REMOVE</button>
         </div>
@@ -410,8 +626,8 @@
   };
 
   /* ── AI Quiz Generation ────────────────────── */
-  window._aiGenerateQuiz = async function (moduleId, moduleTitle) {
-    const numQ = prompt(`🤖 AI Quiz Generator\n\nGenerate a quiz from "${moduleTitle}".\n\nHow many questions? (3-20)`, '10');
+  window._aiGenerateQuiz = async function (moduleId, moduleTitle, fileUrl = '', fileName = '') {
+    const numQ = prompt(`AI Quiz Generator\n\nGenerate a quiz from "${moduleTitle}".\n\nHow many questions? (3-20)`, '10');
     if (!numQ) return;
 
     const num = parseInt(numQ);
@@ -424,24 +640,75 @@
     document.getElementById('profClassDetail').style.display = 'none';
     document.getElementById('quizPreviewView').style.display = 'none';
     const overlay = document.getElementById('aiGeneratingOverlay');
-    overlay.style.display = '';
+    overlay.style.display = 'flex';
     document.getElementById('aiGenModuleTitle').textContent = `Module: ${moduleTitle} · ${num} questions`;
 
-    const data = await api('POST', `/classrooms/${currentClassroomId}/modules/${moduleId}/generate-quiz`, {
-      num_questions: num,
-      quiz_title: `Quiz: ${moduleTitle}`,
-    });
+    const statusTextEl = document.getElementById('aiGenStatusText');
 
-    overlay.style.display = 'none';
+    try {
+      if (statusTextEl) {
+        statusTextEl.innerHTML = 'Reading lesson document…<br>This may take 10–20 seconds.';
+      }
 
-    if (data && !data.error) {
-      toast(`✅ ${data.message} Quiz saved as draft.`, 'success');
-      // Show the generated quiz preview
-      showQuizPreview(data.quiz, data.questions);
-    } else {
-      // Go back to class detail
+      let extractedText = '';
+
+      // 1. Check if module already has content cached in memory or loaded from database
+      const cachedMod = currentModulesMap.get(moduleId);
+      if (cachedMod?.content && cachedMod.content.trim().length >= 50) {
+        extractedText = cachedMod.content.trim();
+      }
+
+      // 2. If an uploaded document exists and we don't have text yet, extract it client-side (Word & PDF)
+      if (!extractedText && fileUrl) {
+        if (statusTextEl) {
+          statusTextEl.innerHTML = 'Analyzing and reading PDF/document…<br>Pengu is preparing key concepts.';
+        }
+
+        try {
+          extractedText = await extractDocumentText(fileUrl, fileName);
+          if (extractedText && extractedText.length >= 50) {
+            // Cache content in Supabase classroom_modules so subsequent quiz runs are instant
+            supa.from('classroom_modules').update({ content: extractedText.slice(0, 30000) }).eq('id', moduleId).then(() => {});
+            if (cachedMod) cachedMod.content = extractedText;
+          }
+        } catch (err) {
+          console.warn('Client-side document text extraction warning:', err);
+          // Continue — the backend will attempt server-side extraction as fallback
+        }
+      }
+
+      if (statusTextEl) {
+        statusTextEl.innerHTML = extractedText
+          ? 'Pengu is reading notes & drafting quiz questions…<br>This may take 15–30 seconds.'
+          : 'Sending document to server for processing…<br>This may take 30–60 seconds.';
+      }
+
+      const payload = {
+        num_questions: num,
+        quiz_title: `Quiz: ${moduleTitle}`,
+      };
+      if (extractedText && extractedText.length >= 50) {
+        payload.content = extractedText.slice(0, 30000);
+      }
+
+      const data = await api('POST', `/classrooms/${currentClassroomId}/modules/${moduleId}/generate-quiz`, payload);
+
+      overlay.style.display = 'none';
+
+      if (data && !data.error) {
+        toast(`${data.message} Quiz saved as draft.`, 'success');
+        // Show the generated quiz preview
+        showQuizPreview(data.quiz, data.questions);
+      } else {
+        // Go back to class detail
+        document.getElementById('profClassDetail').style.display = '';
+        toast(data?.error || 'AI quiz generation failed. Try again.', 'error');
+      }
+    } catch (err) {
+      console.error('AI quiz generation error:', err);
+      overlay.style.display = 'none';
       document.getElementById('profClassDetail').style.display = '';
-      toast(data?.error || 'AI quiz generation failed. Try again.', 'error');
+      toast('AI quiz generation encountered an unexpected error. Please try again.', 'error');
     }
   };
 
@@ -488,7 +755,7 @@
                 <span>${esc(opt)}</span>
               </div>`;
       }).join('')}
-          ${q.explanation ? `<div class="qp-explanation">💡 ${esc(q.explanation)}</div>` : ''}
+          ${q.explanation ? `<div class="qp-explanation">Explanation: ${esc(q.explanation)}</div>` : ''}
         </div>`;
     }).join('');
   }
@@ -500,19 +767,19 @@
 
     const data = await api('GET', `/classrooms/${currentClassroomId}/quizzes`);
     if (!data || data.error) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load quizzes</div></div>';
+      container.innerHTML = '<div class="admin-empty"><div class="empty-text">Failed to load quizzes</div></div>';
       return;
     }
 
     if (!data.quizzes || data.quizzes.length === 0) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-icon">📋</div><div class="empty-text">No quizzes yet. Create one for your students!</div></div>';
+      container.innerHTML = '<div class="admin-empty"><div class="empty-text">No quizzes yet. Create one for your students!</div></div>';
       return;
     }
 
     container.innerHTML = data.quizzes.map(q => `
       <div class="content-card" style="cursor:pointer" onclick="window._previewQuiz('${q.id}')">
         <div>
-          <h4><span class="status-dot ${q.is_published ? 'published' : 'draft'}"></span>${esc(q.title)}</h4>
+          <h4>${esc(q.title)}</h4>
           <div class="content-meta">${q.question_count || 0} questions · ${q.is_published ? 'Published' : 'Draft'}${q.time_limit_minutes ? ` · ${q.time_limit_minutes} min` : ''}${q.is_ai_generated ? ' · AI Generated' : ''}</div>
         </div>
         <div class="admin-actions">
@@ -547,7 +814,7 @@
     div.id = `qCard-${n}`;
     div.innerHTML = `
       <div class="q-number">QUESTION ${n}
-        <button type="button" class="admin-btn danger" style="float:right;padding:0.2rem 0.4rem;font-size:0.65rem" onclick="this.closest('.quiz-question-card').remove()">✕ Remove</button>
+        <button type="button" class="admin-btn danger" style="float:right;padding:0.2rem 0.4rem;font-size:0.65rem" onclick="this.closest('.quiz-question-card').remove()">Remove</button>
       </div>
       <div class="admin-form-group">
         <label>Question Text</label>
@@ -636,12 +903,12 @@
 
     const data = await api('GET', `/classrooms/${currentClassroomId}/quizzes/${quizId}/results`);
     if (!data || data.error) {
-      body.innerHTML = '<tr><td colspan="4"><div class="admin-empty"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load results</div></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="4"><div class="admin-empty"><div class="empty-text">Failed to load results</div></div></td></tr>';
       return;
     }
 
     if (!data.results || data.results.length === 0) {
-      body.innerHTML = '<tr><td colspan="4"><div class="admin-empty"><div class="empty-icon">📊</div><div class="empty-text">No submissions yet</div></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="4"><div class="admin-empty"><div class="empty-text">No submissions yet</div></div></td></tr>';
       return;
     }
 
@@ -679,6 +946,186 @@
     t.className = `admin-toast ${type} visible`;
     setTimeout(() => t.classList.remove('visible'), 3500);
   }
+
+  /* ── In-App Document Viewer (No Download, Authentic Multi-Page & Zero Crampiness) ── */
+  window._openDocViewer = function(url, fileName, title) {
+    const modal = document.getElementById('docViewerModal');
+    const titleEl = document.getElementById('docViewerTitle');
+    const badgeEl = document.getElementById('docViewerBadge');
+    const loadingEl = document.getElementById('docViewerLoading');
+    const frameWrap = document.getElementById('docViewerFrameWrap');
+    const modeSwitch = document.getElementById('docViewerModes');
+    const btnPages = document.getElementById('docViewerBtnPages');
+    const btnGoogle = document.getElementById('docViewerBtnGoogle');
+    const btnOffice = document.getElementById('docViewerBtnOffice');
+    const btnText = document.getElementById('docViewerBtnText');
+
+    if (!modal || !frameWrap) {
+      window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`, '_blank');
+      return;
+    }
+
+    const cleanName = fileName || 'document';
+    const ext = cleanName.split('?')[0].split('.').pop().toLowerCase();
+    const isDocx = ext === 'docx';
+    const isDoc = ext === 'doc';
+    const isPdf = ext === 'pdf';
+    const isImg = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(ext);
+
+    titleEl.textContent = title || cleanName;
+    badgeEl.textContent = isPdf ? 'PDF' : (isDocx || isDoc) ? 'WORD DOCUMENT' : isImg ? 'IMAGE' : 'DOCUMENT';
+
+    modal.classList.add('visible');
+    loadingEl.style.display = 'flex';
+    frameWrap.style.display = 'none';
+    frameWrap.innerHTML = '';
+
+    // In-memory buffer cache for instant view mode toggling without re-downloading
+    let cachedBuffer = null;
+
+    const setActiveModeBtn = (activeBtn) => {
+      [btnPages, btnGoogle, btnOffice, btnText].forEach(b => {
+        if (!b) return;
+        if (b === activeBtn) {
+          b.classList.add('active-doc-mode');
+        } else {
+          b.classList.remove('active-doc-mode');
+        }
+      });
+    };
+
+    const renderGoogleView = () => {
+      setActiveModeBtn(btnGoogle);
+      loadingEl.style.display = 'none';
+      frameWrap.style.display = 'block';
+      frameWrap.innerHTML = `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" style="width:100%;height:100%;border:none;background:#fff;" allowfullscreen></iframe>`;
+    };
+
+    const renderOfficeView = () => {
+      setActiveModeBtn(btnOffice);
+      loadingEl.style.display = 'none';
+      frameWrap.style.display = 'block';
+      frameWrap.innerHTML = `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}" style="width:100%;height:100%;border:none;background:#fff;" allowfullscreen></iframe>`;
+    };
+
+    const renderMammothTextView = async () => {
+      setActiveModeBtn(btnText);
+      loadingEl.style.display = 'flex';
+      frameWrap.style.display = 'none';
+      try {
+        if (!cachedBuffer) {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          cachedBuffer = await res.arrayBuffer();
+        }
+        if (window.mammoth && typeof window.mammoth.convertToHtml === 'function') {
+          const res = await window.mammoth.convertToHtml({ arrayBuffer: cachedBuffer });
+          loadingEl.style.display = 'none';
+          frameWrap.style.display = 'block';
+          frameWrap.innerHTML = `
+            <div class="docx-document-paper">
+              ${res.value || '<p>Document has no readable text.</p>'}
+            </div>
+          `;
+        } else {
+          throw new Error('Mammoth parser unavailable');
+        }
+      } catch (err) {
+        console.warn('Mammoth text render error, switching to Google Docs:', err);
+        renderGoogleView();
+      }
+    };
+
+    const renderDocxPagesView = async () => {
+      setActiveModeBtn(btnPages);
+      loadingEl.style.display = 'flex';
+      frameWrap.style.display = 'none';
+
+      try {
+        if (!cachedBuffer) {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          cachedBuffer = await res.arrayBuffer();
+        }
+
+        if (window.docx && typeof window.docx.renderAsync === 'function') {
+          frameWrap.innerHTML = '';
+          loadingEl.style.display = 'none';
+          frameWrap.style.display = 'block';
+          await window.docx.renderAsync(cachedBuffer, frameWrap, null, {
+            inWrapper: true,
+            ignoreWidth: false,
+            ignoreHeight: false,
+            breakPages: true,
+            experimental: true,
+            useBase64URL: true,
+            renderHeaders: true,
+            renderFooters: true
+          });
+        } else {
+          throw new Error('docx-preview parser unavailable');
+        }
+      } catch (err) {
+        console.warn('docx-preview render error, falling back to Google Docs View:', err);
+        renderGoogleView();
+      }
+    };
+
+    if (isDocx || isDoc) {
+      if (modeSwitch) modeSwitch.style.display = 'flex';
+
+      // Setup button click events
+      if (btnPages) {
+        btnPages.style.display = isDocx ? 'inline-block' : 'none';
+        btnPages.onclick = renderDocxPagesView;
+      }
+      if (btnGoogle) {
+        btnGoogle.style.display = 'inline-block';
+        btnGoogle.onclick = renderGoogleView;
+      }
+      if (btnOffice) {
+        btnOffice.style.display = 'inline-block';
+        btnOffice.onclick = renderOfficeView;
+      }
+      if (btnText) {
+        btnText.style.display = isDocx ? 'inline-block' : 'none';
+        btnText.onclick = renderMammothTextView;
+      }
+
+      // Default rendering:
+      if (isDocx && window.docx && typeof window.docx.renderAsync === 'function') {
+        renderDocxPagesView();
+      } else {
+        renderGoogleView();
+      }
+    } else {
+      if (modeSwitch) modeSwitch.style.display = 'none';
+
+      if (isPdf) {
+        loadingEl.style.display = 'none';
+        frameWrap.style.display = 'block';
+        frameWrap.innerHTML = `
+          <object data="${url}#toolbar=1" type="application/pdf" style="width:100%;height:100%;">
+            <iframe src="${url}#toolbar=1" style="width:100%;height:100%;border:none;background:#fff;" allowfullscreen>
+              <div style="padding:2rem;text-align:center;color:#94a3b8;font-family:'Nunito',sans-serif;">
+                <iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" style="width:100%;height:600px;border:none;" allowfullscreen></iframe>
+              </div>
+            </iframe>
+          </object>
+        `;
+      } else if (isImg) {
+        loadingEl.style.display = 'none';
+        frameWrap.style.display = 'flex';
+        frameWrap.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:2rem;">
+            <img src="${url}" alt="${esc(cleanName)}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.5);" />
+          </div>
+        `;
+      } else {
+        renderGoogleView();
+      }
+    }
+  };
 
   /* ── Boot ──────────────────────────────────── */
   if (document.readyState === 'loading') {

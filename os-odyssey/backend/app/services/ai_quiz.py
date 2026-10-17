@@ -14,7 +14,7 @@ import httpx
 
 from app.config import settings
 
-logger = logging.getLogger("os-odyssey.ai_quiz")
+logger = logging.getLogger("odyssey.ai_quiz")
 
 # Default preferred model candidates
 DEFAULT_MODELS = [
@@ -83,9 +83,9 @@ async def generate_quiz_from_content(
     if len(content) > max_chars:
         content = content[:max_chars] + "\n\n[Content truncated for quiz generation...]"
 
-    prompt = f"""You are an expert educational quiz generator for an Operating Systems course.
+    prompt = f"""You are an expert educational quiz generator. Adapt to the subject, terminology, and level found in the lesson title and content. The lesson content is the source of truth; do not assume a particular subject or introduce unrelated topics.
 
-Based on the following lesson content, generate exactly {num_questions} multiple-choice quiz questions.
+Based on the following lesson content, generate exactly {num_questions} multiple-choice quiz questions about its topics.
 
 LESSON TITLE: {module_title}
 
@@ -230,36 +230,282 @@ Example format:
     )
 
 
-async def extract_text_from_pdf_url(pdf_url: str) -> str:
-    """Download a PDF from URL and extract its text content."""
+def extract_text_from_docx_bytes(data: bytes) -> str:
+    """Extract text from Word (.docx) OpenXML package using standard zipfile and ElementTree."""
+    import io
+    import zipfile
+    import xml.etree.ElementTree as ET
+
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(pdf_url)
-            if response.status_code != 200:
-                raise ValueError(f"Failed to download PDF (status {response.status_code})")
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            ns = {
+                "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+            }
+            paragraphs = []
 
-            pdf_bytes = response.content
+            # 1. Main document body
+            if "word/document.xml" in z.namelist():
+                xml_data = z.read("word/document.xml")
+                root = ET.fromstring(xml_data)
 
-        # Use pypdf to extract text
-        import io
-        from pypdf import PdfReader
+                # Iterate through all paragraphs (includes body paragraphs and table cells)
+                for p in root.iter(f"{{{ns['w']}}}p"):
+                    texts = [node.text for node in p.iter(f"{{{ns['w']}}}t") if node.text]
+                    if texts:
+                        para_text = "".join(texts).strip()
+                        if para_text:
+                            paragraphs.append(para_text)
 
-        reader = PdfReader(io.BytesIO(pdf_bytes))
-        text_parts = []
-        for page in reader.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text_parts.append(page_text)
+            # 2. Check headers and footers if body is small
+            if len("\n\n".join(paragraphs)) < 100:
+                for name in z.namelist():
+                    if name.startswith("word/header") or name.startswith("word/footer"):
+                        try:
+                            h_xml = z.read(name)
+                            h_root = ET.fromstring(h_xml)
+                            for p in h_root.iter(f"{{{ns['w']}}}p"):
+                                texts = [node.text for node in p.iter(f"{{{ns['w']}}}t") if node.text]
+                                if texts:
+                                    pt = "".join(texts).strip()
+                                    if pt:
+                                        paragraphs.append(pt)
+                        except Exception:
+                            pass
 
-        full_text = "\n\n".join(text_parts)
+            full_text = "\n\n".join(paragraphs)
+            if not full_text or len(full_text.strip()) < 50:
+                raise ValueError("Could not extract enough text from the Word document.")
+
+            return full_text
+    except ValueError:
+        raise
+    except Exception as exc:
+        logger.error("DOCX extraction failed: %s", exc)
+        raise ValueError(f"Failed to read Word document: {str(exc)}")
+
+
+def extract_text_from_doc_bytes(data: bytes) -> str:
+    """Extract printable text strings from legacy binary Word (.doc) files."""
+    import re
+    try:
+        decoded = data.decode("utf-16le", errors="ignore")
+        clean_lines = [line.strip() for line in re.findall(r"[\w\s.,!?:;'\-\"()]{5,}", decoded) if len(line.strip()) > 10]
+        if len("\n".join(clean_lines)) >= 50:
+            return "\n\n".join(clean_lines)
+    except Exception:
+        pass
+
+    ascii_lines = [line.strip() for line in re.findall(r"[a-zA-Z0-9\s.,!?:;'\-\"()]{5,}", data.decode("latin-1", errors="ignore")) if len(line.strip()) > 10]
+    return "\n\n".join(ascii_lines)
+
+
+def _extract_text_from_pdf_stream_fallback(pdf_bytes: bytes) -> str:
+    """Fallback text extractor for truncated or damaged PDF streams using zlib and regex."""
+    import re
+    import zlib
+
+    text_chunks = []
+    stream_pattern = re.compile(b"stream[\r\n]+(.*?)[\r\n]+endstream", re.DOTALL)
+    for match in stream_pattern.finditer(pdf_bytes):
+        raw_stream = match.group(1)
+        decompressed = None
+        for wbits in (0, 32 + zlib.MAX_WBITS, -zlib.MAX_WBITS, zlib.MAX_WBITS):
+            try:
+                decompressed = zlib.decompress(raw_stream, wbits)
+                break
+            except Exception:
+                pass
+        if not decompressed:
+            decompressed = raw_stream
+
+        # Look for PDF text show operations: (text) Tj, ' , "
+        for m in re.finditer(rb"\(([^\)\\]*(?:\\.[^\)\\]*)*)\)\s*(?:Tj|\'|\")", decompressed):
+            t = m.group(1).decode("latin-1", errors="ignore").strip()
+            if len(t) > 1 and not t.startswith("/") and not t.startswith("%"):
+                text_chunks.append(t)
+
+        # Look for PDF array text show operations: [(text) 10 (text)] TJ
+        for m in re.finditer(rb"\[(.*?)\]\s*TJ", decompressed):
+            sub = m.group(1)
+            for sm in re.finditer(rb"\(([^\)\\]*(?:\\.[^\)\\]*)*)\)", sub):
+                t = sm.group(1).decode("latin-1", errors="ignore").strip()
+                if len(t) > 1 and not t.startswith("/") and not t.startswith("%"):
+                    text_chunks.append(t)
+
+    full_fallback = " ".join(text_chunks).strip()
+    return full_fallback
+
+
+def extract_text_from_pdf_bytes(pdf_bytes: bytes) -> str:
+    """Extract text from PDF bytes with fault tolerance for stream errors and truncated streams."""
+    import io
+    from pypdf import PdfReader
+    from pypdf.errors import PdfStreamError
+
+    reader = None
+    init_error = None
+    try:
+        reader = PdfReader(io.BytesIO(pdf_bytes), strict=False)
+    except (PdfStreamError, Exception) as exc:
+        init_error = str(exc)
+        logger.warning("pypdf initialization failed (%s). Attempting stream fallback extraction...", exc)
+
+    text_parts = []
+    if reader is not None:
+        try:
+            num_pages = len(reader.pages)
+            for page_idx in range(num_pages):
+                try:
+                    page = reader.pages[page_idx]
+                    page_text = page.extract_text()
+                    if page_text and page_text.strip():
+                        text_parts.append(page_text.strip())
+                except Exception as pe:
+                    logger.warning("Error reading PDF page %d: %s. Continuing...", page_idx + 1, pe)
+                    continue
+        except Exception as exc:
+            logger.warning("Error enumerating PDF pages (%s). Using partial text or fallback...", exc)
+
+    pypdf_text = "\n\n".join(text_parts).strip()
+
+    # Always attempt fallback to supplement pypdf results
+    fallback_text = ""
+    try:
+        fallback_text = _extract_text_from_pdf_stream_fallback(pdf_bytes)
+    except Exception as fb_exc:
+        logger.warning("Raw PDF stream fallback error: %s", fb_exc)
+
+    # Use whichever extraction got more text, or combine if both have content
+    if len(pypdf_text) >= 50:
+        logger.info("pypdf extracted %d characters from PDF", len(pypdf_text))
+        return pypdf_text
+
+    if len(fallback_text) >= 50:
+        logger.info("Raw PDF stream fallback recovered %d characters", len(fallback_text))
+        return fallback_text
+
+    # If we got some text from either source but not enough, combine them
+    combined = (pypdf_text + "\n\n" + fallback_text).strip()
+    if len(combined) >= 50:
+        logger.info("Combined pypdf + fallback recovered %d characters", len(combined))
+        return combined
+
+    raise ValueError(
+        "Could not extract enough readable text from the PDF. "
+        "The file may be scanned, image-only, or corrupted. "
+        f"({'pypdf error: ' + init_error if init_error else 'No text found in PDF streams'})"
+    )
+
+
+def extract_text_from_file_bytes(file_bytes: bytes, file_name: str = "") -> str:
+    """Determine document type and extract text accordingly."""
+    if not file_bytes:
+        raise ValueError("The uploaded document is empty (0 bytes).")
+
+    clean_name = file_name.lower().split("?")[0]
+    is_zip_magic = file_bytes.startswith(b"PK\x03\x04")
+    is_pdf_magic = b"%PDF" in file_bytes[:1024]
+    is_ole_doc = file_bytes.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1")
+
+    # 1. DOCX
+    if is_zip_magic or clean_name.endswith(".docx"):
+        return extract_text_from_docx_bytes(file_bytes)
+
+    # 2. PDF
+    if is_pdf_magic or clean_name.endswith(".pdf"):
+        return extract_text_from_pdf_bytes(file_bytes)
+
+    # 3. Legacy Word .doc
+    if is_ole_doc or clean_name.endswith(".doc"):
+        return extract_text_from_doc_bytes(file_bytes)
+
+    # 4. Plain text / Markdown
+    try:
+        return file_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        return file_bytes.decode("latin-1", errors="ignore")
+
+
+async def extract_text_from_file_url(file_url: str, file_name: str = "") -> str:
+    """Download a document (PDF, Word DOCX, DOC, or text) from URL with retries and extract text content."""
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "*/*",
+            "Accept-Encoding": "identity",
+        }
+        file_bytes = b""
+        last_error = None
+
+        async with httpx.AsyncClient(timeout=60.0, follow_redirects=True, headers=headers) as client:
+            for attempt in range(3):
+                try:
+                    # First try: streaming download
+                    if attempt < 2:
+                        async with client.stream("GET", file_url) as response:
+                            if response.status_code != 200:
+                                raise ValueError(f"Failed to download document (HTTP {response.status_code})")
+
+                            expected_len = response.headers.get("content-length")
+                            chunks = []
+                            async for chunk in response.aiter_bytes():
+                                chunks.append(chunk)
+                            file_bytes = b"".join(chunks)
+
+                            if expected_len and expected_len.isdigit():
+                                exp = int(expected_len)
+                                if len(file_bytes) != exp:
+                                    logger.warning(
+                                        "Download size mismatch on attempt %d: got %d bytes, expected %d. Retrying...",
+                                        attempt + 1, len(file_bytes), exp
+                                    )
+                                    last_error = ValueError(
+                                        f"Incomplete document download ({len(file_bytes)} of {exp} bytes)"
+                                    )
+                                    file_bytes = b""
+                                    await asyncio.sleep(1.5)
+                                    continue
+
+                            if file_bytes:
+                                break
+                    else:
+                        # Final attempt: non-streaming download (more reliable for some CDNs)
+                        logger.info("Attempt %d: trying non-streaming download...", attempt + 1)
+                        response = await client.get(file_url)
+                        if response.status_code != 200:
+                            raise ValueError(f"Failed to download document (HTTP {response.status_code})")
+                        file_bytes = response.content
+                        if file_bytes:
+                            break
+
+                except ValueError:
+                    raise
+                except Exception as dl_err:
+                    last_error = dl_err
+                    logger.warning("Download error on attempt %d: %s", attempt + 1, dl_err)
+                    await asyncio.sleep(1.5)
+
+        if not file_bytes:
+            raise ValueError(f"Failed to download document after 3 attempts: {last_error or 'Empty response'}")
+
+        logger.info("Downloaded document: %d bytes", len(file_bytes))
+
+        name = file_name or file_url.split("?")[0].split("/")[-1]
+        full_text = extract_text_from_file_bytes(file_bytes, name)
 
         if not full_text or len(full_text.strip()) < 50:
-            raise ValueError("Could not extract enough text from the PDF.")
+            raise ValueError("Could not extract enough readable text from the document. The file may be scanned, image-only, or in an unsupported format.")
 
-        return full_text
+        return full_text.strip()
 
     except ValueError:
         raise
     except Exception as exc:
-        logger.error("PDF text extraction failed: %s", exc)
-        raise ValueError(f"Failed to read PDF: {str(exc)}")
+        logger.error("Document text extraction failed: %s", exc)
+        raise ValueError(f"Failed to read document: {str(exc)}")
+
+
+async def extract_text_from_pdf_url(pdf_url: str) -> str:
+    """Backward compatibility alias for extract_text_from_file_url."""
+    return await extract_text_from_file_url(pdf_url)
+
