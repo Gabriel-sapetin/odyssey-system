@@ -25,7 +25,7 @@ from app.services.role_guard import get_user_role, require_professor
 from app.services.audit_logger import log_audit_event
 from app.services.supabase_client import get_admin_client
 
-logger = logging.getLogger("os-odyssey.classrooms")
+logger = logging.getLogger("odyssey.classrooms")
 
 router = APIRouter()
 
@@ -51,6 +51,11 @@ def _is_admin(user):
 class CreateClassroom(BaseModel):
     name: str
     description: Optional[str] = None
+    subject: Optional[str] = "General"
+    theme_color: Optional[str] = "#6366f1"
+    theme_emoji: Optional[str] = "📚"
+    ai_persona: Optional[str] = "Odyssey Mentor"
+    ai_subject_context: Optional[str] = None
 
     @field_validator("name")
     @classmethod
@@ -65,11 +70,34 @@ class CreateClassroom(BaseModel):
     def sanitize_desc(cls, v):
         return clean(v) if v else v
 
+    @field_validator("subject")
+    @classmethod
+    def sanitize_subject(cls, v):
+        if v:
+            v = clean(v)
+            if len(v) > 100:
+                raise ValueError("Subject must be under 100 characters.")
+        return v or "General"
+
+    @field_validator("ai_subject_context")
+    @classmethod
+    def sanitize_ai_context(cls, v):
+        if v:
+            v = clean(v)
+            if len(v) > 2000:
+                raise ValueError("AI context must be under 2000 characters.")
+        return v
+
 
 class UpdateClassroom(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     is_active: Optional[bool] = None
+    subject: Optional[str] = None
+    theme_color: Optional[str] = None
+    theme_emoji: Optional[str] = None
+    ai_persona: Optional[str] = None
+    ai_subject_context: Optional[str] = None
 
     @field_validator("name")
     @classmethod
@@ -169,6 +197,11 @@ async def create_classroom(
             "name": body.name,
             "description": body.description,
             "join_code": code,
+            "subject": body.subject or "General",
+            "theme_color": body.theme_color or "#6366f1",
+            "theme_emoji": body.theme_emoji or "📚",
+            "ai_persona": body.ai_persona or "Odyssey Mentor",
+            "ai_subject_context": body.ai_subject_context,
         }).execute()
 
         if not result.data:
@@ -1278,6 +1311,7 @@ async def get_quiz_results(
 class GenerateQuizRequest(BaseModel):
     num_questions: Optional[int] = 10
     quiz_title: Optional[str] = None
+    content: Optional[str] = None
 
 
 @router.post("/{classroom_id}/modules/{module_id}/generate-quiz")
@@ -1291,7 +1325,12 @@ async def ai_generate_quiz(
 ):
     """Generate quiz questions from a module's content using AI (Google Gemini)."""
     try:
-        from app.services.ai_quiz import generate_quiz_from_content, extract_text_from_pdf_url
+        from app.services.ai_quiz import (
+            generate_quiz_from_content,
+            generate_quiz_from_file_bytes,
+            extract_text_from_file_url,
+            extract_text_from_pdf_url,
+        )
 
         admin_client = get_admin_client()
 
@@ -1313,7 +1352,7 @@ async def ai_generate_quiz(
         # Get module content
         module = (
             admin_client.table("classroom_modules")
-            .select("title, content, file_url")
+            .select("title, content, file_url, file_name")
             .eq("id", module_id)
             .eq("classroom_id", classroom_id)
             .single()
@@ -1323,27 +1362,55 @@ async def ai_generate_quiz(
         if not module.data:
             raise HTTPException(status_code=404, detail="Module not found.")
 
-        content = module.data.get("content", "")
+        content = (body.content or "").strip() or module.data.get("content", "")
         file_url = module.data.get("file_url")
+        file_name = module.data.get("file_name", "")
         module_title = module.data.get("title", "")
 
-        # If module has a PDF, extract text from it
+        # If module has a document and no content, try to extract text
         if file_url and (not content or len(content.strip()) < 50):
-            content = await extract_text_from_pdf_url(file_url)
+            try:
+                content = await extract_text_from_file_url(file_url, file_name=file_name)
+            except Exception as ext_err:
+                logger.warning("Text extraction failed for module '%s': %s", module_title, ext_err)
+                content = ""
 
-        if not content or len(content.strip()) < 50:
-            raise HTTPException(
-                status_code=400,
-                detail="Module has no content to generate quiz from. Upload a PDF or add text content first.",
-            )
+        if content and len(content.strip()) >= 50 and not module.data.get("content"):
+            try:
+                admin_client.table("classroom_modules").update({"content": content[:30000]}).eq("id", module_id).execute()
+            except Exception as ce:
+                logger.warning("Could not cache extracted text in classroom_modules: %s", ce)
 
         num_q = min(max(body.num_questions or 10, 3), 20)
+        questions = None
 
-        questions = await generate_quiz_from_content(
-            content=content,
-            num_questions=num_q,
-            module_title=module_title,
-        )
+        # Primary path: generate from extracted text content
+        if content and len(content.strip()) >= 50:
+            questions = await generate_quiz_from_content(
+                content=content,
+                num_questions=num_q,
+                module_title=module_title,
+            )
+
+        # Fallback: send raw document to Gemini multimodal API (handles scanned PDFs)
+        if not questions and file_url:
+            logger.info("Text extraction insufficient. Trying multimodal quiz generation for '%s'...", module_title)
+            import httpx as _httpx
+            async with _httpx.AsyncClient(timeout=60.0, follow_redirects=True) as dl_client:
+                dl_resp = await dl_client.get(file_url)
+                if dl_resp.status_code == 200 and len(dl_resp.content) >= 100:
+                    questions = await generate_quiz_from_file_bytes(
+                        file_bytes=dl_resp.content,
+                        file_name=file_name,
+                        num_questions=num_q,
+                        module_title=module_title,
+                    )
+
+        if not questions:
+            raise HTTPException(
+                status_code=400,
+                detail="Module has no readable content to generate a quiz from. Upload a document (PDF, Word DOCX) or add lesson notes first.",
+            )
 
         # Auto-create the quiz with generated questions
         quiz_title = body.quiz_title or f"Quiz: {module_title}"
@@ -1393,3 +1460,4 @@ async def ai_generate_quiz(
     except Exception as exc:
         logger.error("AI quiz generation error: %s", exc)
         raise HTTPException(status_code=500, detail="Failed to generate quiz.")
+
