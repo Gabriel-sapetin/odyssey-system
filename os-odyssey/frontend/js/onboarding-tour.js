@@ -1,5 +1,5 @@
 /**
- * OS Odyssey — Onboarding Tour
+ * Odyssey — Onboarding Tour
  * Guided walkthrough for first-time users highlighting key features.
  * Self-contained IIFE — no external dependencies.
  */
@@ -117,10 +117,10 @@
       overlay.innerHTML = `
         <div class="tour-welcome-card">
           <div class="tour-welcome-mascot">
-            <img src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey mascot" />
+            <img src="../../assets/penguin-flower-removebg-preview.png" alt="Odyssey mascot" />
           </div>
           <div class="tour-welcome-badge">QUICK TOUR</div>
-          <h2 class="tour-welcome-title">Welcome to<br>OS Odyssey!</h2>
+          <h2 class="tour-welcome-title">Welcome to<br>Odyssey!</h2>
           <p class="tour-welcome-text">
             Let us show you around! This quick tour will highlight the key features
             to help you get the most out of your learning experience.
@@ -460,7 +460,7 @@
           <div class="tour-complete-title-label">WELL DONE</div>
           <h2 class="tour-complete-title">Tour Complete!</h2>
           <p class="tour-complete-text">
-            You're all set! Start exploring OS Odyssey — complete modules, run simulations,
+            You're all set! Start exploring Odyssey — complete modules, run simulations,
             earn badges, and climb the leaderboard. Happy learning!
           </p>
           <button class="tour-complete-close" id="tourCompleteClose">

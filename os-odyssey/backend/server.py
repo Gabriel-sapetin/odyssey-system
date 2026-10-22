@@ -1,5 +1,5 @@
 """
-OS Odyssey — Uvicorn Entry Point
+Odyssey — Uvicorn Entry Point
 ─────────────────────────────────
 Run with:  python server.py
 """

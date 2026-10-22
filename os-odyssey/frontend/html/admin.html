@@ -7,7 +7,7 @@
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
-  <title>OS Odyssey - Admin Dashboard</title>
+  <title>ODYSSEY - Admin Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
@@ -21,8 +21,8 @@
   <nav class="app-nav">
     <a href="index.html" class="app-brand">
       <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png"
-        alt="OS Odyssey penguin mascot" />
-      OS ODYSSEY
+        alt="ODYSSEY penguin mascot" />
+      ODYSSEY
     </a>
     <button class="app-nav-mobile-toggle" type="button" aria-label="Toggle mobile menu">
       <span></span><span></span><span></span>
@@ -58,6 +58,9 @@
       </button>
       <button class="admin-tab" data-tab="audit">
         <span class="admin-tab-icon"></span> Audit Log
+      </button>
+      <button class="admin-tab" data-tab="applications">
+        <span class="admin-tab-icon"></span> Applications <span id="pendingAppsBadge" style="display:none;background:#f5a623;color:#000;font-size:0.65rem;padding:0.1rem 0.4rem;border-radius:10px;margin-left:0.3rem;font-weight:700;"></span>
       </button>
     </div>
 
@@ -187,13 +190,27 @@
       </div>
       <div class="admin-pagination" id="auditPagination"></div>
     </div>
+
+    <!-- ═══ Applications Panel ═══ -->
+    <div class="admin-panel" id="panel-applications">
+      <div class="admin-toolbar">
+        <select class="admin-filter-select" id="appStatusFilter">
+          <option value="pending">Pending</option>
+          <option value="">All</option>
+          <option value="approved">Approved</option>
+          <option value="denied">Denied</option>
+        </select>
+      </div>
+      <div id="applicationsList"></div>
+      <div class="admin-pagination" id="appsPagination"></div>
+    </div>
   </main>
 
   <!-- Edit User Modal -->
   <div class="admin-modal-overlay" id="editUserModal">
     <div class="admin-modal" style="position:relative;">
       <button class="admin-modal-close" id="editUserClose">✕</button>
-      <h2>✏️ Edit User</h2>
+      <h2>Edit User</h2>
       <form id="editUserForm">
         <input type="hidden" id="editUserId" />
         <div class="admin-form-group">

@@ -16,7 +16,7 @@ import os
 
 import httpx
 
-logger = logging.getLogger("os-odyssey.turnstile")
+logger = logging.getLogger("odyssey.turnstile")
 
 TURNSTILE_SECRET = os.getenv("TURNSTILE_SECRET_KEY", "")
 TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"

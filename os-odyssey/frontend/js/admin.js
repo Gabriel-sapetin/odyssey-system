@@ -1,5 +1,5 @@
 /**
- * OS Odyssey — Admin Dashboard JS
+ * Odyssey — Admin Dashboard JS
  * ────────────────────────────────
  * Full admin panel logic: stats, user management, classroom oversight, audit log.
  * Uses the same backendCall() helper from main.js.
@@ -76,6 +76,7 @@
     setupSearch();
     setupModal();
     loadOverview();
+    loadPendingCount();
   }
 
   /* ── Tabs ───────────────────────────────────── */
@@ -94,6 +95,7 @@
           case 'users': loadUsers(); break;
           case 'classrooms': loadClassrooms(); break;
           case 'audit': loadAuditLog(); break;
+          case 'applications': loadApplications(); break;
         }
       });
     });
@@ -157,12 +159,12 @@
 
     const data = await apiCall('GET', url);
     if (!data || data.error) {
-      body.innerHTML = '<tr><td colspan="8"><div class="admin-empty"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load users</div></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="8"><div class="admin-empty"><div class="empty-text">Failed to load users</div></div></td></tr>';
       return;
     }
 
     if (!data.users || data.users.length === 0) {
-      body.innerHTML = '<tr><td colspan="8"><div class="admin-empty"><div class="empty-icon">👻</div><div class="empty-text">No users found</div></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="8"><div class="admin-empty"><div class="empty-text">No users found</div></div></td></tr>';
       renderPagination('usersPagination', data, (p) => { currentUserPage = p; loadUsers(); });
       return;
     }
@@ -279,12 +281,12 @@
 
     const data = await apiCall('GET', `/admin/classrooms?page=${currentClassroomPage}&per_page=20`);
     if (!data || data.error) {
-      body.innerHTML = '<tr><td colspan="7"><div class="admin-empty"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load classrooms</div></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="7"><div class="admin-empty"><div class="empty-text">Failed to load classrooms</div></div></td></tr>';
       return;
     }
 
     if (!data.classrooms || data.classrooms.length === 0) {
-      body.innerHTML = '<tr><td colspan="7"><div class="admin-empty"><div class="empty-icon">🏫</div><div class="empty-text">No classrooms yet</div></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="7"><div class="admin-empty"><div class="empty-text">No classrooms yet</div></div></td></tr>';
       return;
     }
 
@@ -335,7 +337,7 @@
 
     const data = await apiCall('GET', url);
     if (!data || data.error) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load audit log</div></div>';
+      container.innerHTML = '<div class="admin-empty"><div class="empty-text">Failed to load audit log</div></div>';
       return;
     }
 
@@ -346,7 +348,7 @@
   function renderAuditEntries(entries, containerId) {
     const container = document.getElementById(containerId);
     if (!entries.length) {
-      container.innerHTML = '<div class="admin-empty"><div class="empty-icon">📋</div><div class="empty-text">No entries found</div></div>';
+      container.innerHTML = '<div class="admin-empty"><div class="empty-text">No entries found</div></div>';
       return;
     }
 
@@ -460,6 +462,217 @@
     toast.className = `admin-toast ${type} visible`;
     setTimeout(() => toast.classList.remove('visible'), 3500);
   }
+
+  /* ── Applications Management ────────────────── */
+  let appsPage = 1;
+
+  async function loadApplications(page = 1) {
+    appsPage = page;
+    const list = document.getElementById('applicationsList');
+    if (!list) return;
+    list.innerHTML = '<div class="admin-loading"><div class="admin-spinner"></div></div>';
+
+    const statusFilter = document.getElementById('appStatusFilter')?.value || '';
+    let url = `/applications/instructor?page=${page}&per_page=20`;
+    if (statusFilter) url += `&status=${statusFilter}`;
+
+    let applications = null;
+    const data = await apiCall('GET', url);
+    if (data && !data.error && data.applications) {
+      applications = data.applications;
+    } else {
+      // Direct Supabase fallback
+      try {
+        let query = supa.from('instructor_applications').select('*');
+        if (statusFilter) query = query.eq('status', statusFilter);
+        const { data: supaApps, error } = await query
+          .order('created_at', { ascending: false })
+          .range((page - 1) * 20, page * 20 - 1);
+
+        if (!error && supaApps) {
+          const userIds = [...new Set(supaApps.map(a => a.user_id).filter(Boolean))];
+          let profileMap = {};
+          if (userIds.length > 0) {
+            const { data: profs } = await supa.from('profiles').select('id, username, email').in('id', userIds);
+            if (profs) profs.forEach(p => { profileMap[p.id] = p; });
+          }
+          applications = supaApps.map(a => ({
+            ...a,
+            username: profileMap[a.user_id]?.username || a.full_name || 'Applicant',
+            email: profileMap[a.user_id]?.email || a.work_email || '',
+          }));
+        }
+      } catch (err) {
+        console.warn('Direct Supabase fetch for applications error:', err);
+      }
+    }
+
+    if (!applications) {
+      list.innerHTML = '<div class="admin-empty"><div class="empty-text">Failed to load applications.</div></div>';
+      return;
+    }
+
+    if (applications.length === 0) {
+      list.innerHTML = '<div class="admin-empty"><div class="empty-text">No applications found.</div></div>';
+      return;
+    }
+
+    list.innerHTML = applications.map(app => {
+      const date = new Date(app.created_at).toLocaleDateString();
+      const statusColor = app.status === 'pending' ? '#f5a623' : app.status === 'approved' ? '#22c55e' : '#ef4444';
+      const statusText = app.status.charAt(0).toUpperCase() + app.status.slice(1);
+      return `
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.2rem;margin-bottom:1rem;border-left:4px solid ${statusColor};">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;">
+            <div>
+              <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                <strong style="color:#fff;font-family:'Nunito',sans-serif;font-size:1.05rem;">${esc(app.full_name || app.username || 'Applicant')}</strong>
+                ${app.position_title ? `<span style="font-size:0.75rem;padding:0.15rem 0.5rem;border-radius:4px;background:rgba(56,189,248,0.15);color:#38bdf8;font-weight:700;">${esc(app.position_title)}</span>` : ''}
+              </div>
+              <span style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-top:0.25rem;">
+                Account: ${esc(app.username || 'Unknown')} (${esc(app.email || '')}) · Applied ${date}
+              </span>
+            </div>
+            <span style="display:inline-block;padding:0.25rem 0.75rem;border-radius:20px;background:${statusColor}22;color:${statusColor};font-size:0.75rem;font-weight:700;font-family:'Nunito',sans-serif;">${statusText}</span>
+          </div>
+
+          <!-- Academic & Teaching Info Grid -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.6rem;margin-top:0.9rem;padding:0.75rem;background:rgba(0,0,0,0.25);border-radius:8px;font-size:0.8rem;color:rgba(255,255,255,0.75);">
+            <div><strong style="color:rgba(255,255,255,0.4);display:block;font-size:0.7rem;text-transform:uppercase;">Location</strong>${esc([app.city, app.province, app.region, app.country].filter(Boolean).join(', ') || 'Not specified')}</div>
+            <div><strong style="color:rgba(255,255,255,0.4);display:block;font-size:0.7rem;text-transform:uppercase;">Institution</strong>${esc(app.institution || 'Not specified')}</div>
+            <div><strong style="color:rgba(255,255,255,0.4);display:block;font-size:0.7rem;text-transform:uppercase;">Department</strong>${esc(app.department || 'Not specified')}</div>
+            <div><strong style="color:rgba(255,255,255,0.4);display:block;font-size:0.7rem;text-transform:uppercase;">Experience</strong>${esc(app.years_experience || 'Not specified')}</div>
+            <div><strong style="color:rgba(255,255,255,0.4);display:block;font-size:0.7rem;text-transform:uppercase;">Work Email</strong>${esc(app.work_email || 'None')}</div>
+            ${app.phone_number ? `<div><strong style="color:rgba(255,255,255,0.4);display:block;font-size:0.7rem;text-transform:uppercase;">Phone</strong>${esc(app.phone_number)}</div>` : ''}
+            <div><strong style="color:rgba(255,255,255,0.4);display:block;font-size:0.7rem;text-transform:uppercase;">Subjects to Teach</strong>${esc(app.subjects_taught || 'General')}</div>
+          </div>
+
+          <!-- Statement / Reason -->
+          <div style="margin-top:0.8rem;">
+            <strong style="color:rgba(255,255,255,0.45);display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;">Statement of Purpose</strong>
+            <p style="font-size:0.85rem;color:rgba(255,255,255,0.75);margin:0.25rem 0 0;font-family:'Nunito',sans-serif;line-height:1.5;">${esc(app.reason)}</p>
+          </div>
+
+          <!-- Uploaded Verification Documents -->
+          <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:0.9rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.06);">
+            ${app.id_document_url ? `
+              <div style="display:flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.05);padding:0.4rem 0.8rem;border-radius:6px;border:1px solid rgba(255,255,255,0.1);">
+                <span style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.85);">Faculty ID:</span>
+                <a href="${esc(app.id_document_url)}" target="_blank" rel="noopener noreferrer" style="font-size:0.75rem;color:#38bdf8;text-decoration:underline;">View ID Document</a>
+              </div>
+            ` : '<span style="font-size:0.75rem;color:rgba(255,255,255,0.35);">No ID document attached</span>'}
+
+            ${app.teaching_proof_url ? `
+              <div style="display:flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.05);padding:0.4rem 0.8rem;border-radius:6px;border:1px solid rgba(255,255,255,0.1);">
+                <span style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.85);">Teacher Proof Photo:</span>
+                <a href="${esc(app.teaching_proof_url)}" target="_blank" rel="noopener noreferrer" style="font-size:0.75rem;color:#38bdf8;text-decoration:underline;">View Teaching Proof</a>
+              </div>
+            ` : '<span style="font-size:0.75rem;color:rgba(255,255,255,0.35);">No teaching proof photo attached</span>'}
+          </div>
+
+          ${app.review_note ? `<p style="font-size:0.78rem;color:rgba(255,255,255,0.45);margin-top:0.6rem;font-style:italic;">Admin note: ${esc(app.review_note)}</p>` : ''}
+          ${app.status === 'pending' ? `
+            <div style="display:flex;gap:0.6rem;margin-top:1rem;">
+              <button class="admin-btn success" onclick="window._reviewApp('${app.id}','approved')" style="font-size:0.8rem;padding:0.4rem 1.2rem;background:#22c55e22;border-color:#22c55e55;color:#4ade80;">Approve Application</button>
+              <button class="admin-btn danger" onclick="window._reviewApp('${app.id}','denied')" style="font-size:0.8rem;padding:0.4rem 1.2rem;background:#ef444422;border-color:#ef444455;color:#f87171;">Deny Application</button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  window._reviewApp = async function(appId, newStatus) {
+    const note = newStatus === 'denied' ? prompt('Optional denial reason:') : null;
+    let handled = false;
+
+    // Try backend API first
+    const data = await apiCall('PATCH', `/applications/instructor/${appId}`, {
+      status: newStatus,
+      review_note: note || null,
+    });
+
+    if (data && !data.error) {
+      handled = true;
+    } else {
+      // Direct Supabase fallback
+      try {
+        const session = await getSession();
+        const { data: appData, error: fetchErr } = await supa
+          .from('instructor_applications')
+          .select('*')
+          .eq('id', appId)
+          .single();
+
+        if (fetchErr || !appData) throw new Error('Application record not found.');
+
+        const { error: updateErr } = await supa
+          .from('instructor_applications')
+          .update({
+            status: newStatus,
+            review_note: note || null,
+            reviewed_at: new Date().toISOString(),
+            reviewed_by: session.user.id,
+          })
+          .eq('id', appId);
+
+        if (updateErr) throw updateErr;
+
+        if (newStatus === 'approved') {
+          await supa
+            .from('profiles')
+            .update({ role: 'professor' })
+            .eq('id', appData.user_id);
+        }
+        handled = true;
+      } catch (err) {
+        console.error('Supabase application review error:', err);
+        showToast(err.message || 'Failed to review application.', 'error');
+        return;
+      }
+    }
+
+    if (handled) {
+      showToast(`Application ${newStatus}!`, 'success');
+      loadApplications(appsPage);
+      loadPendingCount();
+    }
+  };
+
+  async function loadPendingCount() {
+    const badge = document.getElementById('pendingAppsBadge');
+    if (!badge) return;
+
+    let total = null;
+    const data = await apiCall('GET', '/applications/instructor?status=pending&per_page=1');
+    if (data && !data.error && typeof data.total === 'number') {
+      total = data.total;
+    } else {
+      try {
+        const { count, error } = await supa
+          .from('instructor_applications')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending');
+        if (!error && typeof count === 'number') {
+          total = count;
+        }
+      } catch (e) {
+        // silent
+      }
+    }
+
+    if (typeof total === 'number' && total > 0) {
+      badge.textContent = total;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // Filter listener
+  document.getElementById('appStatusFilter')?.addEventListener('change', () => loadApplications(1));
+
+  function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
   /* ── Boot ───────────────────────────────────── */
   // Wait for supa to be ready

@@ -146,7 +146,7 @@ pip install -r requirements.txt
    cp .env.example .env
    ```
 
-2. Open `.env` and fill in your Supabase keys:
+2. Open `.env` and fill in your Supabase keys and Gemini API key. The Gemini key is required for Pengu AI and AI quiz generation; get one from Google AI Studio and keep it only in this backend `.env` file.
 
    ```env
    # ─── Supabase ───────────────────────────────────────────
@@ -154,6 +154,9 @@ pip install -r requirements.txt
    SUPABASE_ANON_KEY=your-anon-key-here
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
    SUPABASE_JWT_SECRET=your-jwt-secret-here
+
+   # ─── AI Tutor & Quiz Generator ───────────────────────────
+   GEMINI_API_KEY=your-gemini-api-key-here
 
    # ─── Server ─────────────────────────────────────────────
    PORT=4000
@@ -316,6 +319,7 @@ The project includes a `vercel.json` for deployment to [Vercel](https://vercel.c
 | `ModuleNotFoundError` when running backend | Make sure your virtual environment is activated (`.venv`)                                 |
 | CORS errors in browser console           | Check `CORS_ORIGINS` in `.env` matches your frontend URL exactly (including port)          |
 | `Connection refused` on port 4000        | Ensure the backend is running with `python server.py`                                     |
+| `GEMINI_API_KEY is not configured`       | Add `GEMINI_API_KEY=...` to `os-odyssey/backend/.env` and restart the backend              |
 | Supabase auth not working                | Verify `SUPABASE_URL` and `SUPABASE_ANON_KEY` are correct in both backend `.env` and `frontend/js/supabase.js` |
 | Frontend pages show blank               | Make sure you're serving from the **project root**, not the `frontend/` subfolder         |
 | `pip install` fails                      | Try upgrading pip: `python -m pip install --upgrade pip`                                  |
@@ -355,7 +359,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 copy .env.example .env
-# → Edit .env with your Supabase keys
+# → Edit .env with your Supabase and Gemini keys
 python server.py
 
 # 4. Set up frontend (new terminal)

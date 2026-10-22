@@ -1,5 +1,5 @@
 /**
- * OS Odyssey — Pengu AI Mentor Widget
+ * Odyssey — Pengu AI Mentor Widget
  * ────────────────────────────────────
  * Interactive AI tutor that floats across course pages and simulations.
  * Provides contextual explanations, analogies, C code examples, and hints.
@@ -7,11 +7,13 @@
 (function () {
   'use strict';
 
-  // Base API configuration (points to local dev if on localhost, else production backend)
-  const BACKEND_API =
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? (window.__USE_LOCAL_API ? 'http://127.0.0.1:8000/api' : 'https://os-odyssey-api.onrender.com/api')
-      : 'https://os-odyssey-api.onrender.com/api';
+  // Local pages should exercise the local tutor implementation by default.
+  // Set window.__USE_LOCAL_API = false before loading this script to use production.
+  const IS_LOCAL_HOST = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const USE_LOCAL_API = IS_LOCAL_HOST && window.__USE_LOCAL_API !== false;
+  const BACKEND_API = USE_LOCAL_API
+    ? `http://${window.location.hostname === 'localhost' ? 'localhost' : '127.0.0.1'}:4000/api`
+    : 'https://os-odyssey-api.onrender.com/api';
 
   const DEFAULT_AVATAR = '../../assets/penguin-flower-removebg-preview.png';
 
@@ -28,6 +30,7 @@
       return {
         title: `Lesson: ${lessonTitle}`,
         detail: classroomName ? `Classroom: ${classroomName}` : '',
+        subject: window.__odysseyClassroomSubject || '',
         snippet: document.getElementById('lessonViewContent')?.innerText?.slice(0, 1500) || '',
       };
     }
@@ -35,6 +38,7 @@
       return {
         title: `Classroom: ${classroomName}`,
         detail: 'Classroom Hub',
+        subject: window.__odysseyClassroomSubject || '',
         snippet: document.getElementById('hubCourseDesc')?.innerText?.slice(0, 500) || '',
       };
     }
@@ -53,15 +57,15 @@
     const h1Text = document.querySelector('h1')?.textContent?.trim();
     if (document.body.dataset.kernelSim || window.location.pathname.includes('-sim')) {
       return {
-        title: h1Text || 'OS Simulation Lab',
+        title: h1Text || 'Simulation Lab',
         detail: 'Interactive Simulation',
         snippet: document.querySelector('.sim-instructions, .instructions, main')?.innerText?.slice(0, 1000) || '',
       };
     }
 
     return {
-      title: document.title.replace('OS Odyssey - ', '').trim() || 'Operating Systems',
-      detail: 'OS Odyssey',
+      title: document.title.replace('Odyssey - ', '').replace('ODYSSEY - ', '').trim() || 'Learning',
+      detail: 'Odyssey',
       snippet: '',
     };
   }
@@ -124,11 +128,11 @@
     const html = `
       <div id="penguContainer">
         <!-- Floating Launcher Pill -->
-        <div class="pengu-launcher" id="penguLauncher" title="Ask Pengu AI (OS Mentor)">
+        <div class="pengu-launcher" id="penguLauncher" title="Ask Pengu AI">
           <img class="pengu-launcher-avatar" src="${brandAvatar}" alt="Pengu AI Mascot" />
           <div class="pengu-launcher-text">
             <span class="pengu-launcher-title">PENGU AI</span>
-            <span class="pengu-launcher-subtitle">OS Mentor <span class="pengu-launcher-badge">✨</span></span>
+            <span class="pengu-launcher-subtitle">Odyssey Mentor</span>
           </div>
         </div>
 
@@ -142,28 +146,29 @@
                 <h4>PENGU AI</h4>
                 <div class="pengu-header-status">
                   <span class="pengu-status-dot"></span>
-                  <span>OS Odyssey Mentor</span>
+                  <span>Odyssey Mentor</span>
                 </div>
               </div>
             </div>
             <div class="pengu-header-actions">
-              <button class="pengu-header-btn" id="penguClearBtn" title="Reset Chat" type="button">🗑️</button>
+              <button class="pengu-header-btn" id="penguClearBtn" title="Reset Chat" type="button" aria-label="Reset chat">Reset</button>
               <button class="pengu-header-btn" id="penguCloseBtn" title="Close" type="button">✕</button>
             </div>
           </div>
 
           <!-- Context Ribbon -->
           <div class="pengu-context-ribbon">
-            <span class="pengu-context-tag" id="penguContextTag">📍 Context: Loading...</span>
+            <span class="pengu-context-tag" id="penguContextTag">Context: Loading...</span>
             <span style="font-size:0.65rem;opacity:0.8;">Gemini Powered</span>
           </div>
 
           <!-- Quick Chips Bar -->
           <div class="pengu-chips-bar">
-            <button class="pengu-chip" data-mode="eli5" type="button">💡 Explain Simply</button>
-            <button class="pengu-chip" data-mode="analogy" type="button">🍕 Real-World Analogy</button>
-            <button class="pengu-chip" data-mode="code" type="button">💻 C Code Example</button>
-            <button class="pengu-chip" data-mode="hint" type="button">🧭 Socratic Hint</button>
+            <button class="pengu-chip" data-mode="eli5" type="button">Explain Simply</button>
+            <button class="pengu-chip" data-mode="analogy" type="button">Real-World Analogy</button>
+            <button class="pengu-chip" data-mode="code" type="button">Code Example</button>
+            <button class="pengu-chip" data-mode="hint" type="button">Socratic Hint</button>
+            <button class="pengu-chip" data-mode="navigate" type="button">Navigate Odyssey</button>
           </div>
 
           <!-- Messages Stream -->
@@ -175,12 +180,12 @@
               <textarea
                 class="pengu-textarea"
                 id="penguInput"
-                placeholder="Ask Pengu anything about this lesson..."
+                placeholder="Ask Pengu about your course, Odyssey, or anything else..."
                 rows="1"
                 required
               ></textarea>
               <button class="pengu-send-btn" id="penguSendBtn" type="submit" title="Send message" aria-label="Send">
-                ➤
+                Send
               </button>
             </form>
           </div>
@@ -188,7 +193,7 @@
 
         <!-- Highlight Selection Popup Tooltip -->
         <div class="pengu-selection-tooltip" id="penguSelectionTooltip" style="display:none;">
-          ✨ Ask Pengu
+          Ask Pengu
         </div>
       </div>
     `;
@@ -254,9 +259,10 @@
     chatHistory = [];
 
     const ctx = getPageContext();
-    document.getElementById('penguContextTag').textContent = `📍 ${ctx.title}`;
+    document.getElementById('penguContextTag').textContent = `Context: ${ctx.title}`;
 
-    const welcome = `Greetings, explorer! 🐧 I'm **Pengu**, your Operating Systems mentor.\n\nI can help you break down **${ctx.title}**, give you practical analogies, show working C/POSIX code, or drop Socratic hints if you're stuck.\n\nWhat would you like to explore?`;
+    const subject = window.__odysseyClassroomSubject || ctx.subject;
+    const welcome = `Hello! I'm **Pengu**, your Odyssey learning assistant.\n\nI can help with **${ctx.title}**${subject ? ` in ${subject}` : ''}, explain ideas with examples, answer questions on other topics, or guide you through the Odyssey interface.\n\nWhat would you like to explore?`;
     appendMessage('pengu', welcome, avatarUrl);
   }
 
@@ -293,6 +299,9 @@
         selected_text: activeSelectedText,
         content_snippet: ctx.snippet,
         history: chatHistory.slice(-6),
+        classroom_id: window.__odysseyClassroomId || null,
+        classroom_subject: window.__odysseyClassroomSubject || null,
+        classroom_persona: window.__odysseyClassroomPersona || null,
       };
 
       const res = await fetch(`${BACKEND_API}/ai/tutor`, {
@@ -310,7 +319,7 @@
       }
 
       const data = await res.json();
-      const reply = data.reply || "Brrr, I couldn't generate a response. Let's try rephrasing!";
+      const reply = data.reply || "I couldn't generate a response. Let's try rephrasing.";
 
       setThinking(false, brandAvatar);
       appendMessage('pengu', reply, brandAvatar);
@@ -320,9 +329,14 @@
       activeSelectedText = '';
     } catch (err) {
       setThinking(false, brandAvatar);
+      const errorMessage = err.message?.includes('GEMINI_API_KEY is not configured')
+        ? 'Pengu AI is not configured on this backend. Add GEMINI_API_KEY to os-odyssey/backend/.env and restart the backend.'
+        : USE_LOCAL_API && err instanceof TypeError
+          ? 'The local Odyssey API is not reachable at port 4000. Start the backend with `python server.py` from the backend folder, then try again.'
+          : (err.message || 'Please check your connection or try again.');
       appendMessage(
         'pengu',
-        `⚠️ **Pengu couldn't connect:** ${err.message || 'Please check your connection or try again.'}\n\n*Tip: If the backend is waking up, give it a few seconds and try again!*`,
+        `**Pengu couldn't connect:** ${errorMessage}`,
         brandAvatar
       );
     }
@@ -343,7 +357,7 @@
       win.classList.toggle('active');
       if (win.classList.contains('active')) {
         const ctx = getPageContext();
-        document.getElementById('penguContextTag').textContent = `📍 ${ctx.title}`;
+        document.getElementById('penguContextTag').textContent = `Context: ${ctx.title}`;
         input.focus();
       }
     });
@@ -387,10 +401,13 @@
             promptText = `Give me a creative real-world analogy to understand ${ctx.title}.`;
             break;
           case 'code':
-            promptText = `Show me a practical C / POSIX code example demonstrating ${ctx.title}.`;
+            promptText = `Show me a practical code example in a suitable language demonstrating ${ctx.title}.`;
             break;
           case 'hint':
             promptText = `Give me a Socratic hint or guiding question about ${ctx.title}.`;
+            break;
+          case 'navigate':
+            promptText = 'Help me navigate Odyssey. Based on my current page, give me steps to reach the next thing I need to do.';
             break;
           default:
             promptText = `Tell me more about ${ctx.title}.`;

@@ -12,7 +12,7 @@ from app.middleware.sanitize import clean
 from app.services.supabase_client import get_admin_client
 from app.services.turnstile import verify_turnstile_token
 
-logger = logging.getLogger("os-odyssey.auth")
+logger = logging.getLogger("odyssey.auth")
 
 router = APIRouter()
 

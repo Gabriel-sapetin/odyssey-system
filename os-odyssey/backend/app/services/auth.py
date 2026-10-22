@@ -11,7 +11,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from app.services.supabase_client import get_admin_client, get_user_client
 
-logger = logging.getLogger("os-odyssey.auth")
+logger = logging.getLogger("odyssey.auth")
 
 _bearer_scheme = HTTPBearer(auto_error=False)
 

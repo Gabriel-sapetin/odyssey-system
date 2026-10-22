@@ -23,7 +23,7 @@ from app.services.role_guard import require_admin
 from app.services.audit_logger import log_audit_event
 from app.services.supabase_client import get_admin_client
 
-logger = logging.getLogger("os-odyssey.admin")
+logger = logging.getLogger("odyssey.admin")
 
 router = APIRouter()
 

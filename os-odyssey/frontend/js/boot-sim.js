@@ -100,7 +100,7 @@
     { text: '  ✓ CPU switched to USER MODE', type: 'success' },
     { text: '  ✓ OS is now interrupt-driven', type: 'success' },
     { text: '', type: 'divider' },
-    { text: '🐧 OS ODYSSEY v2.1 — Boot complete!', type: 'final' }
+    { text: '🐧 ODYSSEY v2.1 — Boot complete!', type: 'final' }
   ];
 
   /* ---- Render IVT ---- */
@@ -273,7 +273,7 @@
   resetBtn.addEventListener('click', () => {
     if (booting) return;
     booted = false;
-    bootConsole.innerHTML = '<div class="boot-line boot-dim">OS ODYSSEY BIOS v2.1 — Ready to boot</div>';
+    bootConsole.innerHTML = '<div class="boot-line boot-dim">ODYSSEY BIOS v2.1 — Ready to boot</div>';
     statusLabel.textContent = '● System OFF';
     statusLabel.style.color = '';
     storagePanel.style.display = 'none';

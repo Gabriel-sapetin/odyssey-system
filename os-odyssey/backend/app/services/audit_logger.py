@@ -12,7 +12,7 @@ from fastapi import Request
 
 from app.services.supabase_client import get_admin_client
 
-logger = logging.getLogger("os-odyssey.audit")
+logger = logging.getLogger("odyssey.audit")
 
 
 def get_client_ip(request: Request) -> str:

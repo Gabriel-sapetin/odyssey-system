@@ -10,7 +10,7 @@ import logging
 from supabase import create_client, Client
 from app.config import settings
 
-logger = logging.getLogger("os-odyssey.supabase")
+logger = logging.getLogger("odyssey.supabase")
 
 _admin_client: Client | None = None
 

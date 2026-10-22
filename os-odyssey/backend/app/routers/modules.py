@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, Request
 from app.middleware.rate_limiter import limiter, API_LIMIT
 from app.services.thread_pool import run_in_pool
 
-logger = logging.getLogger("os-odyssey.modules")
+logger = logging.getLogger("odyssey.modules")
 
 router = APIRouter()
 

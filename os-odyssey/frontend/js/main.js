@@ -2,6 +2,34 @@
 (function () {
   'use strict';
 
+  // Load the shared mobile presentation layer only on signed-in app surfaces.
+  // Navigation is mounted by one component instead of copied across the MPA pages.
+  const hasMobileAppShell = document.body && document.body.classList.contains('app-page');
+  const hasMobileLanding = document.body && document.body.classList.contains('home-page');
+  const hasMobileAuth = document.body && document.body.classList.contains('auth-page');
+  const hasMobileInstructorPage = document.body && document.body.classList.contains('instructor-apply-page');
+  if (hasMobileAppShell || hasMobileLanding || hasMobileAuth || hasMobileInstructorPage) {
+    const mainScriptUrl = document.currentScript && document.currentScript.src;
+    if (mainScriptUrl) {
+      const mobileCssUrl = new URL('../css/mobile.css', mainScriptUrl).href;
+      if (!document.querySelector(`link[href="${mobileCssUrl}"]`)) {
+        const mobileCss = document.createElement('link');
+        mobileCss.rel = 'stylesheet';
+        mobileCss.href = mobileCssUrl;
+        document.head.appendChild(mobileCss);
+      }
+
+      if (hasMobileAppShell || hasMobileLanding || hasMobileInstructorPage) {
+        const mobileNavUrl = new URL('mobile-nav.js', mainScriptUrl).href;
+        if (!document.querySelector(`script[src="${mobileNavUrl}"]`)) {
+          const mobileNavScript = document.createElement('script');
+          mobileNavScript.src = mobileNavUrl;
+          document.body.appendChild(mobileNavScript);
+        }
+      }
+    }
+  }
+
   const DEFAULT_AVATAR = '../../assets/penguin-flower-removebg-preview.png';
   const DEFAULT_CHARACTER = 'Kernel Penguin';
   const SIGNUP_REQUIRED_CHARACTER = '__signup_required__';
@@ -81,7 +109,14 @@
     btn.id = 'bgmToggle';
     btn.type = 'button';
     btn.setAttribute('aria-label', 'Toggle background music');
-    btn.innerHTML = isMuted ? '🔇' : '🔊';
+    const usePlainAudioLabel = document.body.classList.contains('odyssey-home-page')
+      || document.body.classList.contains('explore-lessons-page');
+    const updateAudioLabel = () => {
+      btn.textContent = usePlainAudioLabel
+        ? (bgm.muted ? 'Sound off' : 'Sound on')
+        : (bgm.muted ? '🔇' : '🔊');
+    };
+    updateAudioLabel();
     document.body.appendChild(btn);
 
     /* BGM toggle button styles are defined in styles.css */
@@ -90,7 +125,7 @@
       e.stopPropagation(); // don't trigger the document-level tryStartBgm
       bgm.muted = !bgm.muted;
       localStorage.setItem(MUTE_KEY, bgm.muted);
-      btn.innerHTML = bgm.muted ? '🔇' : '🔊';
+      updateAudioLabel();
     });
 
     /* — Start playback on first user interaction (autoplay policy) — */
@@ -371,13 +406,13 @@
     }
     if (action) {
       action.textContent = unlocked ? 'Enter System Lab' : 'Open Course';
-      action.setAttribute('href', unlocked ? '#system-lab' : 'course.html');
+      action.setAttribute('href', unlocked ? '#system-lab' : '#modules');
     }
 
     const systemLabSection = document.getElementById('system-lab');
-    if (systemLabSection) systemLabSection.hidden = !unlocked;
+    if (systemLabSection) systemLabSection.hidden = false;
 
-    document.querySelectorAll('.sim-module-card.kernel-sim-link').forEach(cardLink => {
+    document.querySelectorAll('.kernel-sim-link').forEach(cardLink => {
       cardLink.classList.toggle('kernel-locked', !unlocked);
       cardLink.setAttribute('aria-disabled', unlocked ? 'false' : 'true');
       let lock = cardLink.querySelector('.kernel-lock-label');
@@ -527,6 +562,25 @@
       console.error('Error fetching profile:', error);
       return null;
     }
+
+    if (data && data.role !== 'professor' && data.role !== 'admin') {
+      try {
+        const { data: approvedApps } = await supa
+          .from('instructor_applications')
+          .select('id, status')
+          .eq('user_id', session.user.id)
+          .eq('status', 'approved')
+          .limit(1);
+
+        if (approvedApps && approvedApps.length > 0) {
+          data.role = 'professor';
+          supa.from('profiles').update({ role: 'professor' }).eq('id', session.user.id);
+        }
+      } catch (e) {
+        // silent
+      }
+    }
+
     return data;
   }
 
@@ -566,6 +620,9 @@
   async function renderSessionUI() {
     const user = await getCurrentUser();
     activeProfile = user;
+    window.odysseyProfileReady = true;
+    window.odysseyUserRole = user && user.role ? user.role : 'guest';
+    window.dispatchEvent(new Event('odyssey:profile-ready'));
 
     document.querySelectorAll('[data-auth-action="guest"]').forEach(el => {
       el.hidden = Boolean(user);
@@ -619,7 +676,7 @@
     renderSystemLabState(displayUser);
 
     if (document.body.dataset.kernelSim && !isKernelModeUnlocked(displayUser)) {
-      window.location.href = 'dashboard.html#practice';
+      window.location.href = 'explore-lessons.html';
       return;
     }
 
@@ -667,11 +724,21 @@
         profLink.textContent = 'My Classes';
         navLinks.insertBefore(profLink, insertBefore);
       } else {
-        const classLink = document.createElement('a');
-        classLink.href = 'classroom.html';
-        classLink.className = 'role-nav-link';
-        classLink.textContent = 'Classes';
-        navLinks.insertBefore(classLink, insertBefore);
+        if (!navLinks.querySelector('a[href="classroom.html"]')) {
+          const classLink = document.createElement('a');
+          classLink.href = 'classroom.html';
+          classLink.className = 'role-nav-link';
+          classLink.textContent = 'Classes';
+          navLinks.insertBefore(classLink, insertBefore);
+        }
+
+        if (!navLinks.querySelector('a[href="apply-instructor.html"]')) {
+          const applyLink = document.createElement('a');
+          applyLink.href = 'apply-instructor.html';
+          applyLink.className = 'role-nav-link';
+          applyLink.textContent = 'Apply as Instructor';
+          navLinks.insertBefore(applyLink, insertBefore);
+        }
       }
     })();
 
@@ -973,10 +1040,11 @@
 
   /* ---- Theme Toggle (dashboard) ---- */
   const dashToggle = document.getElementById('dashThemeToggle');
-  const isDashboard = document.body.classList.contains('app-page') || document.body.classList.contains('dashboard-page');
+  const isDashboard = document.body.classList.contains('app-page') || document.body.classList.contains('dashboard-page') || document.body.classList.contains('instructor-apply-page');
 
   if (isDashboard) {
-    const savedDashTheme = localStorage.getItem('os-odyssey-dash-theme') || 'dark';
+    const mobileDefaultTheme = document.body.dataset.defaultTheme || (window.matchMedia('(max-width: 768px)').matches ? 'light' : 'dark');
+    const savedDashTheme = localStorage.getItem('os-odyssey-dash-theme') || mobileDefaultTheme;
     if (savedDashTheme === 'light') {
       document.body.classList.add('light-mode');
     }
@@ -1153,8 +1221,8 @@
     const MODULE_LABELS = {
       module1: { num: '1', title: 'Introduction to Operating Systems', color: '#22c55e' },
       module2: { num: '2', title: 'Operating-System Structures', color: '#3b82f6' },
-      module3: { num: '3', title: 'Processes', icon: '⚙️', color: '#f59e0b' },
-      module4: { num: '4', title: 'Threads', icon: '🧵', color: '#e879f9' }
+      module3: { num: '3', title: 'Processes', color: '#f59e0b' },
+      module4: { num: '4', title: 'Threads', color: '#e879f9' }
     };
 
     const completedModules = (activeProfile && activeProfile.completed_modules) ? activeProfile.completed_modules : [];
@@ -1164,7 +1232,7 @@
 
     let html = `
       <div class="progress-panel-header">
-        <span class="progress-panel-title">Your Progress</span>
+        <span class="progress-panel-title">Course modules</span>
         <span class="progress-panel-overall">${overallPct}% Complete</span>
       </div>
       <div class="progress-panel-bar-wrap">
@@ -1184,6 +1252,13 @@
           <span class="progress-stat-label">Total Topics</span>
         </div>
       </div>
+      ${(() => {
+        const nextModule = MODULE_META.find(meta => isModuleUnlocked(meta.id) && !completedModules.includes(meta.id));
+        const targetModule = nextModule || MODULE_META[MODULE_META.length - 1];
+        const targetNumber = (MODULE_LABELS[targetModule.id] || {}).num || targetModule.id.replace('module', '');
+        const actionLabel = nextModule ? (completedCount ? 'Continue' : 'Start') : 'Review';
+        return `<button class="odyssey-continue-button" type="button" data-start-module="${targetModule.id}">${actionLabel} Module ${targetNumber}</button>`;
+      })()}
     `;
 
     MODULE_META.forEach(meta => {
@@ -1191,12 +1266,13 @@
       const isDone = completedModules.includes(meta.id);
       const unlocked = isModuleUnlocked(meta.id);
       const statusClass = isDone ? 'completed' : (unlocked ? 'in-progress' : 'locked');
-      const statusText = isDone ? '✓ Completed' : (unlocked ? 'In Progress' : '🔒 Locked');
+      const statusText = isDone ? 'Completed' : (unlocked ? 'In progress' : 'Locked');
       const statusColor = isDone ? '#16a34a' : (unlocked ? '#f59e0b' : '#64748b');
       const topicPct = isDone ? 100 : (unlocked ? 15 : 0);
 
       html += `
         <button class="progress-module-row ${statusClass}" type="button" data-start-module="${meta.id}" ${unlocked ? '' : 'disabled'}>
+          <span class="progress-module-number">${label.num}</span>
 
           <span class="progress-module-info">
             <strong>Module ${label.num}</strong>
@@ -1954,8 +2030,7 @@
   window.OS_ODYSSEY_MODULES = modules;
 
   /**
-   * Apply lock/unlock visual state to all module buttons
-   * (sidebar outline + main "Start Module" action buttons).
+   * Apply lock/unlock visual state to all module entry buttons.
    * Called on page load and after a module is completed.
    * Defined at IIFE scope so renderSessionUI & markModuleCompleted can reach it.
    */
@@ -1975,7 +2050,7 @@
       if (button.classList.contains('lesson-button')) {
         const num = mid.replace('module', '');
         if (!unlocked) {
-          button.textContent = '\ud83d\udd12 Module ' + num + ' Locked';
+          button.textContent = 'Module ' + num + ' Locked';
         } else if (isDone) {
           button.textContent = '\u2713 Review Module ' + num;
           button.disabled = false;
@@ -1990,7 +2065,7 @@
         if (checkEl) {
           const num = mid.replace('module', '');
           if (!unlocked) {
-            checkEl.textContent = '\ud83d\udd12';
+            checkEl.textContent = 'Locked';
           } else if (isDone) {
             checkEl.textContent = '\u2713';
           } else {
@@ -2613,8 +2688,9 @@
       elements.primaryAction.textContent = 'Submit Answer';
     }
 
-    document.querySelectorAll('[data-start-module]').forEach(button => {
-      button.addEventListener('click', () => openModule(button.dataset.startModule));
+    document.addEventListener('click', event => {
+      const button = event.target.closest('[data-start-module]');
+      if (button && !button.disabled) openModule(button.dataset.startModule);
     });
 
 
@@ -2728,10 +2804,10 @@
   }
 
   document.addEventListener('click', (event) => {
-    const lockedSim = event.target.closest('.sim-module-card.kernel-locked');
+    const lockedSim = event.target.closest('.kernel-sim-link.kernel-locked');
     if (!lockedSim) return;
     event.preventDefault();
-    const systemLabCard = document.getElementById('systemLabCard');
+    const systemLabCard = document.getElementById('systemLabCard') || document.querySelector('.lesson-unlock-note');
     if (systemLabCard) {
       systemLabCard.classList.add('kernel-attention');
       setTimeout(() => systemLabCard.classList.remove('kernel-attention'), 700);
@@ -2739,8 +2815,8 @@
   });
 
   /* ---- Easter egg ---- */
-  console.log('%c🐧 OS ODYSSEY', 'font-family:monospace;font-size:22px;color:#f5a623;font-weight:bold;');
-  console.log('%cTrain like a coder. Think like a kernel.', 'font-family:monospace;font-size:12px;color:#94a3b8;');
+  console.log('%c🐧 ODYSSEY', 'font-family:monospace;font-size:22px;color:#f5a623;font-weight:bold;');
+  console.log('%cLearn without limits. Powered by AI.', 'font-family:monospace;font-size:12px;color:#94a3b8;');
   console.log('%c⚡ Powered by Supabase', 'font-family:monospace;font-size:10px;color:#3ecf8e;');
 
 })();

@@ -17,11 +17,11 @@ from functools import partial
 
 from app.config import settings
 
-logger = logging.getLogger("os-odyssey.threads")
+logger = logging.getLogger("odyssey.threads")
 
 pool = ThreadPoolExecutor(
     max_workers=settings.WORKER_THREADS,
-    thread_name_prefix="os-odyssey-worker",
+    thread_name_prefix="odyssey-worker",
 )
 
 logger.info("Thread pool initialised with %d workers", settings.WORKER_THREADS)

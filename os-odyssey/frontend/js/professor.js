@@ -10,6 +10,8 @@
   const BACKEND_API = 'https://os-odyssey-api.onrender.com/api';
   let currentClassroomId = null;
   let questionCount = 0;
+  let activePreviewQuiz = null;
+  let pendingDeletedQuestionIds = [];
   const currentModulesMap = new Map();
 
   async function getSession() {
@@ -290,6 +292,14 @@
       document.getElementById('inner-quizzes').classList.add('active');
       loadQuizzes();
     });
+
+    document.getElementById('addPreviewQuestion')?.addEventListener('click', () => {
+      const container = document.getElementById('quizPreviewQuestions');
+      container.insertAdjacentHTML('beforeend', renderEditableQuestion({ question_text: '', question_type: 'multiple_choice', options: [], correct_answer: '', explanation: '' }, container.children.length));
+      bindQuestionCard(container.lastElementChild);
+      container.lastElementChild.querySelector('.qp-edit-text').focus();
+    });
+    document.getElementById('savePreviewQuestions')?.addEventListener('click', savePreviewQuestions);
 
     // Inner tabs
     document.querySelectorAll('.classroom-inner-tab').forEach(tab => {
@@ -723,6 +733,8 @@
   };
 
   function showQuizPreview(quiz, questions) {
+    activePreviewQuiz = quiz;
+    pendingDeletedQuestionIds = [];
     document.getElementById('profClassDetail').style.display = 'none';
     document.getElementById('aiGeneratingOverlay').style.display = 'none';
     const view = document.getElementById('quizPreviewView');
@@ -734,30 +746,108 @@
 
     // Action buttons
     document.getElementById('quizPreviewActions').innerHTML = `
-      <button class="admin-btn ${quiz.is_published ? '' : 'primary'}" onclick="window._toggleQuizPub('${quiz.id}', ${!quiz.is_published});document.getElementById('backToQuizList').click()">
+      <button class="admin-btn ${quiz.is_published ? '' : 'primary'}" onclick="window._toggleQuizPub('${quiz.id}', ${!quiz.is_published})">
         ${quiz.is_published ? 'Unpublish' : 'Publish Quiz'}
       </button>
     `;
 
-    const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    const container = document.getElementById('quizPreviewQuestions');
+    container.innerHTML = questions.map(renderEditableQuestion).join('');
+    container.querySelectorAll('.quiz-preview-card').forEach(bindQuestionCard);
+  }
 
-    document.getElementById('quizPreviewQuestions').innerHTML = questions.map((q, i) => {
-      const options = q.options || [];
-      return `
-        <div class="quiz-preview-card">
-          <div class="qp-number">Question ${i + 1}</div>
-          <div class="qp-text">${esc(q.question_text)}</div>
-          ${options.map((opt, oi) => {
-        const isCorrect = opt === q.correct_answer;
-        return `
-              <div class="qp-option ${isCorrect ? 'correct' : ''}">
-                <span class="qp-marker">${isCorrect ? '✓' : optionLabels[oi] || oi + 1}</span>
-                <span>${esc(opt)}</span>
-              </div>`;
-      }).join('')}
-          ${q.explanation ? `<div class="qp-explanation">Explanation: ${esc(q.explanation)}</div>` : ''}
-        </div>`;
-    }).join('');
+  function renderEditableQuestion(question, index) {
+    const options = Array.isArray(question.options) ? question.options.join('\n') : '';
+    return `
+      <section class="quiz-preview-card quiz-edit-card" data-question-id="${esc(question.id || '')}" data-question-type="${esc(question.question_type || 'multiple_choice')}" draggable="true">
+        <div class="qp-number"><span class="qp-drag-handle" aria-label="Drag to reorder">Drag to reorder</span><span class="qp-position">Question ${index + 1}</span>
+          <button class="admin-btn danger qp-remove-question" type="button">Remove</button>
+        </div>
+        <label>Question<input class="qp-edit-text" type="text" maxlength="2000" value="${esc(question.question_text || '')}" /></label>
+        <label>Options, one per line<textarea class="qp-edit-options" rows="4">${esc(options)}</textarea></label>
+        <label>Correct answer<input class="qp-edit-answer" type="text" maxlength="1000" value="${esc(question.correct_answer || '')}" /></label>
+        <label>Explanation<textarea class="qp-edit-explanation" rows="2">${esc(question.explanation || '')}</textarea></label>
+      </section>`;
+  }
+
+  function bindQuestionCard(card) {
+    card.querySelector('.qp-remove-question')?.addEventListener('click', () => {
+      if (card.dataset.questionId) pendingDeletedQuestionIds.push(card.dataset.questionId);
+      card.remove();
+      renumberPreviewQuestions();
+    });
+    card.addEventListener('dragstart', (event) => {
+      card.classList.add('dragging');
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', card.dataset.questionId || 'new-question');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+    card.addEventListener('dragover', (event) => {
+      event.preventDefault();
+      const dragging = document.querySelector('.quiz-edit-card.dragging');
+      if (!dragging || dragging === card) return;
+      const bounds = card.getBoundingClientRect();
+      const insertAfter = event.clientY > bounds.top + bounds.height / 2;
+      card.parentNode.insertBefore(dragging, insertAfter ? card.nextSibling : card);
+      renumberPreviewQuestions();
+    });
+  }
+
+  function renumberPreviewQuestions() {
+    document.querySelectorAll('#quizPreviewQuestions .qp-position').forEach((el, index) => {
+      el.textContent = `Question ${index + 1}`;
+    });
+  }
+
+  async function savePreviewQuestions() {
+    if (!activePreviewQuiz) return;
+    const container = document.getElementById('quizPreviewQuestions');
+    const cards = [...container.querySelectorAll('.quiz-edit-card')];
+    const pending = cards.map(card => ({
+      card,
+      question_text: card.querySelector('.qp-edit-text').value.trim(),
+      options: card.querySelector('.qp-edit-options').value.split('\n').map(value => value.trim()).filter(Boolean),
+      correct_answer: card.querySelector('.qp-edit-answer').value.trim(),
+      explanation: card.querySelector('.qp-edit-explanation').value.trim() || null,
+    }));
+    if (pending.some(question => !question.question_text || !question.correct_answer)) {
+      toast('Each question needs question text and a correct answer.', 'error');
+      return;
+    }
+
+    const saveButton = document.getElementById('savePreviewQuestions');
+    saveButton.disabled = true;
+    try {
+      for (const question of pending) {
+        const body = {
+          question_text: question.question_text,
+          question_type: question.card.dataset.questionType || 'multiple_choice',
+          options: question.options,
+          correct_answer: question.correct_answer,
+          explanation: question.explanation,
+        };
+        const id = question.card.dataset.questionId;
+        const result = id
+          ? await api('PATCH', `/classrooms/${currentClassroomId}/quizzes/${activePreviewQuiz.id}/questions/${id}`, body)
+          : await api('POST', `/classrooms/${currentClassroomId}/quizzes/${activePreviewQuiz.id}/questions`, body);
+        if (!result || result.error) throw new Error(result?.error || 'Failed to save a question.');
+        if (result.question?.id) question.card.dataset.questionId = result.question.id;
+      }
+      for (const id of pendingDeletedQuestionIds) {
+        const result = await api('DELETE', `/classrooms/${currentClassroomId}/quizzes/${activePreviewQuiz.id}/questions/${id}`);
+        if (!result || result.error) throw new Error(result?.error || 'Failed to remove a question.');
+      }
+      const reorder = await api('PATCH', `/classrooms/${currentClassroomId}/quizzes/${activePreviewQuiz.id}/questions/reorder`, {
+        question_ids: [...container.querySelectorAll('.quiz-edit-card')].map(card => card.dataset.questionId),
+      });
+      if (!reorder || reorder.error) throw new Error(reorder?.error || 'Failed to save question order.');
+      toast('Quiz questions saved.', 'success');
+      await window._previewQuiz(activePreviewQuiz.id);
+    } catch (err) {
+      toast(err.message || 'Failed to save quiz questions.', 'error');
+    } finally {
+      saveButton.disabled = false;
+    }
   }
 
   /* ── Quizzes ───────────────────────────────── */

@@ -72,4 +72,6 @@ pip install -r requirements.txt
 python server.py
 ```
 
+Before starting, copy `.env.example` to `.env`, fill in the Supabase settings and `GEMINI_API_KEY`, then restart the server after changing keys. `GEMINI_API_KEY` is required by Pengu AI and AI quiz generation; keep it in the backend environment and never place it in frontend code.
+
 The API docs are available at `http://localhost:4000/api/docs` in development mode.

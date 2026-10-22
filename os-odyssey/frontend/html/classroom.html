@@ -5,8 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src 'self' https://challenges.cloudflare.com https://*.supabase.co https://docs.google.com; object-src 'self' https://*.supabase.co; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
-  <title>OS Odyssey - My Classrooms</title>
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; worker-src 'self' blob: https://cdn.jsdelivr.net; child-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://localhost:4000 http://127.0.0.1:4000 https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src 'self' https://challenges.cloudflare.com https://*.supabase.co https://docs.google.com https://view.officeapps.live.com https://*.officeapps.live.com; object-src 'self' https://*.supabase.co; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
+  <title>ODYSSEY - My Classrooms</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
@@ -17,24 +17,22 @@
   <link rel="stylesheet" href="../css/pengu-ai.css" />
 </head>
 
-<body class="app-page dashboard-page">
+<body class="app-page dashboard-page odyssey-classroom-page">
   <nav class="app-nav">
     <a href="index.html" class="app-brand">
-      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png"
-        alt="OS Odyssey penguin mascot" />
-      OS ODYSSEY
+      ODYSSEY
     </a>
     <button class="app-nav-mobile-toggle" type="button" aria-label="Toggle mobile menu">
       <span></span><span></span><span></span>
     </button>
     <div class="app-nav-links">
       <a href="dashboard.html">Dashboard</a>
-      <a href="classroom.html" class="active">My Classes</a>
+      <a href="classroom.html" class="active">Classes</a>
+      <a href="apply-instructor.html">Apply as Instructor</a>
       <a href="course.html">Learn</a>
       <a href="leaderboard.html">Leaderboard</a>
       <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
-        <span class="toggle-icon sun-icon">☀️</span>
-        <span class="toggle-icon moon-icon">🌙</span>
+        <span class="toggle-label">Theme</span>
       </button>
       <button class="app-link-button" type="button" data-logout>Log out</button>
     </div>
@@ -44,7 +42,7 @@
     <!-- Classroom List View -->
     <div id="studentClassList">
       <div class="admin-header">
-        <h1>🎓 My Classrooms</h1>
+        <h1>My Classrooms</h1>
       </div>
 
       <!-- Join classroom section -->
@@ -62,26 +60,27 @@
       <div class="classroom-grid" id="studentClassroomGrid"></div>
     </div>
 
-    <!-- Classroom Detail View (Cisco NetAcad Course Player) -->
+    <!-- Classroom Detail View -->
     <div id="studentClassDetail" style="display:none">
       <section class="netacad-course standalone">
-        <!-- Shell Header (Cisco NetAcad header) -->
-        <header class="netacad-shell-header">
-          <div class="course-shell-brand">
+        <!-- Classroom header -->
+        <header class="netacad-shell-header classroom-gizmo-header">
+          <div class="classroom-header-back-row">
             <button class="netacad-back-link" id="backToStudentClasses" type="button" title="Back to My Classrooms">
-              ← Back
+              Back to Classes
             </button>
-            <div class="netacad-brand-lockup">
-              <span class="netacad-brand-mark">OS</span>
-              <div>
-                <strong id="studentClassDetailName">Classroom</strong>
-                <span id="studentClassDetailMeta">Prof. Aldren Lorens · 3 students</span>
-              </div>
-            </div>
+          </div>
+          <div class="classroom-heading-lockup">
+            <strong id="studentClassDetailName">Classroom</strong>
+            <span id="studentClassDetailMeta">By Instructor · 0 students</span>
           </div>
           <nav class="course-shell-nav" aria-label="Classroom navigation">
-            <button class="netacad-nav-tab active" id="navOutlineTab" type="button">Course Outline</button>
+            <button class="netacad-nav-tab active" id="navOutlineTab" type="button">Modules</button>
             <button class="netacad-nav-tab" id="navResourcesTab" type="button">Resources</button>
+            <button class="classroom-more-toggle" id="classroomMoreToggle" type="button" aria-label="Class options" aria-expanded="false" aria-controls="classroomMoreMenu">Class options</button>
+            <div class="classroom-more-menu" id="classroomMoreMenu" hidden>
+              <button class="classroom-leave-action" id="leaveClassMenuBtn" type="button">Leave Class</button>
+            </div>
             <button class="classroom-leave-link" id="leaveClassBtn" type="button">Leave Class</button>
           </nav>
         </header>
@@ -91,7 +90,7 @@
           <!-- Left Sidebar (Curriculum Tree) -->
           <aside class="netacad-sidebar" id="classroomSidebar">
             <div class="netacad-tabs">
-              <button class="active" id="sidebarTabOutline" type="button">Course Outline</button>
+              <button class="active" id="sidebarTabOutline" type="button">Modules</button>
               <button id="sidebarTabResources" type="button">Resources</button>
             </div>
             <label class="netacad-search">
@@ -110,11 +109,8 @@
             <!-- View 1: Classroom Learning Path & Progress (Overview) -->
             <article class="netacad-reader-preview" id="classroomHubView">
               <div class="reader-topline">
-                <span id="hubBreadcrumb">Course Outline</span>
+                <span id="hubBreadcrumb">Modules</span>
                 <span id="hubTopStatus">Classroom Overview</span>
-              </div>
-              <div class="reader-progress-strip" aria-hidden="true">
-                <span id="classroomOverallProgress" style="width: 0%"></span>
               </div>
               <div class="reader-content-split">
                 <div>
@@ -135,7 +131,7 @@
             <article class="netacad-reader-preview" id="classroomLessonView" style="display:none">
               <div class="reader-topline">
                 <div style="display:flex;align-items:center;gap:12px;">
-                  <button class="reader-back-btn" id="readerBackToHub" type="button">← Outline</button>
+                  <button class="reader-back-btn" id="readerBackToHub" type="button">Back to Lessons</button>
                   <span id="lessonBreadcrumb">Lesson</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:10px;">
@@ -159,21 +155,21 @@
 
               <!-- Reader Footer Nav: Prev / Next -->
               <div class="reader-footer-nav" id="readerFooterNav">
-                <button class="admin-btn" id="prevLessonBtn" type="button">← Previous Lesson</button>
-                <button class="admin-btn primary" id="nextLessonBtn" type="button">Next Lesson →</button>
+                <button class="admin-btn" id="prevLessonBtn" type="button">Previous Lesson</button>
+                <button class="admin-btn primary" id="nextLessonBtn" type="button">Next Lesson</button>
               </div>
             </article>
 
-            <!-- View 3: Assessment / Quiz View (Cisco NetAcad Assessment Style) -->
+            <!-- View 3: Assessment / Quiz View -->
             <article class="netacad-reader-preview" id="classroomQuizView" style="display:none">
               <div class="reader-topline">
                 <div style="display:flex;align-items:center;gap:12px;">
-                  <button class="reader-back-btn" id="quizBackToHub" type="button">← Outline</button>
+                  <button class="reader-back-btn" id="quizBackToHub" type="button">Back to Lessons</button>
                   <span id="quizBreadcrumb">Assessment</span>
                 </div>
                 <span id="quizAttemptStatusPill" class="quiz-status-badge">1 Attempt</span>
               </div>
-              <div class="reader-progress-strip" aria-hidden="true"><span style="width: 100%"></span></div>
+              <div class="reader-progress-strip" id="quizProgressTrack" role="progressbar" aria-label="Quiz completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="quizProgressBar" style="width: 0%"></span></div>
 
               <div class="reader-quiz-canvas-body">
                 <!-- Quiz Briefing Screen -->
@@ -214,9 +210,17 @@
 
                 <!-- Questions Container (during active taking) -->
                 <div id="quizTakingScreen" style="display:none">
+                  <div class="quiz-meta-row" id="quizMetaRow" aria-live="polite">
+                    <span id="quizQuestionMeta">Question 1</span>
+                    <span>Attempt 1</span>
+                    <span id="quizAnsweredMeta">0 answered</span>
+                  </div>
                   <div id="quizQuestionsContainer"></div>
-                  <div id="quizSubmitArea" style="margin-top:2rem;text-align:center">
-                    <button class="admin-btn primary" id="submitQuizBtn" style="padding:0.85rem 2.5rem;font-size:0.95rem">Submit Quiz</button>
+                  <div id="quizSubmitArea" class="quiz-step-controls">
+                    <button class="quiz-step-button" id="quizPreviousBtn" type="button">Previous</button>
+                    <span class="quiz-step-hint">Choose an answer to save it. You can return to earlier questions.</span>
+                    <button class="quiz-step-button primary" id="quizNextBtn" type="button">Next question</button>
+                    <button class="quiz-step-button primary" id="submitQuizBtn" type="button" hidden>Submit Quiz</button>
                   </div>
                 </div>
 
@@ -236,6 +240,13 @@
   <!-- Toast -->
   <div class="admin-toast" id="adminToast"></div>
 
+  <!-- JSZip & docx-preview for authentic multi-page Word rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.4.1/dist/docx-preview.min.js"></script>
+  <!-- Mammoth.js Word DOCX in-browser converter fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+  <!-- PDF.js in-browser text extractor -->
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase.js"></script>

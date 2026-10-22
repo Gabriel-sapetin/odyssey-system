@@ -22,7 +22,7 @@ from app.services.thread_pool import run_in_pool
 # Prevents automated farming even if an attacker has valid credentials
 MUTATION_LIMIT = "10/minute"
 
-logger = logging.getLogger("os-odyssey.progress")
+logger = logging.getLogger("odyssey.progress")
 
 router = APIRouter()
 

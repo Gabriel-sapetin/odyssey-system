@@ -170,6 +170,63 @@ class SubmitQuiz(BaseModel):
     answers: dict  # {question_id: selected_answer}
 
 
+def _authorize_quiz_editor(admin_client, classroom_id, quiz_id, user):
+    quiz = (
+        admin_client.table("classroom_quizzes")
+        .select("id, classroom_id")
+        .eq("id", quiz_id)
+        .eq("classroom_id", classroom_id)
+        .maybe_single()
+        .execute()
+    )
+    if not quiz.data:
+        raise HTTPException(status_code=404, detail="Quiz not found.")
+
+    classroom = (
+        admin_client.table("classrooms")
+        .select("professor_id")
+        .eq("id", classroom_id)
+        .maybe_single()
+        .execute()
+    )
+    if not classroom.data:
+        raise HTTPException(status_code=404, detail="Classroom not found.")
+    if not _is_admin(user) and not _is_classroom_owner(classroom.data, user["id"]):
+        raise HTTPException(status_code=403, detail="Not the owner.")
+    return quiz.data
+
+
+def _validated_quiz_question(body, partial=False):
+    allowed = {"question_text", "question_type", "options", "correct_answer", "explanation", "points"}
+    if not isinstance(body, dict) or set(body) - allowed:
+        raise HTTPException(status_code=400, detail="Invalid question fields.")
+    result = {}
+    for field in allowed:
+        if field not in body:
+            continue
+        value = body[field]
+        if field in {"question_text", "correct_answer", "explanation", "question_type"}:
+            if value is not None and not isinstance(value, str):
+                raise HTTPException(status_code=400, detail=f"{field} must be text.")
+            value = clean(value).strip() if value is not None else None
+            if field in {"question_text", "correct_answer"} and not value:
+                raise HTTPException(status_code=400, detail=f"{field} cannot be empty.")
+        elif field == "options":
+            if value is not None and (not isinstance(value, list) or any(not isinstance(item, str) for item in value)):
+                raise HTTPException(status_code=400, detail="Options must be a list of text values.")
+            value = [clean(item).strip() for item in value] if value is not None else None
+        elif field == "points":
+            if not isinstance(value, int) or value < 1:
+                raise HTTPException(status_code=400, detail="Points must be a positive integer.")
+        result[field] = value
+
+    if not partial and (not result.get("question_text") or not result.get("correct_answer")):
+        raise HTTPException(status_code=400, detail="Question text and correct answer are required.")
+    if result.get("question_type") and result["question_type"] not in {"multiple_choice", "true_false"}:
+        raise HTTPException(status_code=400, detail="Unsupported question type.")
+    return result
+
+
 # ─── Classroom CRUD ─────────────────────────────────────
 
 @router.post("/")
@@ -1128,6 +1185,152 @@ async def update_quiz(
     except Exception as exc:
         logger.error("Update quiz error: %s", exc)
         raise HTTPException(status_code=500, detail="Failed to update quiz.")
+
+
+@router.patch("/{classroom_id}/quizzes/{quiz_id}/questions/reorder")
+@limiter.limit(API_LIMIT)
+async def reorder_quiz_questions(
+    request: Request,
+    classroom_id: str,
+    quiz_id: str,
+    body: dict,
+    user=Depends(require_professor),
+):
+    """Persist a complete question ordering without replacing question records."""
+    try:
+        admin_client = get_admin_client()
+        _authorize_quiz_editor(admin_client, classroom_id, quiz_id, user)
+        question_ids = body.get("question_ids") if isinstance(body, dict) else None
+        if not isinstance(question_ids, list) or any(not isinstance(item, str) for item in question_ids):
+            raise HTTPException(status_code=400, detail="question_ids must be a list of question IDs.")
+        if len(question_ids) != len(set(question_ids)):
+            raise HTTPException(status_code=400, detail="Question IDs must not be repeated.")
+
+        current = (
+            admin_client.table("classroom_quiz_questions")
+            .select("id")
+            .eq("quiz_id", quiz_id)
+            .execute()
+        ).data or []
+        if set(question_ids) != {item["id"] for item in current}:
+            raise HTTPException(status_code=400, detail="Include every question in this quiz exactly once.")
+
+        for index, question_id in enumerate(question_ids, start=1):
+            admin_client.table("classroom_quiz_questions").update({"order_index": index}).eq("id", question_id).eq("quiz_id", quiz_id).execute()
+        return {"message": "Question order saved."}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("Reorder quiz questions error: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to reorder quiz questions.")
+
+
+@router.patch("/{classroom_id}/quizzes/{quiz_id}/questions/{question_id}")
+@limiter.limit(API_LIMIT)
+async def update_quiz_question(
+    request: Request,
+    classroom_id: str,
+    quiz_id: str,
+    question_id: str,
+    body: dict,
+    user=Depends(require_professor),
+):
+    """Edit a single quiz question while keeping its ID and attempt references."""
+    try:
+        admin_client = get_admin_client()
+        _authorize_quiz_editor(admin_client, classroom_id, quiz_id, user)
+        updates = _validated_quiz_question(body, partial=True)
+        if not updates:
+            raise HTTPException(status_code=400, detail="Provide at least one question field to update.")
+        question = (
+            admin_client.table("classroom_quiz_questions")
+            .select("id")
+            .eq("id", question_id)
+            .eq("quiz_id", quiz_id)
+            .maybe_single()
+            .execute()
+        )
+        if not question.data:
+            raise HTTPException(status_code=404, detail="Question not found.")
+        result = (
+            admin_client.table("classroom_quiz_questions")
+            .update(updates)
+            .eq("id", question_id)
+            .eq("quiz_id", quiz_id)
+            .execute()
+        )
+        return {"message": "Question updated.", "question": (result.data or [None])[0]}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("Update quiz question error: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to update question.")
+
+
+@router.post("/{classroom_id}/quizzes/{quiz_id}/questions", status_code=status.HTTP_201_CREATED)
+@limiter.limit(API_LIMIT)
+async def add_quiz_question(
+    request: Request,
+    classroom_id: str,
+    quiz_id: str,
+    body: dict,
+    user=Depends(require_professor),
+):
+    """Append a question to an existing quiz."""
+    try:
+        admin_client = get_admin_client()
+        _authorize_quiz_editor(admin_client, classroom_id, quiz_id, user)
+        question_data = _validated_quiz_question(body)
+        last = (
+            admin_client.table("classroom_quiz_questions")
+            .select("order_index")
+            .eq("quiz_id", quiz_id)
+            .order("order_index", desc=True)
+            .limit(1)
+            .execute()
+        ).data or []
+        question_data.update({"quiz_id": quiz_id, "order_index": (last[0].get("order_index") or 0) + 1})
+        result = admin_client.table("classroom_quiz_questions").insert(question_data).execute()
+        if not result.data:
+            raise HTTPException(status_code=500, detail="Failed to add question.")
+        return {"message": "Question added.", "question": result.data[0]}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("Add quiz question error: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to add question.")
+
+
+@router.delete("/{classroom_id}/quizzes/{quiz_id}/questions/{question_id}")
+@limiter.limit(API_LIMIT)
+async def delete_quiz_question(
+    request: Request,
+    classroom_id: str,
+    quiz_id: str,
+    question_id: str,
+    user=Depends(require_professor),
+):
+    """Remove one question from a quiz."""
+    try:
+        admin_client = get_admin_client()
+        _authorize_quiz_editor(admin_client, classroom_id, quiz_id, user)
+        question = (
+            admin_client.table("classroom_quiz_questions")
+            .select("id")
+            .eq("id", question_id)
+            .eq("quiz_id", quiz_id)
+            .maybe_single()
+            .execute()
+        )
+        if not question.data:
+            raise HTTPException(status_code=404, detail="Question not found.")
+        admin_client.table("classroom_quiz_questions").delete().eq("id", question_id).eq("quiz_id", quiz_id).execute()
+        return {"message": "Question deleted."}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("Delete quiz question error: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to delete question.")
 
 
 @router.delete("/{classroom_id}/quizzes/{quiz_id}")

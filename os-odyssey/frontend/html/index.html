@@ -7,7 +7,7 @@
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
-  <title>OS Odyssey — Begin Your Journey</title>
+  <title>Odyssey — Learn Without Limits</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Fredoka+One&family=Luckiest+Guy&family=Nunito:wght@400;600;700;800&display=swap"
@@ -16,16 +16,18 @@
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 
-<body>
+<body class="home-page">
 
   <!--NAVBAR-->
   <nav class="navbar">
     <div class="nav-logo">
       <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png"
-        alt="OS Odyssey penguin mascot" />
-      OS ODYSSEY
+        alt="ODYSSEY penguin mascot" />
+      ODYSSEY
     </div>
     <div class="nav-right">
+      <a href="classroom.html" class="nav-leaderboard-link">Classes</a>
+      <a href="apply-instructor.html" class="nav-leaderboard-link">Apply as Instructor</a>
       <a href="leaderboard.html" class="nav-leaderboard-link">Leaderboard</a>
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
         <span class="sun">☀️</span>
@@ -39,6 +41,7 @@
           <small>Dashboard</small>
         </span>
       </a>
+      <button type="button" data-auth-action="user" data-logout hidden>Log out</button>
     </div>
     <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle mobile menu">
       <span></span>
@@ -51,11 +54,10 @@
     <div class="hero-content">
       <p class="hero-eyebrow">BEGIN YOUR</p>
       <h1 class="hero-title">
-        <span class="title-os">OS</span>
         <span class="title-odyssey">Odyssey</span>
       </h1>
       <p class="hero-subtitle">
-        An Operating System Simulator where you train like a coder and think like a kernel
+        A gamified learning platform where AI meets education — master any subject, your way
       </p>
       <a href="signup.html" class="btn btn-cta" data-auth-action="guest">GET STARTED</a>
       <a href="dashboard.html" class="btn btn-cta" data-auth-action="user" hidden>OPEN DASHBOARD</a>
@@ -87,12 +89,25 @@
     </video>
     <div class="modules-header">
       <div class="penguin-icon">
-        <img src="../../assets/penguin-flower-removebg-preview.png" alt="OS Odyssey penguin mascot" />
+        <img src="../../assets/penguin-flower-removebg-preview.png" alt="ODYSSEY penguin mascot" />
       </div>
       <p class="modules-tagline">
-        DIVE INTO FUN, INTERACTIVE LEARNING MODULES THAT BUILD REAL OPERATING SYSTEM PROBLEM-SOLVING SKILLS.
+        EXPLORE COURSES, INTERACTIVE LESSONS, AND HANDS-ON ACTIVITIES — WITH ODYSSEY'S AI STUDY COMPANION.
       </p>
     </div>
+
+    <article class="mobile-featured-course">
+      <div class="mobile-featured-course__art">
+        <img src="../../assets/penguin-flower-removebg-preview.png" alt="Odyssey penguin guide" />
+      </div>
+      <div>
+        <p class="mobile-featured-course__eyebrow">Featured starter course</p>
+        <h3>Operating Systems</h3>
+        <p>Lessons, quizzes, and interactive labs in one hands-on course.</p>
+      </div>
+      <a href="signup.html" class="mobile-featured-course__action" data-auth-action="guest">Start learning</a>
+      <a href="course.html" class="mobile-featured-course__action" data-auth-action="user" hidden>Open course</a>
+    </article>
 
     <div class="modules-grid">
 
@@ -191,16 +206,16 @@
 
   <section class="cta-section">
     <div class="cta-content">
-      <h2 class="cta-title">Ready to think like a kernel?</h2>
-      <p class="cta-sub">Join <span id="ctaLearners">our</span> learners already on their OS Odyssey.</p>
+      <h2 class="cta-title">Ready to start your journey?</h2>
+      <p class="cta-sub">Join <span id="ctaLearners">our</span> learners already on their Odyssey.</p>
       <a href="signup.html" class="btn btn-cta">START FOR FREE</a>
     </div>
   </section>
 
   <!-- ===== FOOTER ===== -->
   <footer class="footer">
-    <div class="footer-logo">OS ODYSSEY</div>
-    <p class="footer-copy">© 2026 OS Odyssey. All rights reserved.</p>
+    <div class="footer-logo">ODYSSEY</div>
+    <p class="footer-copy">© 2026 ODYSSEY. All rights reserved.</p>
   </footer>
 
   <!-- Supabase CDN -->

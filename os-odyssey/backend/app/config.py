@@ -1,5 +1,5 @@
 """
-OS Odyssey — Backend Configuration
+Odyssey — Backend Configuration
 ───────────────────────────────────
 Loads environment variables via pydantic-settings for type-safe config.
 """

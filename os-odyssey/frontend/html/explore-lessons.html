@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>Odyssey - Explore Lessons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../../assets/favicon.png" />
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body class="app-page explore-lessons-page" data-default-theme="light">
+  <nav class="app-nav" aria-label="Main navigation">
+    <a href="dashboard.html" class="app-brand"><span class="brand-wordmark">Odyssey</span></a>
+    <button class="app-nav-mobile-toggle" type="button" aria-label="Toggle mobile menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="app-nav-links">
+      <a href="dashboard.html">Home</a>
+      <a href="course.html">My Learning</a>
+      <a href="explore-lessons.html" aria-current="page">Explore Lessons</a>
+      <a href="classroom.html">Classes</a>
+      <a href="profile.html">Profile</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle light and dark theme">Theme</button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="dashboard-shell lessons-shell">
+    <header class="lessons-heading">
+      <p class="section-kicker">LEARNING LIBRARY</p>
+      <h1>Explore Lessons</h1>
+      <p>Find a way to learn that fits you. Explore guided courses, check your understanding with quizzes, and practice with interactive activities across Odyssey.</p>
+    </header>
+
+    <section class="lesson-discovery" aria-labelledby="learningFormatsTitle">
+      <div class="lesson-section-heading">
+        <div>
+          <p class="section-kicker">LEARN YOUR WAY</p>
+          <h2 id="learningFormatsTitle">Explore what you can do</h2>
+        </div>
+      </div>
+      <div class="lesson-discovery-grid">
+        <article class="lesson-discovery-item lesson-discovery-courses">
+          <span class="lesson-discovery-icon" aria-hidden="true">📚</span>
+          <div><h3>Guided courses</h3><p>Work through lessons organized into clear, manageable modules.</p></div>
+        </article>
+        <article class="lesson-discovery-item lesson-discovery-quizzes">
+          <span class="lesson-discovery-icon" aria-hidden="true">✏️</span>
+          <div><h3>Knowledge checks</h3><p>Answer focused quizzes and see how well concepts are sticking.</p></div>
+        </article>
+        <article class="lesson-discovery-item lesson-discovery-paced">
+          <span class="lesson-discovery-icon" aria-hidden="true">🌱</span>
+          <div><h3>Learn at your pace</h3><p>Build understanding one lesson at a time and return whenever you’re ready.</p></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="lesson-library-section lesson-course-catalog" aria-labelledby="availableCoursesTitle">
+      <div class="lesson-section-heading">
+        <div>
+          <p class="section-kicker">COURSES</p>
+          <h2 id="availableCoursesTitle">Available courses</h2>
+        </div>
+      </div>
+      <p class="lesson-section-description">Choose a course to see its lessons and learning activities.</p>
+      <a class="lesson-course-card lesson-course-link lesson-course-summary" href="course.html" aria-label="Open the Operating Systems course">
+          <span class="lesson-course-mark" aria-hidden="true">OS</span>
+          <span class="lesson-course-summary-copy">
+            <span class="section-kicker">COMPUTER SCIENCE</span>
+            <strong id="osCourseTitle">Operating Systems</strong>
+            <span>A step-by-step course with lessons and practice activities</span>
+          </span>
+          <span class="lesson-course-expand"><span class="lesson-course-expand-label">Open course</span><span class="lesson-course-chevron" aria-hidden="true">→</span></span>
+      </a>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+
+</html>

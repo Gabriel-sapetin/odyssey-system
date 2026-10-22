@@ -711,6 +711,11 @@
   margin-top: 1rem;
 }
 
+.classroom-grid .admin-empty,
+.classroom-grid .admin-loading {
+  grid-column: 1 / -1;
+}
+
 .classroom-card {
   background: rgba(13, 20, 38, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -821,33 +826,63 @@
 
 /* ── Module & Quiz Cards ─────────────────────────── */
 .content-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 1rem;
+  background: rgba(13, 20, 38, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 1.35rem 1.4rem;
   margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  transition: border-color 0.2s;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
 }
 
 .content-card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-3px);
+  border-color: rgba(245, 166, 35, 0.45);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35), 0 0 15px rgba(245, 166, 35, 0.12);
+}
+
+/* In grid view (e.g. #modulesList, #quizzesList) */
+.classroom-grid .content-card {
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 1rem;
+  min-height: 180px;
 }
 
 .content-card h4 {
   font-family: 'Nunito', sans-serif;
-  font-weight: 700;
+  font-weight: 800;
   color: #fff;
-  font-size: 0.9rem;
-  margin-bottom: 0.2rem;
+  font-size: 1.05rem;
+  margin-bottom: 0.35rem;
+  line-height: 1.35;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .content-card .content-meta {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.45;
+}
+
+.content-card .admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: auto;
 }
 
 .status-dot {
@@ -1058,9 +1093,11 @@
 .light-mode .classroom-card .classroom-card-desc,
 .light-mode .classroom-card p { color: #5a6478; }
 .light-mode .classroom-card .classroom-meta { color: #64748b; }
-.light-mode .admin-empty { color: #64748b; }
-.light-mode .content-card { background: rgba(0, 0, 0, 0.02); border-color: rgba(0, 0, 0, 0.06); }
-.light-mode .content-card h4 { color: #1a1a2e; }
+.light-mode .content-card { background: #ffffff; border-color: rgba(0, 0, 0, 0.1); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); }
+.light-mode .content-card:hover { border-color: rgba(245, 166, 35, 0.6); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
+.light-mode .content-card h4 { color: #1a1f36; }
+.light-mode .content-card .content-meta { color: #5a6478; }
+.light-mode .content-card .admin-actions { border-top-color: rgba(0, 0, 0, 0.08); }
 .light-mode .quiz-question-card { background: rgba(0, 0, 0, 0.02); border-color: rgba(0, 0, 0, 0.06); }
 .light-mode .quiz-question-card .q-text { color: #1a1a2e; }
 .light-mode .quiz-option { color: rgba(0, 0, 0, 0.7); border-color: rgba(0, 0, 0, 0.08); }
@@ -1179,6 +1216,46 @@
   color: rgba(255, 255, 255, 0.5);
   line-height: 1.5;
 }
+
+.quiz-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+  color: rgba(255, 255, 255, 0.65);
+  font: 0.85rem 'Nunito', sans-serif;
+}
+
+.quiz-editor-toolbar p { margin: 0; }
+.quiz-editor-toolbar > div { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.quiz-edit-card { cursor: grab; }
+.quiz-edit-card.dragging { opacity: 0.45; }
+.quiz-edit-card .qp-number { display: flex; align-items: center; gap: 0.75rem; }
+.qp-drag-handle { color: #94a3b8; font-size: 0.72rem; cursor: grab; }
+.qp-position { flex: 1; }
+.quiz-edit-card label {
+  display: block;
+  margin: 0.85rem 0 0.35rem;
+  color: #cbd5e1;
+  font: 700 0.78rem 'Nunito', sans-serif;
+}
+.quiz-edit-card input,
+.quiz-edit-card textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+  font: 400 0.9rem 'Nunito', sans-serif;
+}
+.quiz-edit-card textarea { resize: vertical; }
+.quiz-editor-toolbar button:disabled { opacity: 0.6; cursor: wait; }
 
 /* ── Student Quizzes & Lessons Grid (Max 4 Columns) ───────── */
 .student-quiz-grid,
@@ -2179,5 +2256,177 @@
   color: #1e3a8a;
   line-height: 1.5;
 }
+
+/* ── Document Viewer Paper Styling (Clean Non-Cramped DOCX View) ── */
+.docx-document-paper {
+  max-width: 860px;
+  width: 94%;
+  margin: 2rem auto;
+  padding: 3rem 3.5rem;
+  background: #ffffff;
+  color: #1e293b;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.85;
+  font-size: 1.05rem;
+  word-wrap: break-word;
+}
+
+.docx-document-paper h1,
+.docx-document-paper h2,
+.docx-document-paper h3,
+.docx-document-paper h4 {
+  color: #0f172a;
+  font-weight: 800;
+  line-height: 1.35;
+  margin-top: 2rem;
+  margin-bottom: 0.85rem;
+}
+
+.docx-document-paper h1 {
+  font-size: 1.85rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+.docx-document-paper h2 {
+  font-size: 1.45rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.35rem;
+}
+
+.docx-document-paper h3 {
+  font-size: 1.2rem;
+}
+
+.docx-document-paper p {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  color: #334155;
+  text-align: justify;
+}
+
+.docx-document-paper table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.docx-document-paper table th,
+.docx-document-paper table td {
+  border: 1px solid #cbd5e1;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.docx-document-paper table th {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.docx-document-paper table tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+.docx-document-paper img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 1.5rem auto;
+  display: block;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.docx-document-paper ul,
+.docx-document-paper ol {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  padding-left: 2rem;
+}
+
+.docx-document-paper li {
+  margin-bottom: 0.5rem;
+  color: #334155;
+}
+
+.docx-document-paper blockquote {
+  border-left: 4px solid #38bdf8;
+  padding: 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  background: #f8fafc;
+  color: #475569;
+  font-style: italic;
+  border-radius: 0 8px 8px 0;
+}
+
+/* ── Active Document Viewer Mode Switcher Button ── */
+.admin-btn.active-doc-mode {
+  background: rgba(56, 189, 248, 0.25) !important;
+  color: #38bdf8 !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
+  font-weight: 700 !important;
+}
+
+/* ── docx-preview Paginated Multi-Page Viewer Styles ── */
+.docx-wrapper {
+  background: #0b0f19 !important;
+  padding: 30px 15px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  min-height: 100% !important;
+  box-sizing: border-box !important;
+  gap: 24px !important;
+}
+
+.docx-wrapper > section.docx {
+  background: #ffffff !important;
+  color: #1e293b !important;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.55), 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 4px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  margin-bottom: 24px !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+/* Ensure docx-wrapper text typography is crisp and spacious */
+.docx-wrapper > section.docx p,
+.docx-wrapper > section.docx span {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  line-height: 1.7 !important;
+}
+
+.docx-wrapper > section.docx table {
+  border-collapse: collapse !important;
+  margin: 1.25rem 0 !important;
+  width: 100% !important;
+}
+
+.docx-wrapper > section.docx table th,
+.docx-wrapper > section.docx table td {
+  padding: 0.65rem 0.85rem !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.docx-wrapper > section.docx table th {
+  background: #f1f5f9 !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+}
+
+.docx-wrapper > section.docx table tr:nth-child(even) td {
+  background: #f8fafc !important;
+}
+
+
 
 

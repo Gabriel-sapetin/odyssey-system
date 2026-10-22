@@ -1,7 +1,7 @@
 /**
- * OS Odyssey — Student Classroom JS (Cisco NetAcad Architecture)
+ * Odyssey — Student Classroom UI
  * ─────────────────────────────────────────────────────────────
- * Cisco NetAcad LMS layout with persistent Course Outline sidebar,
+ * Responsive classroom views with course outline navigation,
  * modules with nested quizzes, integrated PDF viewer with module
  * assessment placed directly underneath the PDF, and 1-attempt guard.
  */
@@ -17,6 +17,8 @@
   let currentLessonIndex = -1;
   let currentModuleId = null;
   let currentQuizAnswers = {};
+  let currentQuizQuestions = [];
+  let currentQuizQuestionIndex = 0;
 
   async function getSession() {
     const { data: { session } } = await supa.auth.getSession();
@@ -62,6 +64,7 @@
     document.getElementById('backToStudentClasses')?.addEventListener('click', () => {
       hide('studentClassDetail');
       show('studentClassList');
+      document.body.dataset.classroomView = 'list';
       currentClassroomId = null;
       loadClassrooms();
     });
@@ -76,10 +79,42 @@
         toast('Left classroom.', 'success');
         hide('studentClassDetail');
         show('studentClassList');
+        document.body.dataset.classroomView = 'list';
         currentClassroomId = null;
         loadClassrooms();
       } else {
         toast(data?.error || 'Failed to leave.', 'error');
+      }
+    });
+
+    document.getElementById('leaveClassMenuBtn')?.addEventListener('click', () => {
+      document.getElementById('classroomMoreMenu')?.setAttribute('hidden', '');
+      document.getElementById('classroomMoreToggle')?.setAttribute('aria-expanded', 'false');
+      document.getElementById('leaveClassBtn')?.click();
+    });
+    document.getElementById('classroomMoreToggle')?.addEventListener('click', () => {
+      const toggle = document.getElementById('classroomMoreToggle');
+      const menu = document.getElementById('classroomMoreMenu');
+      if (!toggle || !menu) return;
+      const open = menu.hidden;
+      menu.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', event => {
+      const menu = document.getElementById('classroomMoreMenu');
+      const toggle = document.getElementById('classroomMoreToggle');
+      if (menu && !menu.hidden && !menu.contains(event.target) && !toggle?.contains(event.target)) {
+        menu.hidden = true;
+        toggle?.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', event => {
+      const menu = document.getElementById('classroomMoreMenu');
+      const toggle = document.getElementById('classroomMoreToggle');
+      if (event.key === 'Escape' && menu && !menu.hidden) {
+        menu.hidden = true;
+        toggle?.setAttribute('aria-expanded', 'false');
+        toggle?.focus();
       }
     });
 
@@ -102,9 +137,44 @@
       filterSidebar(e.target.value.toLowerCase().trim());
     });
 
+    document.getElementById('quizQuestionsContainer')?.addEventListener('keydown', event => {
+      const container = event.currentTarget;
+      if (event.target.matches('input, textarea, select, [contenteditable="true"]')) return;
+      const question = event.target.closest('.quiz-question-card') || container.querySelector('.quiz-question-card');
+      if (!question) return;
+      const options = Array.from(question.querySelectorAll('.quiz-option'));
+      if (!options.length) return;
+      const focusedIndex = options.indexOf(document.activeElement);
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const nextIndex = focusedIndex < 0
+          ? 0
+          : (focusedIndex + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+        options[nextIndex].focus();
+        return;
+      }
+      if (!/^[a-h]$/i.test(event.key)) return;
+      const answerIndex = event.key.toUpperCase().charCodeAt(0) - 65;
+      if (options[answerIndex]) {
+        event.preventDefault();
+        options[answerIndex].focus();
+        options[answerIndex].click();
+      }
+    });
+
+    let responsiveRenderTimer;
+    window.addEventListener('resize', () => {
+      window.clearTimeout(responsiveRenderTimer);
+      responsiveRenderTimer = window.setTimeout(() => {
+        const detail = document.getElementById('studentClassDetail');
+        if (classroomData && detail && detail.style.display !== 'none') renderClassroomHub();
+      }, 120);
+    }, { passive: true });
+
     // Return to hub from reader/quiz
     document.getElementById('readerBackToHub')?.addEventListener('click', () => showCanvasView('hub'));
     document.getElementById('quizBackToHub')?.addEventListener('click', () => {
+      delete document.body.dataset.quizFocus;
       if (currentModuleId) {
         window._openModule(currentModuleId, true);
       } else {
@@ -128,6 +198,8 @@
 
     // Submit quiz
     document.getElementById('submitQuizBtn')?.addEventListener('click', submitQuiz);
+    document.getElementById('quizPreviousBtn')?.addEventListener('click', () => window._moveQuizQuestion(-1));
+    document.getElementById('quizNextBtn')?.addEventListener('click', () => window._moveQuizQuestion(1));
   }
 
   /* ── Join Classroom ────────────────────────── */
@@ -137,7 +209,7 @@
     const code = input.value.trim().toUpperCase();
 
     if (!code || code.length < 4) {
-      feedback.textContent = '❌ Please enter a valid join code.';
+      feedback.textContent = 'Please enter a valid join code.';
       feedback.style.color = '#f87171';
       return;
     }
@@ -149,16 +221,16 @@
 
     if (data && !data.error) {
       if (data.already_enrolled) {
-        feedback.textContent = 'ℹ️ You are already enrolled in this classroom.';
+        feedback.textContent = 'You are already enrolled in this classroom.';
         feedback.style.color = '#60a5fa';
       } else {
-        feedback.textContent = `✅ ${data.message}`;
+        feedback.textContent = data.message;
         feedback.style.color = '#4ade80';
         input.value = '';
         loadClassrooms();
       }
     } else {
-      feedback.textContent = `❌ ${data?.error || 'Failed to join.'}`;
+      feedback.textContent = data?.error || 'Failed to join.';
       feedback.style.color = '#f87171';
     }
   }
@@ -170,25 +242,37 @@
 
     const data = await api('GET', '/classrooms/');
     if (!data || data.error) {
-      grid.innerHTML = '<div class="admin-empty"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load classrooms</div></div>';
+      grid.innerHTML = '<div class="admin-empty"><div class="empty-text">Failed to load classrooms</div></div>';
       return;
     }
 
     if (!data.classrooms || data.classrooms.length === 0) {
-      grid.innerHTML = '<div class="admin-empty"><div class="empty-icon">🏫</div><div class="empty-text">You haven\'t joined any classrooms yet.<br>Enter a join code above to get started!</div></div>';
+      grid.innerHTML = '<div class="admin-empty"><div class="empty-text">You haven\'t joined any classrooms yet.<br>Enter a join code above to get started!</div></div>';
       return;
     }
 
-    grid.innerHTML = data.classrooms.map(c => `
-      <div class="classroom-card" onclick="window._openStudentClass('${c.id}')">
-        <h3>${esc(c.name)}</h3>
-        ${c.description ? `<p class="classroom-card-desc">${esc(c.description)}</p>` : ''}
-        <div class="classroom-meta">
-          <span>👤 Prof. ${esc(c.professor_username || 'Unknown')}</span>
-          <span>👥 ${c.member_count || 0} students</span>
-        </div>
-      </div>
-    `).join('');
+    const classroomColors = ['#6757dc', '#e56a32', '#159b75', '#3478c5', '#c34e83'];
+    grid.innerHTML = data.classrooms.map((c, index) => {
+      // Only accept a CSS hex color from classroom data; avoid injecting arbitrary inline styles.
+      const accent = /^#[\da-f]{3}(?:[\da-f]{3})?$/i.test(c.theme_color || '')
+        ? c.theme_color
+        : classroomColors[index % classroomColors.length];
+      return `
+        <button class="classroom-card" type="button" onclick="window._openStudentClass('${c.id}')" style="--class-accent:${accent}" aria-label="Open ${esc(c.name)} classroom">
+          <span class="classroom-card-accent" aria-hidden="true"></span>
+          <span class="classroom-card-content">
+            <span class="classroom-card-subject">${esc(c.subject || 'General')}</span>
+            <strong class="classroom-card-title">${esc(c.name)}</strong>
+            ${c.description ? `<span class="classroom-card-desc">${esc(c.description)}</span>` : ''}
+            <span class="classroom-meta">
+              <span>Prof. ${esc(c.professor_username || 'Unknown')}</span>
+              <span>${Number(c.member_count) || 0} students</span>
+            </span>
+            <span class="classroom-card-open">Open classroom</span>
+          </span>
+        </button>
+      `;
+    }).join('');
   }
 
   /* ── Find Quiz For Module Helper ───────────── */
@@ -217,7 +301,7 @@
     return null;
   }
 
-  /* ── Open Classroom (Cisco NetAcad Architecture) ────────── */
+  /* ── Open Classroom ─────────────────────────────────────── */
   window._openStudentClass = async function (id) {
     currentClassroomId = id;
     hide('studentClassList');
@@ -242,17 +326,25 @@
     }
 
     classroomData = classRes.classroom;
+    document.body.dataset.classroomView = 'hub';
+    document.body.dataset.classroomLibraryView = 'outline';
     modulesList = modRes?.modules || [];
     quizzesList = quizRes?.quizzes || [];
 
     // Header info
     document.getElementById('studentClassDetailName').textContent = classroomData.name;
     document.getElementById('studentClassDetailMeta').textContent =
-      `Prof. ${classroomData.professor_username || 'Instructor'} · ${classroomData.member_count || 0} students`;
+      `By ${classroomData.professor_username || 'Instructor'} · ${classroomData.member_count || 0} students`;
+
+    // Expose classroom ID for the AI chat widget
+    window.__odysseyClassroomId = classroomData.id || null;
+    window.__odysseyClassroomSubject = classroomData.subject || 'General';
+    window.__odysseyClassroomPersona = classroomData.ai_persona || 'Odyssey Mentor';
 
     // Render components
     renderSidebarOutline();
     renderSidebarResources();
+    switchSidebarTab('outline');
     renderClassroomHub();
     showCanvasView('hub');
   };
@@ -263,6 +355,9 @@
     const resBtn = document.getElementById('sidebarTabResources');
     const navOutline = document.getElementById('navOutlineTab');
     const navRes = document.getElementById('navResourcesTab');
+    const workspace = document.getElementById('classroomWorkspace');
+    if (workspace) workspace.dataset.libraryView = tab;
+    document.body.dataset.classroomLibraryView = tab;
 
     if (tab === 'outline') {
       outlineBtn?.classList.add('active');
@@ -299,7 +394,7 @@
       const quiz = findQuizForModule(m.id);
 
       const isCompleted = isViewed && (!quiz || Boolean(quiz.last_attempt));
-      const checkText = isCompleted ? '✓' : String(idx + 1);
+      const checkText = String(idx + 1);
       const circleClass = isCompleted ? 'outline-badge-circle completed' : 'outline-badge-circle';
       const badgeText = hasPdf ? 'PDF' : 'NOTES';
 
@@ -314,10 +409,9 @@
             <span class="course-outline-badge ${isViewed ? 'completed' : ''}">${badgeText}</span>
           </button>
           ${quiz ? `
-            <button class="course-outline-subitem ${quiz.last_attempt ? 'completed' : ''}" id="sidebar-subquiz-${quiz.id}" type="button" onclick="window._openModuleQuiz('${m.id}', '${quiz.id}')">
-              <span class="subitem-marker">└</span>
-              <span class="subitem-icon">${quiz.last_attempt ? '✓' : 'Q'}</span>
-              <span class="subitem-title">Quiz: ${esc(quiz.title.replace(/^quiz:\s*/i, ''))}</span>
+            <button class="course-outline-subitem ${quiz.last_attempt ? 'completed' : ''}" id="sidebar-subquiz-${quiz.id}" type="button" onclick="window._openModuleQuiz('${m.id}', '${quiz.id}')" aria-label="${quiz.last_attempt ? 'Review' : 'Take'} quiz: ${esc(quiz.title.replace(/^quiz:\s*/i, ''))}">
+              <span class="subitem-title">${quiz.last_attempt ? 'Review quiz' : 'Take Quiz'}</span>
+              <span class="subitem-description">${esc(quiz.title.replace(/^quiz:\s*/i, ''))}</span>
               <span class="subitem-badge ${quiz.last_attempt ? 'completed' : ''}">
                 ${quiz.last_attempt ? `${Math.round((quiz.last_attempt.score / quiz.last_attempt.max_score) * 100)}%` : 'QUIZ'}
               </span>
@@ -335,25 +429,31 @@
     const list = document.getElementById('sidebarResourcesList');
     if (!list) return;
 
-    const pdfModules = modulesList.filter(m => m.file_url && m.file_name);
+    const resourceModules = modulesList.filter(m => m.file_url || m.content || m.description);
 
-    if (pdfModules.length === 0) {
-      list.innerHTML = '<div style="padding:1.5rem;text-align:center;color:#64748b;font-size:0.85rem;">No downloadable PDF resources uploaded yet.</div>';
+    if (resourceModules.length === 0) {
+      list.innerHTML = '<div class="classroom-resource-empty">Your instructor has not added any materials yet.</div>';
       return;
     }
 
-    list.innerHTML = pdfModules.map(m => `
-      <div class="course-outline-item" style="cursor:default">
-        <span class="outline-badge-circle">📥</span>
-        <div>
-          <strong>${esc(m.title)}</strong>
-          <em>${esc(m.file_name)}</em>
-        </div>
-        <button class="admin-btn primary" type="button" style="padding:4px 8px;font-size:0.75rem;" onclick="window._downloadPdfFile(this, '${m.file_url}', '${esc(m.file_name)}')">
-          Download
-        </button>
-      </div>
-    `).join('');
+    list.innerHTML = resourceModules.map((m, index) => {
+      const fileName = m.file_name || 'Lesson notes';
+      const ext = m.file_name?.split('?')[0].split('.').pop().toUpperCase() || 'NOTES';
+      const quiz = findQuizForModule(m.id);
+      return `
+        <article class="classroom-resource-row">
+          <span class="classroom-resource-type">${esc(ext)}</span>
+          <span class="classroom-resource-copy">
+            <strong>${esc(m.title || `Material ${index + 1}`)}</strong>
+            <span>${esc(fileName)}${quiz ? ' · Quiz available' : ''}</span>
+          </span>
+          <span class="classroom-resource-actions">
+            <button class="classroom-resource-open" type="button" onclick="window._openModule('${m.id}')">Open material</button>
+            ${m.file_url ? `<button class="classroom-resource-download" type="button" onclick="window._downloadPdfFile(this, '${m.file_url}', '${esc(fileName)}')">Download</button>` : ''}
+          </span>
+        </article>
+      `;
+    }).join('');
   }
 
   /* ── Filter Sidebar Items ──────────────────── */
@@ -366,28 +466,40 @@
 
   /* ── Render Classroom Hub (Picture 2 Architecture) ──── */
   function renderClassroomHub() {
-    document.getElementById('hubCourseTitle').textContent = `${classroomData.name} - Curriculum`;
+    document.getElementById('hubCourseTitle').textContent = 'Class modules';
     document.getElementById('hubCourseDesc').textContent =
       classroomData.description || 'Welcome to this classroom. Review the available lessons and materials below, and take the assigned quizzes to assess your understanding.';
 
-    // Quick Action Launch Buttons per module
     const actionArea = document.getElementById('hubQuickActions');
-    let actionsHtml = '';
-
-    modulesList.forEach((m, idx) => {
-      const isViewed = viewedModuleIds.has(m.id);
-      const quiz = findQuizForModule(m.id);
-      const isQuizDone = quiz && Boolean(quiz.last_attempt);
-
-      let label = isViewed ? `✓ Review Module ${idx + 1}` : `Start Module ${idx + 1}`;
-      let btnClass = isViewed && isQuizDone ? 'module-completed' : 'secondary';
-
-      actionsHtml += `
-        <button class="lesson-button ${btnClass}" type="button" onclick="window._openModule('${m.id}')">${label}</button>
-      `;
-    });
-
-    actionArea.innerHTML = actionsHtml || '<p style="color:#64748b;font-size:0.9rem;">No modules uploaded yet.</p>';
+    if (actionArea) {
+      const states = modulesList.map(m => {
+        const quiz = findQuizForModule(m.id);
+        return { module: m, done: viewedModuleIds.has(m.id) && (!quiz || Boolean(quiz.last_attempt)) };
+      });
+      if (window.matchMedia('(max-width: 768px)').matches) {
+        // Mobile gets one clear launch action for the next unfinished module.
+        const nextIndex = states.findIndex(state => !state.done);
+        const targetIndex = nextIndex >= 0 ? nextIndex : states.length - 1;
+        const target = states[targetIndex];
+        if (target) {
+          const number = targetIndex + 1;
+          const wasViewed = viewedModuleIds.has(target.module.id);
+          const action = target.done ? 'Review' : (wasViewed ? 'Continue' : 'Start');
+          actionArea.innerHTML = `<button class="lesson-button hub-primary-cta" type="button" aria-label="${action} Module ${number}: ${esc(target.module.title)}" onclick="window._openModule('${target.module.id}')">${action} Module ${number}</button>`;
+        } else {
+          actionArea.innerHTML = '<span class="hub-empty-state">No modules available yet.</span>';
+        }
+      } else {
+        actionArea.innerHTML = modulesList.map((m, idx) => {
+          const quiz = findQuizForModule(m.id);
+          const isViewed = viewedModuleIds.has(m.id);
+          const isQuizDone = quiz && Boolean(quiz.last_attempt);
+          const btnClass = isViewed && isQuizDone ? 'module-completed' : 'secondary';
+          const label = isViewed ? `Review Module ${idx + 1}` : `Start Module ${idx + 1}`;
+          return `<button class="lesson-button ${btnClass}" type="button" onclick="window._openModule('${m.id}')">${label}</button>`;
+        }).join('') || '<p class="hub-empty-state">No modules uploaded yet.</p>';
+      }
+    }
 
     // Render "Your Progress" Card (matching Picture 2)
     renderProgressCard();
@@ -411,19 +523,37 @@
 
     const overallPct = totalModules > 0 ? Math.round((completedModulesCount / totalModules) * 100) : 0;
 
-    // Update overall top progress bar
-    const topBar = document.getElementById('classroomOverallProgress');
-    if (topBar) topBar.style.width = `${overallPct}%`;
-
-    // Compute average score of attempted quizzes
-    let avgScoreText = '—';
-    const scoredQuizzes = quizzesList.filter(q => q.last_attempt && q.last_attempt.max_score);
-    if (scoredQuizzes.length > 0) {
-      const sumPct = scoredQuizzes.reduce((acc, q) => acc + (q.last_attempt.score / q.last_attempt.max_score), 0);
-      avgScoreText = `${Math.round((sumPct / scoredQuizzes.length) * 100)}%`;
+    if (!window.matchMedia('(max-width: 768px)').matches) {
+      const scoredQuizzes = quizzesList.filter(q => q.last_attempt && q.last_attempt.max_score);
+      const avgScoreText = scoredQuizzes.length
+        ? `${Math.round((scoredQuizzes.reduce((sum, q) => sum + (q.last_attempt.score / q.last_attempt.max_score), 0) / scoredQuizzes.length) * 100)}%`
+        : '—';
+      const checklistHtml = modulesList.map((m, idx) => {
+        const isViewed = viewedModuleIds.has(m.id);
+        const quiz = findQuizForModule(m.id);
+        const isQuizDone = quiz && Boolean(quiz.last_attempt);
+        const isModuleDone = isViewed && (!quiz || isQuizDone);
+        const statusText = isModuleDone ? 'Completed' : (isViewed && quiz ? 'Quiz Pending' : 'Pending');
+        return `<div class="progress-module-row${isModuleDone ? ' completed' : ''}"><button class="progress-module-open" type="button" aria-label="Open Module ${idx + 1}: ${esc(m.title)}" onclick="window._openModule('${m.id}')"><span class="progress-module-info"><strong>Module ${idx + 1}</strong><em>${esc(m.title)}</em></span><span class="progress-module-status">${statusText}</span></button>${quiz ? `<button class="progress-module-quiz" type="button" onclick="window._openModuleQuiz('${m.id}', '${quiz.id}')">${quiz.last_attempt ? 'Review Quiz' : 'Take Quiz'}</button>` : ''}</div>`;
+      }).join('');
+      card.innerHTML = `
+        <div class="progress-panel-header"><span class="progress-panel-title">Your Progress</span><span class="progress-panel-overall">${overallPct}% Complete</span></div>
+        <div class="progress-panel-bar-wrap"><div class="progress-panel-bar" style="width:${overallPct}%"></div></div>
+        <div class="progress-panel-stats-row">
+          <div class="progress-stat-mini"><span class="progress-stat-num">${completedModulesCount} / ${totalModules}</span><span class="progress-stat-label">Modules Done</span></div>
+          <div class="progress-stat-mini"><span class="progress-stat-num">${scoredQuizzes.length} / ${quizzesList.length}</span><span class="progress-stat-label">Quizzes Taken</span></div>
+          <div class="progress-stat-mini"><span class="progress-stat-num">${avgScoreText}</span><span class="progress-stat-label">Avg Score</span></div>
+        </div>
+        ${checklistHtml}
+      `;
+      return;
     }
 
-    let checklistHtml = '';
+    let roadmapHtml = '';
+    const currentIndex = modulesList.findIndex(m => {
+      const quiz = findQuizForModule(m.id);
+      return !(viewedModuleIds.has(m.id) && (!quiz || Boolean(quiz.last_attempt)));
+    });
 
     modulesList.forEach((m, idx) => {
       const isViewed = viewedModuleIds.has(m.id);
@@ -432,57 +562,45 @@
       const isModuleDone = isViewed && (!quiz || isQuizDone);
 
       let statusText = 'Pending';
-      let statusColor = '#64748b';
-
       if (isModuleDone) {
-        statusText = '✓ Completed';
-        statusColor = '#16a34a';
+        statusText = 'Completed';
       } else if (isViewed && quiz && !isQuizDone) {
         statusText = 'Quiz Pending';
-        statusColor = '#2563eb';
       }
 
-      checklistHtml += `
-        <button class="progress-module-row ${isModuleDone ? 'completed' : ''}" type="button" onclick="window._openModule('${m.id}')">
-          <span class="progress-module-info">
-            <strong>Module ${idx + 1}</strong>
-            <em>${esc(m.title)}</em>
-          </span>
-          <span class="progress-module-status" style="color: ${statusColor}">
-            ${statusText}
-          </span>
-        </button>
+      const isCurrent = idx === currentIndex;
+      roadmapHtml += `
+        <div class="progress-module-row${isModuleDone ? ' completed' : ''}${isCurrent ? ' is-current' : ''}">
+          <button class="progress-module-open" type="button"${isCurrent ? ' aria-current="step"' : ''} aria-label="Module ${idx + 1}: ${esc(m.title)}. ${statusText}. Open material." onclick="window._openModule('${m.id}')">
+            <span class="progress-module-number" aria-hidden="true">${idx + 1}</span>
+            <span class="progress-module-info"><strong>Module ${idx + 1}</strong><em>${esc(m.title)}</em></span>
+            <span class="progress-module-status">${statusText}</span>
+          </button>
+          ${quiz ? `<button class="progress-module-quiz" type="button" onclick="window._openModuleQuiz('${m.id}', '${quiz.id}')">${quiz.last_attempt ? 'Review Quiz' : 'Take Quiz'}</button>` : ''}
+        </div>
       `;
     });
 
     card.innerHTML = `
-      <div class="progress-panel-header">
-        <span class="progress-panel-title">Your Progress</span>
-        <span class="progress-panel-overall">${overallPct}% Complete</span>
+      <div class="classroom-progress-summary">
+        <span>Your progress</span>
+        <span class="classroom-progress-track" role="progressbar" aria-label="Classroom module completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${overallPct}">
+          <span style="width:${overallPct}%"></span>
+        </span>
+        <strong>${overallPct}%</strong>
       </div>
-      <div class="progress-panel-bar-wrap">
-        <div class="progress-panel-bar" style="width: ${overallPct}%"></div>
+      <div class="classroom-roadmap" role="group" aria-label="Class modules">
+        ${roadmapHtml || '<p class="hub-empty-state">No modules available yet.</p>'}
       </div>
-      <div class="progress-panel-stats-row">
-        <div class="progress-stat-mini">
-          <span class="progress-stat-num">${completedModulesCount} / ${totalModules}</span>
-          <span class="progress-stat-label">Modules Done</span>
-        </div>
-        <div class="progress-stat-mini">
-          <span class="progress-stat-num">${scoredQuizzes.length} / ${quizzesList.length}</span>
-          <span class="progress-stat-label">Quizzes Taken</span>
-        </div>
-        <div class="progress-stat-mini">
-          <span class="progress-stat-num">${avgScoreText}</span>
-          <span class="progress-stat-label">Avg Score</span>
-        </div>
-      </div>
-      ${checklistHtml}
     `;
+    card.dataset.completedModules = String(completedModulesCount);
+    card.dataset.totalModules = String(totalModules);
   }
 
   /* ── Show Canvas View ──────────────────────── */
   function showCanvasView(view) {
+    document.body.dataset.classroomView = view;
+    delete document.body.dataset.quizFocus;
     hide('classroomHubView');
     hide('classroomLessonView');
     hide('classroomQuizView');
@@ -499,6 +617,8 @@
       show('classroomQuizView');
     }
   }
+  // Result screens use inline navigation buttons; expose the view switcher for them.
+  window.showCanvasView = showCanvasView;
 
   /* ── Open Lesson Reader (with Quiz Underneath PDF) ──── */
   window._openModule = async function (modId, scrollToQuiz = false) {
@@ -530,28 +650,299 @@
 
     if (mod.file_url) {
       const fileName = mod.file_name || 'lesson.pdf';
-      typePill.textContent = 'PDF Document';
-      typePill.style.color = '#ef4444';
+      const ext = fileName.split('?')[0].split('.').pop().toLowerCase();
+      const isWord = ext === 'docx' || ext === 'doc';
+      const isPdf = ext === 'pdf';
+
+      typePill.textContent = isPdf ? 'PDF Document' : isWord ? 'Word Document' : 'Document';
+      typePill.style.color = isPdf ? '#ef4444' : '#38bdf8';
 
       dlBtn.style.display = 'inline-block';
-      dlBtn.textContent = 'Download PDF';
+      dlBtn.textContent = isPdf ? 'Download PDF' : 'Download File';
       dlBtn.onclick = () => window._downloadPdfFile(dlBtn, mod.file_url, fileName);
 
       tabBtn.style.display = 'inline-block';
       tabBtn.href = mod.file_url;
 
-      contentEl.innerHTML = `
-        <div style="position:relative;width:100%;height:75vh;border-radius:8px;overflow:hidden;border:1px solid #cbd5e1;background:#0f172a;box-shadow:0 4px 20px rgba(0,0,0,0.08);margin-top:1rem;">
-          <object data="${mod.file_url}#toolbar=1" type="application/pdf" style="width:100%;height:100%">
-            <iframe src="${mod.file_url}#toolbar=1" style="width:100%;height:100%;border:none;background:#fff" allowfullscreen>
-              <div style="padding:2rem;text-align:center;color:#64748b;">
-                <p style="margin-bottom:1rem">PDF preview not supported in this frame.</p>
-                <button type="button" onclick="window._downloadPdfFile(this, '${mod.file_url}', '${esc(fileName)}')" class="admin-btn primary">Download PDF</button>
+      if (isWord) {
+        contentEl.innerHTML = `
+          <div class="odyssey-document-toolbar">
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+              <span class="odyssey-document-label">View</span>
+              <button type="button" class="admin-btn active-doc-mode" id="studentModePages">Page Layout</button>
+              <button type="button" class="admin-btn" id="studentModeGoogle">Google View</button>
+              <button type="button" class="admin-btn" id="studentModeOffice">Office View</button>
+              <button type="button" class="admin-btn" id="studentModeText">Clean Text</button>
+            </div>
+            <span class="odyssey-document-label">Document reader</span>
+          </div>
+          <div id="studentDocCanvas" class="odyssey-document-canvas">
+            <div id="studentDocLoading" class="odyssey-document-loading">
+              <div class="admin-spinner"></div> Loading document pages
+            </div>
+            <div id="studentDocWrap" class="odyssey-document-content"></div>
+          </div>
+        `;
+
+        const btnPages = document.getElementById('studentModePages');
+        const btnGoogle = document.getElementById('studentModeGoogle');
+        const btnOffice = document.getElementById('studentModeOffice');
+        const btnText = document.getElementById('studentModeText');
+        const docLoading = document.getElementById('studentDocLoading');
+        const docWrap = document.getElementById('studentDocWrap');
+
+        let studentBuffer = null;
+
+        const setStudentActiveBtn = (active) => {
+          [btnPages, btnGoogle, btnOffice, btnText].forEach(b => {
+            if (!b) return;
+            if (b === active) b.classList.add('active-doc-mode');
+            else b.classList.remove('active-doc-mode');
+          });
+        };
+
+        const renderGoogle = () => {
+          setStudentActiveBtn(btnGoogle);
+          if (docLoading) docLoading.style.display = 'none';
+          if (docWrap) {
+            docWrap.style.display = 'block';
+            docWrap.innerHTML = `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(mod.file_url)}&embedded=true" style="width:100%;height:75vh;border:none;background:#fff;" allowfullscreen></iframe>`;
+          }
+        };
+
+        const renderOffice = () => {
+          setStudentActiveBtn(btnOffice);
+          if (docLoading) docLoading.style.display = 'none';
+          if (docWrap) {
+            docWrap.style.display = 'block';
+            docWrap.innerHTML = `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(mod.file_url)}" style="width:100%;height:75vh;border:none;background:#fff;" allowfullscreen></iframe>`;
+          }
+        };
+
+        const renderText = async () => {
+          setStudentActiveBtn(btnText);
+          if (docLoading) docLoading.style.display = 'flex';
+          if (docWrap) docWrap.style.display = 'none';
+          try {
+            if (!studentBuffer) {
+              const res = await fetch(mod.file_url);
+              if (!res.ok) throw new Error();
+              studentBuffer = await res.arrayBuffer();
+            }
+            if (window.mammoth && typeof window.mammoth.convertToHtml === 'function') {
+              const res = await window.mammoth.convertToHtml({ arrayBuffer: studentBuffer });
+              if (docLoading) docLoading.style.display = 'none';
+              if (docWrap) {
+                docWrap.style.display = 'block';
+                docWrap.innerHTML = `<div class="docx-document-paper" style="margin:1.5rem auto;">${res.value || '<p>Document has no readable text.</p>'}</div>`;
+              }
+            } else {
+              throw new Error('Mammoth unavailable');
+            }
+          } catch (err) {
+            renderGoogle();
+          }
+        };
+
+        const renderPages = async () => {
+          setStudentActiveBtn(btnPages);
+          if (docLoading) docLoading.style.display = 'flex';
+          if (docWrap) docWrap.style.display = 'none';
+
+          try {
+            if (!studentBuffer) {
+              const res = await fetch(mod.file_url);
+              if (!res.ok) throw new Error();
+              studentBuffer = await res.arrayBuffer();
+            }
+
+            if (window.docx && typeof window.docx.renderAsync === 'function') {
+              if (docWrap) docWrap.innerHTML = '';
+              if (docLoading) docLoading.style.display = 'none';
+              if (docWrap) {
+                docWrap.style.display = 'block';
+                await window.docx.renderAsync(studentBuffer, docWrap, null, {
+                  inWrapper: true,
+                  // Mobile page layouts otherwise preserve the document's fixed
+                  // paper width and force students to pan across a tiny page.
+                  ignoreWidth: window.matchMedia('(max-width: 768px)').matches,
+                  ignoreHeight: false,
+                  breakPages: true,
+                  experimental: true,
+                  useBase64URL: true,
+                  renderHeaders: true,
+                  renderFooters: true
+                });
+              }
+            } else {
+              throw new Error('docx-preview unavailable');
+            }
+          } catch (err) {
+            console.warn('docx-preview fallback:', err);
+            renderGoogle();
+          }
+        };
+
+        if (btnPages) btnPages.onclick = renderPages;
+        if (btnGoogle) btnGoogle.onclick = renderGoogle;
+        if (btnOffice) btnOffice.onclick = renderOffice;
+        if (btnText) btnText.onclick = renderText;
+
+        if (ext === 'doc') {
+          if (btnPages) btnPages.style.display = 'none';
+          if (btnText) btnText.style.display = 'none';
+          renderGoogle();
+        } else {
+          // Reflow Word content on phones by default. The page-layout mode is
+          // still available for documents where exact pagination matters.
+          if (window.matchMedia('(max-width: 768px)').matches) renderText();
+          else renderPages();
+        }
+      } else {
+        contentEl.innerHTML = `
+          <div class="odyssey-pdf-reader">
+            <div class="odyssey-pdf-controls" role="group" aria-label="PDF viewing controls">
+              <span class="odyssey-pdf-page-count" aria-live="polite">Loading PDF…</span>
+              <div>
+                <button type="button" class="admin-btn" data-pdf-zoom="out" aria-label="Zoom out">−</button>
+                <button type="button" class="admin-btn" data-pdf-zoom="fit">Fit width</button>
+                <button type="button" class="admin-btn" data-pdf-zoom="in" aria-label="Zoom in">+</button>
               </div>
-            </iframe>
-          </object>
-        </div>
-      `;
+            </div>
+            <div class="odyssey-document-canvas odyssey-pdf-canvas" id="studentPdfCanvas" aria-label="PDF document pages">
+              <div class="odyssey-pdf-pages" id="studentPdfPages"></div>
+            </div>
+          </div>
+        `;
+
+        const pdfCanvas = document.getElementById('studentPdfCanvas');
+        const pdfPages = document.getElementById('studentPdfPages');
+        const pageCount = contentEl.querySelector('.odyssey-pdf-page-count');
+        let pdfDocument = null;
+        let pdfZoom = 1;
+        let renderFrame = 0;
+        let rendering = false;
+        let renderAgain = false;
+        let pdfPageObserver = null;
+
+        const renderPdfPages = async () => {
+          if (!pdfDocument || !pdfPages) return;
+          if (rendering) { renderAgain = true; return; }
+          rendering = true;
+          try {
+            const pageGutter = window.matchMedia('(max-width: 768px)').matches ? 16 : 28;
+            const availableWidth = Math.max(240, pdfCanvas.clientWidth - pageGutter);
+            const outputScale = Math.min(window.devicePixelRatio || 1, 2);
+            pdfPageObserver?.disconnect();
+            pdfPages.innerHTML = '';
+            if (pageCount) pageCount.textContent = `${pdfDocument.numPages} page${pdfDocument.numPages === 1 ? '' : 's'}`;
+            const drawPage = async (page, canvas, viewport) => {
+              if (canvas.dataset.rendered === 'true') return;
+              canvas.dataset.rendered = 'true';
+              canvas.width = Math.ceil(viewport.width * outputScale);
+              canvas.height = Math.ceil(viewport.height * outputScale);
+              const context = canvas.getContext('2d', { alpha: false });
+              try {
+                await page.render({
+                  canvasContext: context,
+                  viewport,
+                  transform: outputScale === 1 ? null : [outputScale, 0, 0, outputScale, 0, 0]
+                }).promise;
+              } catch (error) {
+                canvas.dataset.rendered = 'false';
+                throw error;
+              }
+            };
+            if ('IntersectionObserver' in window) {
+              const pageObserver = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                  if (!entry.isIntersecting) return;
+                  pageObserver.unobserve(entry.target);
+                  drawPage(entry.target._pdfPage, entry.target, entry.target._pdfViewport)
+                    .catch(error => console.warn('PDF page render failed:', error));
+                });
+              }, { root: pdfCanvas, rootMargin: '500px 0px' });
+              pdfPageObserver = pageObserver;
+            }
+            for (let pageNumber = 1; pageNumber <= pdfDocument.numPages; pageNumber++) {
+              const page = await pdfDocument.getPage(pageNumber);
+              const baseViewport = page.getViewport({ scale: 1 });
+              const scale = (availableWidth / baseViewport.width) * pdfZoom;
+              const viewport = page.getViewport({ scale });
+              const pageNode = document.createElement('section');
+              pageNode.className = 'odyssey-pdf-page';
+              pageNode.setAttribute('aria-label', `Page ${pageNumber} of ${pdfDocument.numPages}`);
+              const canvas = document.createElement('canvas');
+              canvas.style.width = `${viewport.width}px`;
+              canvas.style.height = `${viewport.height}px`;
+              canvas.setAttribute('role', 'img');
+              canvas.setAttribute('aria-label', `PDF page ${pageNumber}`);
+              canvas._pdfPage = page;
+              canvas._pdfViewport = viewport;
+              pageNode.appendChild(canvas);
+              const accessibleText = await page.getTextContent();
+              const textSummary = document.createElement('div');
+              textSummary.className = 'odyssey-pdf-accessible-text';
+              textSummary.setAttribute('aria-label', `Text from page ${pageNumber}`);
+              textSummary.textContent = accessibleText.items
+                .map(item => item && typeof item.str === 'string' ? item.str : '')
+                .filter(Boolean)
+                .join(' ');
+              pageNode.appendChild(textSummary);
+              pdfPages.appendChild(pageNode);
+              if (pdfPageObserver) pdfPageObserver.observe(canvas);
+              else await drawPage(page, canvas, viewport);
+            }
+          } catch (error) {
+            console.warn('PDF page rendering failed:', error);
+            if (pageCount) pageCount.textContent = 'PDF preview unavailable';
+            pdfPages.innerHTML = `<div class="odyssey-pdf-fallback">
+              <p>This browser could not preview the PDF here.</p>
+              <a class="admin-btn primary" href="${esc(mod.file_url)}" target="_blank" rel="noopener">Open PDF</a>
+            </div>`;
+          } finally {
+            rendering = false;
+            if (renderAgain) { renderAgain = false; renderPdfPages(); }
+          }
+        };
+
+        const schedulePdfRender = () => {
+          cancelAnimationFrame(renderFrame);
+          renderFrame = requestAnimationFrame(renderPdfPages);
+        };
+
+        contentEl.querySelectorAll('[data-pdf-zoom]').forEach(button => {
+          button.addEventListener('click', () => {
+            const action = button.dataset.pdfZoom;
+            pdfZoom = action === 'fit' ? 1 : Math.max(0.75, Math.min(2.5, pdfZoom * (action === 'in' ? 1.2 : 1 / 1.2)));
+            schedulePdfRender();
+          });
+        });
+
+        if (window.ResizeObserver && pdfCanvas) {
+          const resizeObserver = new ResizeObserver(schedulePdfRender);
+          resizeObserver.observe(pdfCanvas);
+        }
+
+        const loadPdf = async () => {
+          if (!window.pdfjsLib) throw new Error('PDF.js unavailable');
+          if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+          }
+          const loadingTask = window.pdfjsLib.getDocument({ url: mod.file_url });
+          pdfDocument = await loadingTask.promise;
+          await renderPdfPages();
+        };
+
+        loadPdf().catch(error => {
+          console.warn('PDF preview failed:', error);
+          if (pageCount) pageCount.textContent = 'PDF preview unavailable';
+          if (pdfPages) pdfPages.innerHTML = `<div class="odyssey-pdf-fallback">
+            <p>Open or download this PDF to view it on your device.</p>
+            <a class="admin-btn primary" href="${esc(mod.file_url)}" target="_blank" rel="noopener">Open PDF</a>
+          </div>`;
+        });
+      }
     } else {
       typePill.textContent = 'Lesson Notes';
       typePill.style.color = '#3b82f6';
@@ -565,7 +956,7 @@
       `;
     }
 
-    // Populate Respective Quiz Section Underneath PDF (Cisco NetAcad Style)
+    // Populate the lesson's assigned quiz section.
     const quiz = findQuizForModule(modId);
     if (quiz) {
       const attempted = quiz.last_attempt;
@@ -573,7 +964,7 @@
       const isAttempted = Boolean(attempted);
 
       quizArea.innerHTML = `
-        <div class="cisco-module-assessment-card" id="module-quiz-card-${quiz.id}">
+      <div class="odyssey-assessment-card" id="module-quiz-card-${quiz.id}">
           <div class="assessment-card-header">
             <div class="assessment-kicker">MODULE ASSESSMENT</div>
             <h3 class="assessment-title">${esc(quiz.title)}</h3>
@@ -618,7 +1009,7 @@
     const nextBtn = document.getElementById('nextLessonBtn');
     if (prevBtn) prevBtn.disabled = currentLessonIndex <= 0;
     if (nextBtn) {
-      nextBtn.textContent = currentLessonIndex < modulesList.length - 1 ? 'Next Lesson →' : 'Back to Outline →';
+      nextBtn.textContent = currentLessonIndex < modulesList.length - 1 ? 'Next Lesson' : 'Back to Lessons';
     }
 
     // Mark as viewed
@@ -640,10 +1031,8 @@
 
   /* ── Open Module Quiz from Subitem ─────────── */
   window._openModuleQuiz = function (modId, quizId) {
-    window._openModule(modId, true);
-    // Highlight subitem
-    document.querySelectorAll('.course-outline-subitem').forEach(el => el.classList.remove('active'));
-    document.getElementById(`sidebar-subquiz-${quizId}`)?.classList.add('active');
+    // Quizzes have their own focused view, separate from opening lesson materials.
+    window._openQuiz(quizId, modId);
   };
 
   /* ── Open Quiz Assessment Player ───────────── */
@@ -700,7 +1089,7 @@
           <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
             <button class="admin-btn secondary" type="button" style="padding:0.75rem 1.8rem;" onclick="window._reviewQuiz('${quizId}', '${currentModuleId}')">Review Quiz</button>
             ${currentModuleId ? `<button class="admin-btn primary" type="button" style="padding:0.75rem 1.8rem;" onclick="window._openModule('${currentModuleId}', true)">Back to Lesson</button>` : ''}
-            <button class="admin-btn" type="button" style="padding:0.75rem 1.8rem;" onclick="showCanvasView('hub')">Course Outline</button>
+            <button class="admin-btn" type="button" style="padding:0.75rem 1.8rem;" onclick="showCanvasView('hub')">Modules</button>
           </div>
         </div>
       `;
@@ -748,43 +1137,92 @@
     hide('quizBriefingScreen');
     show('quizTakingScreen');
     hide('quizResultArea');
+    document.body.dataset.quizFocus = 'true';
 
-    document.getElementById('submitQuizBtn').dataset.quizId = quizId;
-
-    const container = document.getElementById('quizQuestionsContainer');
-    const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-
-    container.innerHTML = questions.map((q, i) => `
-      <div class="quiz-question-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:1.5rem;margin-bottom:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
-        <div class="q-number" style="font-size:0.75rem;font-weight:800;color:#64748b;letter-spacing:0.5px;margin-bottom:0.5rem;">QUESTION ${i + 1} OF ${questions.length}</div>
-        <div class="q-text" style="font-size:1.05rem;font-weight:700;color:#0f172a;line-height:1.5;margin-bottom:1.25rem;">${esc(q.question_text)}</div>
-        ${(q.options || []).map((opt, oi) => `
-          <div class="quiz-option" data-qid="${q.id}" data-answer="${esc(opt)}" onclick="window._selectAnswer(this)" style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all 0.15s ease;">
-            <span class="option-marker" style="width:26px;height:26px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#475569;">${optionLabels[oi] || oi + 1}</span>
-            <span style="font-size:0.92rem;color:#1e293b;">${esc(opt)}</span>
-          </div>
-        `).join('')}
-      </div>
-    `).join('');
+    currentQuizAnswers = {};
+    currentQuizQuestions = questions;
+    currentQuizQuestionIndex = 0;
+    const submitButton = document.getElementById('submitQuizBtn');
+    if (submitButton) submitButton.dataset.quizId = quizId;
+    renderActiveQuizQuestion(true);
+    updateQuizProgress();
   };
+
+  function renderActiveQuizQuestion(moveFocus = false) {
+    const container = document.getElementById('quizQuestionsContainer');
+    const question = currentQuizQuestions[currentQuizQuestionIndex];
+    if (!container || !question) return;
+
+    const total = currentQuizQuestions.length;
+    const position = currentQuizQuestionIndex + 1;
+    const selectedAnswer = currentQuizAnswers[question.id];
+    const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    container.innerHTML = `
+      <section class="quiz-question-card" role="group" aria-label="Question ${position} of ${total}: ${esc(question.question_text)}">
+        <div class="q-number">QUESTION ${position} OF ${total}</div>
+        <div class="q-text" tabindex="-1">${esc(question.question_text)}</div>
+        <div class="quiz-answer-list" role="group" aria-label="Answer choices">
+          ${(question.options || []).map((option, optionIndex) => `
+            <button class="quiz-option${selectedAnswer === option ? ' selected' : ''}" type="button" data-qid="${question.id}" data-answer="${esc(option)}" aria-label="Option ${optionLabels[optionIndex] || optionIndex + 1}: ${esc(option)}" aria-pressed="${selectedAnswer === option}" onclick="window._selectAnswer(this)">
+              <span class="option-marker">${optionLabels[optionIndex] || optionIndex + 1}</span>
+              <span class="quiz-option-text">${esc(option)}</span>
+            </button>
+          `).join('')}
+        </div>
+      </section>
+    `;
+
+    const previousButton = document.getElementById('quizPreviousBtn');
+    const nextButton = document.getElementById('quizNextBtn');
+    const submitButton = document.getElementById('submitQuizBtn');
+    const isLastQuestion = currentQuizQuestionIndex === total - 1;
+    if (previousButton) previousButton.disabled = currentQuizQuestionIndex === 0;
+    if (nextButton) nextButton.hidden = isLastQuestion;
+    if (submitButton) submitButton.hidden = !isLastQuestion;
+
+    const answeredMeta = document.getElementById('quizAnsweredMeta');
+    if (answeredMeta) answeredMeta.textContent = `${Object.keys(currentQuizAnswers).length} answered`;
+    const questionMeta = document.getElementById('quizQuestionMeta');
+    if (questionMeta) questionMeta.textContent = `Question ${position} of ${total}`;
+    if (moveFocus) {
+      const questionTitle = container.querySelector('.q-text');
+      questionTitle?.focus({ preventScroll: true });
+      questionTitle?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  window._moveQuizQuestion = function (offset) {
+    const nextIndex = currentQuizQuestionIndex + offset;
+    if (nextIndex < 0 || nextIndex >= currentQuizQuestions.length) return;
+    currentQuizQuestionIndex = nextIndex;
+    renderActiveQuizQuestion(true);
+    updateQuizProgress();
+  };
+
+  function updateQuizProgress() {
+    const total = currentQuizQuestions.length;
+    const percent = total ? Math.round(((currentQuizQuestionIndex + 1) / total) * 100) : 0;
+    const bar = document.getElementById('quizProgressBar');
+    const track = document.getElementById('quizProgressTrack');
+    if (bar) bar.style.width = `${percent}%`;
+    if (track) track.setAttribute('aria-valuenow', String(percent));
+  }
 
   window._selectAnswer = function (el) {
     const qid = el.dataset.qid;
     const answer = el.dataset.answer;
 
     el.parentElement.querySelectorAll(`.quiz-option[data-qid="${qid}"]`).forEach(o => {
-      o.style.borderColor = '#e2e8f0';
-      o.style.background = '#ffffff';
-      const marker = o.querySelector('.option-marker');
-      if (marker) { marker.style.background = '#f1f5f9'; marker.style.color = '#475569'; }
+      o.classList.remove('selected');
+      o.setAttribute('aria-pressed', 'false');
     });
-
-    el.style.borderColor = '#3b82f6';
-    el.style.background = '#eff6ff';
-    const activeMarker = el.querySelector('.option-marker');
-    if (activeMarker) { activeMarker.style.background = '#3b82f6'; activeMarker.style.color = '#ffffff'; }
+    el.classList.add('selected');
+    el.setAttribute('aria-pressed', 'true');
 
     currentQuizAnswers[qid] = answer;
+    const answeredMeta = document.getElementById('quizAnsweredMeta');
+    if (answeredMeta) answeredMeta.textContent = `${Object.keys(currentQuizAnswers).length} answered`;
+    updateQuizProgress();
   };
 
   /* ── Submit Quiz ───────────────────────────── */
@@ -803,6 +1241,7 @@
 
     if (data && !data.error) {
       hide('quizTakingScreen');
+      delete document.body.dataset.quizFocus;
       const resultArea = document.getElementById('quizResultArea');
       show('quizResultArea');
 
@@ -838,7 +1277,7 @@
             <button class="admin-btn secondary" type="button" style="padding:0.8rem 2.2rem;" onclick="window._reviewQuiz('${quizId}', '${currentModuleId || ''}')">Review Quiz</button>
             ${currentModuleId ? `<button class="admin-btn primary" type="button" style="padding:0.8rem 2.2rem;" onclick="window._openModule('${currentModuleId}', true)">Back to Lesson</button>` : ''}
             <button class="admin-btn" type="button" style="padding:0.8rem 2.2rem;" onclick="showCanvasView('hub')">
-              Course Outline
+              Modules
             </button>
           </div>
         </div>
@@ -924,11 +1363,11 @@
 
         let verdictHtml = '';
         if (!isAnswered) {
-          verdictHtml = '<span class="quiz-review-verdict unanswered">— Unanswered</span>';
+          verdictHtml = '<span class="quiz-review-verdict unanswered">Unanswered</span>';
         } else if (isCorrect) {
-          verdictHtml = '<span class="quiz-review-verdict correct">✓ Correct</span>';
+          verdictHtml = '<span class="quiz-review-verdict correct">Correct</span>';
         } else {
-          verdictHtml = '<span class="quiz-review-verdict incorrect">✗ Incorrect</span>';
+          verdictHtml = '<span class="quiz-review-verdict incorrect">Incorrect</span>';
         }
 
         return `
@@ -950,13 +1389,13 @@
 
                 if (isRightAnswer && isStudentPick) {
                   optClass += ' is-correct';
-                  tagHtml = '<span class="quiz-review-tag correct">Your Answer ✓ (Correct)</span>';
+                  tagHtml = '<span class="quiz-review-tag correct">Your Answer (Correct)</span>';
                 } else if (isRightAnswer) {
                   optClass += ' is-correct';
                   tagHtml = '<span class="quiz-review-tag correct">Correct Answer</span>';
                 } else if (isStudentPick) {
                   optClass += ' is-wrong-student';
-                  tagHtml = '<span class="quiz-review-tag wrong">Your Answer ✗</span>';
+                  tagHtml = '<span class="quiz-review-tag wrong">Your Answer</span>';
                 }
 
                 return `
@@ -993,7 +1432,7 @@
 
       <div style="display:flex;gap:12px;justify-content:center;margin-top:2rem;margin-bottom:2rem;flex-wrap:wrap;">
         ${targetModId ? `<button class="admin-btn primary" type="button" style="padding:0.8rem 2.2rem;" onclick="window._openModule('${targetModId}', true)">Back to Lesson</button>` : ''}
-        <button class="admin-btn" type="button" style="padding:0.8rem 2.2rem;" onclick="showCanvasView('hub')">Course Outline</button>
+        <button class="admin-btn" type="button" style="padding:0.8rem 2.2rem;" onclick="showCanvasView('hub')">Modules</button>
       </div>
     `;
   };

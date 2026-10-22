@@ -16,7 +16,7 @@ from app.services.auth import get_current_user
 from app.services.audit_logger import log_audit_event
 from app.services.supabase_client import get_admin_client
 
-logger = logging.getLogger("os-odyssey.profile")
+logger = logging.getLogger("odyssey.profile")
 
 router = APIRouter()
 

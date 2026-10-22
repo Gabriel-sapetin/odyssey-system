@@ -11,7 +11,7 @@ from app.middleware.rate_limiter import limiter
 from app.services.supabase_client import get_admin_client
 from app.services.thread_pool import run_in_pool
 
-logger = logging.getLogger("os-odyssey.stats")
+logger = logging.getLogger("odyssey.stats")
 
 router = APIRouter()
 

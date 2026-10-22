@@ -17,7 +17,7 @@ async def health_check(request: Request):
     return {
         "status": "healthy",
         "uptime_seconds": uptime,
-        "service": "OS Odyssey API",
+        "service": "Odyssey API",
         "version": "1.0.0",
     }
 

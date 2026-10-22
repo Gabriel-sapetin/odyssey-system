@@ -20,7 +20,7 @@ from fastapi import Depends, HTTPException, status
 from app.services.auth import get_current_user
 from app.services.supabase_client import get_admin_client
 
-logger = logging.getLogger("os-odyssey.role_guard")
+logger = logging.getLogger("odyssey.role_guard")
 
 ROLE_HIERARCHY = {"admin": 3, "professor": 2, "student": 1}
 

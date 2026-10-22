@@ -5,8 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src 'self' https://challenges.cloudflare.com https://*.supabase.co https://docs.google.com; object-src 'self' https://*.supabase.co; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
-  <title>OS Odyssey - Professor Dashboard</title>
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; worker-src 'self' blob: https://cdn.jsdelivr.net; child-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://localhost:4000 http://127.0.0.1:4000 https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src 'self' https://challenges.cloudflare.com https://*.supabase.co https://docs.google.com https://view.officeapps.live.com https://*.officeapps.live.com; object-src 'self' https://*.supabase.co; base-uri 'self'; form-action 'self' https://*.supabase.co; upgrade-insecure-requests" />
+  <title>ODYSSEY - Professor Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
@@ -14,14 +14,15 @@
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
   <link rel="stylesheet" href="../css/styles.css" />
   <link rel="stylesheet" href="../css/admin.css" />
+  <link rel="stylesheet" href="../css/pengu-ai.css" />
 </head>
 
 <body class="app-page dashboard-page">
   <nav class="app-nav">
     <a href="index.html" class="app-brand">
       <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png"
-        alt="OS Odyssey penguin mascot" />
-      OS ODYSSEY
+        alt="ODYSSEY penguin mascot" />
+      ODYSSEY
     </a>
     <button class="app-nav-mobile-toggle" type="button" aria-label="Toggle mobile menu">
       <span></span><span></span><span></span>
@@ -42,7 +43,7 @@
     <!-- Class List View -->
     <div id="profClassList">
       <div class="admin-header">
-        <h1> My Classrooms</h1>
+        <h1>My Classrooms</h1>
         <button class="admin-btn primary" id="createClassBtn">+ Create Classroom</button>
       </div>
       <div class="classroom-grid" id="profClassroomGrid"></div>
@@ -52,7 +53,7 @@
     <div id="profClassDetail" style="display:none;">
       <div class="classroom-detail-header">
         <div>
-          <button class="admin-btn" id="backToClasses" style="margin-bottom:0.5rem">← Back</button>
+          <button class="admin-btn" id="backToClasses" style="margin-bottom:0.5rem">Back</button>
           <h1 id="classDetailName"></h1>
           <div style="margin-top:0.35rem">
             <span class="join-code" id="classDetailCode" style="cursor:pointer" title="Click to copy"></span>
@@ -60,16 +61,16 @@
           </div>
         </div>
         <div class="admin-actions">
-          <button class="admin-btn danger" id="deleteClassBtn"> Delete</button>
+          <button class="admin-btn danger" id="deleteClassBtn">Delete</button>
         </div>
       </div>
 
       <!-- Inner tabs -->
       <div class="classroom-inner-tabs" id="classInnerTabs">
-        <button class="classroom-inner-tab active" data-inner="members"> Students</button>
-        <button class="classroom-inner-tab" data-inner="modules"> Modules</button>
-        <button class="classroom-inner-tab" data-inner="quizzes"> Quizzes</button>
-        <button class="classroom-inner-tab" data-inner="results"> Results</button>
+        <button class="classroom-inner-tab active" data-inner="members">Students</button>
+        <button class="classroom-inner-tab" data-inner="modules">Modules</button>
+        <button class="classroom-inner-tab" data-inner="quizzes">Quizzes</button>
+        <button class="classroom-inner-tab" data-inner="results">Results</button>
       </div>
 
       <!-- Members panel -->
@@ -97,7 +98,7 @@
           <h2>Lesson Modules</h2>
           <button class="admin-btn primary" id="addModuleBtn">+ Add Module</button>
         </div>
-        <div id="modulesList"></div>
+        <div class="classroom-grid" id="modulesList"></div>
       </div>
 
       <!-- Quizzes panel -->
@@ -106,7 +107,7 @@
           <h2>Quizzes</h2>
           <button class="admin-btn primary" id="addQuizBtn">+ Create Quiz</button>
         </div>
-        <div id="quizzesList"></div>
+        <div class="classroom-grid" id="quizzesList"></div>
       </div>
 
       <!-- Results panel -->
@@ -135,7 +136,7 @@
 
     <!-- Quiz Detail / Preview View -->
     <div id="quizPreviewView" style="display:none">
-      <button class="admin-btn" id="backToQuizList" style="margin-bottom:1rem">← Back to Quizzes</button>
+      <button class="admin-btn" id="backToQuizList" style="margin-bottom:1rem">Back to Quizzes</button>
       <div
         style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem">
         <div>
@@ -144,7 +145,14 @@
             style="font-size:0.78rem;color:rgba(255,255,255,0.4);margin-top:0.25rem;font-family:'Nunito',sans-serif">
           </p>
         </div>
-        <div style="display:flex;gap:0.5rem" id="quizPreviewActions"></div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap" id="quizPreviewActions"></div>
+      </div>
+      <div class="quiz-editor-toolbar">
+        <p>Drag questions to reorder them, or edit their content below.</p>
+        <div>
+          <button class="admin-btn" id="addPreviewQuestion" type="button">Add Question</button>
+          <button class="admin-btn primary" id="savePreviewQuestions" type="button">Save Changes</button>
+        </div>
       </div>
       <div id="quizPreviewQuestions"></div>
     </div>
@@ -163,7 +171,7 @@
         <div class="ai-progress-bar">
           <div class="ai-progress-fill"></div>
         </div>
-        <p style="font-family:'Nunito',sans-serif;font-size:0.78rem;color:rgba(255,255,255,0.35);margin-top:1.5rem">
+        <p id="aiGenStatusText" style="font-family:'Nunito',sans-serif;font-size:0.78rem;color:rgba(255,255,255,0.35);margin-top:1.5rem">
           Reading module content… Picking key concepts… Writing questions…<br>
           This may take 15–30 seconds.
         </p>
@@ -173,19 +181,72 @@
 
   <!-- Create Classroom Modal -->
   <div class="admin-modal-overlay" id="createClassModal">
-    <div class="admin-modal" style="position:relative">
+    <div class="admin-modal" style="position:relative;max-width:540px;">
       <button class="admin-modal-close"
         onclick="document.getElementById('createClassModal').classList.remove('visible')">✕</button>
       <h2>Create Classroom</h2>
       <form id="createClassForm">
         <div class="admin-form-group">
           <label for="className">Classroom Name</label>
-          <input type="text" id="className" placeholder="e.g. OS 101 — Section A" required maxlength="150" />
+          <input type="text" id="className" placeholder="e.g. Data Structures — Section A" required maxlength="150" />
         </div>
         <div class="admin-form-group">
           <label for="classDesc">Description (optional)</label>
-          <textarea id="classDesc" placeholder="Brief description of this classroom…" rows="3"></textarea>
+          <textarea id="classDesc" placeholder="Brief description of this classroom…" rows="2"></textarea>
         </div>
+        <div class="admin-form-group">
+          <label for="classSubject">Subject</label>
+          <select id="classSubject" style="width:100%;padding:0.6rem 0.8rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-family:'Nunito',sans-serif;font-size:0.9rem;">
+            <option value="General">General</option>
+            <option value="Operating Systems">Operating Systems</option>
+            <option value="Data Structures & Algorithms">Data Structures & Algorithms</option>
+            <option value="Web Development">Web Development</option>
+            <option value="Computer Networks">Computer Networks</option>
+            <option value="Database Systems">Database Systems</option>
+            <option value="Software Engineering">Software Engineering</option>
+            <option value="Discrete Mathematics">Discrete Mathematics</option>
+            <option value="Computer Architecture">Computer Architecture</option>
+            <option value="Artificial Intelligence">Artificial Intelligence</option>
+            <option value="Cybersecurity">Cybersecurity</option>
+            <option value="Physics">Physics</option>
+            <option value="Mathematics">Mathematics</option>
+            <option value="Custom">Custom (type below)</option>
+          </select>
+          <input type="text" id="classSubjectCustom" placeholder="Enter custom subject…" maxlength="100"
+            style="display:none;margin-top:0.4rem;" />
+        </div>
+
+        <div class="admin-form-group">
+          <label>Theme</label>
+          <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+            <div style="display:flex;gap:0.35rem;flex-wrap:wrap;" id="emojiPicker">
+              <button type="button" class="emoji-pick active" data-emoji="📚">📚</button>
+              <button type="button" class="emoji-pick" data-emoji="💻">💻</button>
+              <button type="button" class="emoji-pick" data-emoji="🧠">🧠</button>
+              <button type="button" class="emoji-pick" data-emoji="🔬">🔬</button>
+              <button type="button" class="emoji-pick" data-emoji="📐">📐</button>
+              <button type="button" class="emoji-pick" data-emoji="🌐">🌐</button>
+              <button type="button" class="emoji-pick" data-emoji="🛡️">🛡️</button>
+              <button type="button" class="emoji-pick" data-emoji="⚙️">⚙️</button>
+              <button type="button" class="emoji-pick" data-emoji="🎨">🎨</button>
+              <button type="button" class="emoji-pick" data-emoji="🐧">🐧</button>
+            </div>
+            <input type="color" id="classThemeColor" value="#6366f1"
+              style="width:36px;height:36px;border:none;border-radius:8px;cursor:pointer;background:transparent;" title="Pick accent color" />
+          </div>
+        </div>
+
+        <div class="admin-form-group">
+          <label for="classAiPersona">AI Tutor Persona Name</label>
+          <input type="text" id="classAiPersona" placeholder="e.g. Professor Tux, CodeBot, Mentor…" maxlength="100" value="Odyssey Mentor" />
+          <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.25rem;">The name your AI tutor will use when talking to students.</p>
+        </div>
+        <div class="admin-form-group">
+          <label for="classAiContext">AI Subject Context (optional)</label>
+          <textarea id="classAiContext" placeholder="Tell the AI what this course covers, specific topics, textbook used, etc…" rows="3" maxlength="2000"></textarea>
+          <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.25rem;">Helps the AI give more accurate, course-specific answers.</p>
+        </div>
+
         <div class="admin-form-actions">
           <button type="button" class="admin-btn"
             onclick="document.getElementById('createClassModal').classList.remove('visible')">Cancel</button>
@@ -194,6 +255,15 @@
       </form>
     </div>
   </div>
+  <style>
+    .emoji-pick {
+      width: 34px; height: 34px; font-size: 1.15rem; border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 8px; background: rgba(255,255,255,0.04); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .emoji-pick:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.08); }
+    .emoji-pick.active { border-color: #6366f1; background: rgba(99,102,241,0.15); box-shadow: 0 0 8px rgba(99,102,241,0.3); }
+  </style>
 
   <!-- Add Module Modal -->
   <div class="admin-modal-overlay" id="addModuleModal">
@@ -211,11 +281,10 @@
           <input type="text" id="modDesc" maxlength="500" />
         </div>
         <div class="admin-form-group">
-          <label for="modFile">Upload PDF</label>
-          <input type="file" id="modFile" accept=".pdf"
+          <label for="modFile">Upload Lesson Document (PDF or Word DOCX)</label>
+          <input type="file" id="modFile" accept=".pdf,.docx,.doc"
             style="padding:0.5rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Nunito',sans-serif;width:100%;box-sizing:border-box" />
-          <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.3rem">Upload a PDF lesson file (max
-            10MB)</p>
+          <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.3rem">Upload a lesson file (.pdf, .docx, max 10MB)</p>
           <div id="modUploadStatus" style="font-size:0.78rem;margin-top:0.3rem;font-family:'Nunito',sans-serif"></div>
         </div>
         <div class="admin-form-group">
@@ -276,14 +345,47 @@
     </div>
   </div>
 
+  <!-- In-App Document Viewer Modal (View PDF & Word DOCX without downloading) -->
+  <div class="admin-modal-overlay" id="docViewerModal">
+    <div class="admin-modal" style="position:relative;max-width:1050px;width:95vw;height:90vh;max-height:92vh;padding:0;display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(255,255,255,0.15);box-shadow:0 25px 60px rgba(0,0,0,0.85);background:#0f172a;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.9rem 1.4rem;background:#1e293b;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:0.75rem;overflow:hidden;">
+          <span id="docViewerBadge" style="font-size:0.7rem;font-weight:800;letter-spacing:0.06em;padding:0.25rem 0.65rem;border-radius:4px;background:rgba(56,189,248,0.2);color:#38bdf8;text-transform:uppercase;">DOCUMENT</span>
+          <h2 id="docViewerTitle" style="font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:800;color:#fff;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Document Viewer</h2>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+          <div id="docViewerModes" style="display:none;align-items:center;gap:4px;background:rgba(0,0,0,0.3);padding:3px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);">
+            <button type="button" class="admin-btn active-doc-mode" id="docViewerBtnPages" style="padding:0.25rem 0.65rem;font-size:0.75rem;">Page Layout</button>
+            <button type="button" class="admin-btn" id="docViewerBtnGoogle" style="padding:0.25rem 0.65rem;font-size:0.75rem;">Google View</button>
+            <button type="button" class="admin-btn" id="docViewerBtnOffice" style="padding:0.25rem 0.65rem;font-size:0.75rem;">Office View</button>
+            <button type="button" class="admin-btn" id="docViewerBtnText" style="padding:0.25rem 0.65rem;font-size:0.75rem;">Clean Text</button>
+          </div>
+          <button type="button" class="admin-modal-close" style="position:static;font-size:1.1rem;padding:0.25rem 0.6rem;cursor:pointer;" onclick="document.getElementById('docViewerModal').classList.remove('visible')">✕</button>
+        </div>
+      </div>
+      <div id="docViewerBody" style="flex:1;position:relative;overflow:auto;background:#0d1117;display:flex;flex-direction:column;">
+        <div class="admin-loading" id="docViewerLoading" style="height:100%;"><div class="admin-spinner"></div></div>
+        <div id="docViewerFrameWrap" style="width:100%;height:100%;display:none;flex:1;overflow:auto;"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="admin-toast" id="adminToast"></div>
 
+  <!-- JSZip & docx-preview for authentic multi-page Word rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.4.1/dist/docx-preview.min.js"></script>
+  <!-- Mammoth.js Word DOCX in-browser converter fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+  <!-- PDF.js in-browser text extractor -->
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase.js"></script>
   <script src="../js/main.js"></script>
   <script src="../js/professor.js"></script>
+  <script src="../js/pengu-ai.js"></script>
 </body>
 
 </html>

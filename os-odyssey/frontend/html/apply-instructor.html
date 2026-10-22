@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ODYSSEY — Apply as Instructor</title>
+  <meta name="description" content="Apply to become a verified instructor on Odyssey. Create classrooms, custom modules, and AI tutors for your students." />
+  <link rel="icon" type="image/png" href="../../assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+  <style>
+    .instructor-apply-shell {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 5rem;
+    }
+
+    .apply-hero {
+      background: linear-gradient(135deg, rgba(30, 30, 58, 0.7), rgba(20, 20, 40, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 2.25rem 2rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .apply-hero::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(245, 166, 35, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .apply-kicker {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.65rem;
+      color: var(--accent, #f5a623);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .apply-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(1.1rem, 2.8vw, 1.6rem);
+      color: #fff;
+      line-height: 1.4;
+      margin-bottom: 0.85rem;
+    }
+
+    .apply-desc {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+      max-width: 720px;
+      margin: 0;
+    }
+
+    .apply-card {
+      background: linear-gradient(160deg, #1b1b33, #141427);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .apply-section-heading {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.8rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .apply-section-sub {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 1.25rem;
+    }
+
+    .apply-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .apply-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .apply-input,
+    .apply-select,
+    .apply-textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .apply-input:focus,
+    .apply-select:focus,
+    .apply-textarea:focus {
+      outline: none;
+      border-color: var(--accent, #f5a623);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15);
+    }
+
+    .apply-select option {
+      background: #1b1b33;
+      color: #fff;
+    }
+
+    .upload-box {
+      border: 2px dashed rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.02);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .upload-box:hover,
+    .upload-box.drag-over {
+      border-color: var(--accent, #f5a623);
+      background: rgba(245, 166, 35, 0.04);
+    }
+
+    .upload-box input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.3rem;
+    }
+
+    .upload-hint {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.45);
+      line-height: 1.4;
+    }
+
+    .upload-preview {
+      display: none;
+      margin-top: 1rem;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 0.75rem;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .upload-preview.active {
+      display: flex;
+    }
+
+    .upload-preview-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .upload-preview-info {
+      flex: 1;
+      text-align: left;
+      overflow: hidden;
+    }
+
+    .upload-preview-name {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .upload-preview-size {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .upload-preview-remove {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .upload-preview-remove:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    .verification-notice {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .verification-notice p {
+      margin: 0;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.5;
+    }
+
+    .affirmation-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+
+    .affirmation-row input[type="checkbox"] {
+      margin-top: 0.2rem;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--accent, #f5a623);
+    }
+
+    .affirmation-row label {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.5;
+      cursor: pointer;
+    }
+
+    .btn-submit-app {
+      width: 100%;
+      background: linear-gradient(135deg, #f5a623, #d98210);
+      color: #12121e;
+      border: none;
+      border-radius: 10px;
+      padding: 0.95rem 1.5rem;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(245, 166, 35, 0.25);
+    }
+
+    .btn-submit-app:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 166, 35, 0.35);
+    }
+
+    .btn-submit-app:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Status Banner Cards */
+    .status-panel {
+      display: none;
+      background: linear-gradient(160deg, #1b1b33, #141427);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .status-panel.active {
+      display: block;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 0.35rem 1rem;
+      border-radius: 999px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .status-pill.pending {
+      background: rgba(245, 166, 35, 0.15);
+      color: #f5a623;
+      border: 1px solid rgba(245, 166, 35, 0.3);
+    }
+
+    .status-pill.approved {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-pill.denied {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.15rem;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .status-desc {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.6;
+      max-width: 600px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      text-align: left;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-item strong {
+      display: block;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 0.2rem;
+    }
+
+    .summary-item span {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.85rem;
+      color: #fff;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body class="instructor-apply-page">
+
+  <!-- Top Navigation Bar -->
+  <nav class="app-nav">
+    <a href="index.html" class="app-brand">
+      <img class="brand-penguin" src="../../assets/penguin-flower-removebg-preview.png" alt="" />
+      ODYSSEY
+    </a>
+    <button class="app-nav-mobile-toggle" type="button" aria-label="Toggle mobile menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="app-nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="classroom.html">Classes</a>
+      <a href="apply-instructor.html" class="active" aria-current="page">Apply as Instructor</a>
+      <a href="course.html">Learn</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
+        <span class="toggle-icon sun-icon">☀️</span>
+        <span class="toggle-icon moon-icon">🌙</span>
+      </button>
+      <button class="app-link-button" type="button" data-logout>Log out</button>
+    </div>
+  </nav>
+
+  <main class="instructor-apply-shell">
+
+    <!-- Hero Header -->
+    <header class="apply-hero">
+      <div class="apply-kicker">INSTRUCTOR VERIFICATION PROGRAM</div>
+      <h1 class="apply-title">Apply as an Odyssey Instructor</h1>
+      <p class="apply-desc">
+        Empower students with customized classrooms, AI-driven learning personas, interactive simulations, and structured modules. Submit your academic credentials and verified proof of teaching to join our educator network.
+      </p>
+    </header>
+
+    <!-- State 1: Checking Authentication / Status -->
+    <div id="stateLoading" style="text-align:center;padding:3rem 1rem;">
+      <p style="font-family:'Nunito',sans-serif;color:rgba(255,255,255,0.5);">Verifying application eligibility...</p>
+    </div>
+
+    <!-- State 2: Not Signed In -->
+    <section class="status-panel" id="stateAuthRequired">
+      <div class="status-pill pending">Sign In Required</div>
+      <h2 class="status-title">Odyssey Account Needed</h2>
+      <p class="status-desc">
+        You need an active Odyssey learner account to apply for instructor privileges. Please log in or register before submitting your credentials.
+      </p>
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+        <a href="login.html" class="admin-btn primary" style="padding:0.6rem 1.5rem;font-size:0.85rem;">Sign In</a>
+        <a href="signup.html" class="admin-btn" style="padding:0.6rem 1.5rem;font-size:0.85rem;">Create Account</a>
+      </div>
+    </section>
+
+    <!-- State 3: Already an Instructor or Admin -->
+    <section class="status-panel" id="stateAlreadyProfessor">
+      <div class="status-pill approved">Verified Instructor</div>
+      <h2 class="status-title">You Have Instructor Access</h2>
+      <p class="status-desc">
+        Your account is already authorized as a verified Instructor or Administrator. You can immediately create classrooms, configure AI tutors, and publish learning modules.
+      </p>
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+        <a href="professor.html" class="admin-btn primary" style="padding:0.6rem 1.5rem;font-size:0.85rem;">Go to My Classes</a>
+        <a href="dashboard.html" class="admin-btn" style="padding:0.6rem 1.5rem;font-size:0.85rem;">Open Dashboard</a>
+      </div>
+    </section>
+
+    <!-- State 4: Pending Application Under Review -->
+    <section class="status-panel" id="statePending">
+      <div class="status-pill pending">Application Under Review</div>
+      <h2 class="status-title">Verification In Progress</h2>
+      <p class="status-desc" id="pendingSummaryDesc">
+        Your instructor application has been submitted and is currently being evaluated by our administrative board. We thoroughly verify each applicant's institutional credentials and teaching proof.
+      </p>
+
+      <div class="summary-grid" id="pendingSummaryGrid">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+        <a href="dashboard.html" class="admin-btn primary" style="padding:0.6rem 1.5rem;font-size:0.85rem;">Back to Dashboard</a>
+        <a href="classroom.html" class="admin-btn" style="padding:0.6rem 1.5rem;font-size:0.85rem;">Browse Classrooms</a>
+      </div>
+    </section>
+
+    <!-- State 5: Application Denied Notice (with resubmit option) -->
+    <section class="status-panel" id="stateDenied">
+      <div class="status-pill denied">Application Needs Revision</div>
+      <h2 class="status-title">Application Not Approved</h2>
+      <p class="status-desc" id="deniedReviewNote">
+        Your previous instructor application was reviewed and could not be verified at this time.
+      </p>
+      <button type="button" class="admin-btn primary" id="btnReapply" style="padding:0.6rem 1.5rem;font-size:0.85rem;">
+        Update and Resubmit Application
+      </button>
+    </section>
+
+    <!-- State 6: Application Form (Students / New Applicants) -->
+    <form id="instructorForm" style="display:none;">
+
+      <!-- Section 1: Personal & Contact Information -->
+      <section class="apply-card">
+        <h2 class="apply-section-heading">1. Personal & Contact Information</h2>
+        <p class="apply-section-sub">Please provide your full legal name and official contact channels.</p>
+
+        <div class="apply-grid-2">
+          <div class="admin-form-group">
+            <label for="fullName">Full Legal Name *</label>
+            <input type="text" id="fullName" class="apply-input" required minlength="2" maxlength="120" placeholder="e.g. Dr. Jane Doe" />
+          </div>
+
+          <div class="admin-form-group">
+            <label for="workEmail">Work / Institutional Email *</label>
+            <input type="email" id="workEmail" class="apply-input" required maxlength="254" placeholder="e.g. jdoe@university.edu" />
+          </div>
+        </div>
+
+        <div class="apply-grid-2" style="margin-top:1rem;">
+          <div class="admin-form-group">
+            <label for="phoneNumber">Contact Phone Number</label>
+            <input type="tel" id="phoneNumber" class="apply-input" maxlength="30" placeholder="e.g. +1 (555) 012-3456" />
+          </div>
+
+          <div class="admin-form-group">
+            <label for="yearsExperience">Years of Teaching Experience *</label>
+            <select id="yearsExperience" class="apply-select" required>
+              <option value="">Select experience level</option>
+              <option value="Less than 1 year">Less than 1 year</option>
+              <option value="1 - 3 years">1 - 3 years</option>
+              <option value="4 - 6 years">4 - 6 years</option>
+              <option value="7 - 10 years">7 - 10 years</option>
+              <option value="More than 10 years">More than 10 years</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Academic & Institutional Affiliation -->
+      <section class="apply-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.4rem;">
+          <div>
+            <h2 class="apply-section-heading" style="margin-bottom:0.25rem;">2. Institutional Affiliation & Location</h2>
+            <p class="apply-section-sub" style="margin-bottom:0;">Specify your educational workplace location and institution. You can use GPS to auto-detect your location.</p>
+          </div>
+          <button type="button" id="btnDetectLocation" class="admin-btn" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 0.9rem;border-color:rgba(56,189,248,0.3);background:rgba(56,189,248,0.08);color:#38bdf8;font-size:0.75rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span id="btnDetectLocationText">Detect Location (GPS)</span>
+          </button>
+        </div>
+
+        <div id="locationNotice" style="display:none;margin:0.75rem 0;padding:0.4rem 0.8rem;border-radius:6px;background:rgba(56,189,248,0.1);color:#38bdf8;font-size:0.78rem;font-family:'Nunito',sans-serif;"></div>
+
+        <!-- Cascading Location Bars: Country -> Region -> Province -> City -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1.25rem;">
+          <div class="admin-form-group">
+            <label for="institutionCountry">Country *</label>
+            <select id="institutionCountry" class="apply-select" required>
+              <option value="">Select Country</option>
+              <option value="Philippines">Philippines</option>
+              <option value="United States">United States</option>
+              <option value="United Kingdom">United Kingdom</option>
+              <option value="Canada">Canada</option>
+              <option value="Australia">Australia</option>
+              <option value="India">India</option>
+              <option value="Singapore">Singapore</option>
+              <option value="Japan">Japan</option>
+              <option value="Germany">Germany</option>
+            </select>
+          </div>
+
+          <div class="admin-form-group" id="regionGroup" style="display:none;">
+            <label for="institutionRegion">Region *</label>
+            <select id="institutionRegion" class="apply-select">
+              <option value="">Select Region</option>
+            </select>
+            <input type="text" id="institutionRegionCustom" class="apply-input" placeholder="Type custom region" style="display:none;margin-top:0.4rem;" />
+          </div>
+
+          <div class="admin-form-group" id="provinceGroup" style="display:none;">
+            <label for="institutionProvince">Province *</label>
+            <select id="institutionProvince" class="apply-select">
+              <option value="">Select Province</option>
+            </select>
+            <input type="text" id="institutionProvinceCustom" class="apply-input" placeholder="Type custom province" style="display:none;margin-top:0.4rem;" />
+          </div>
+
+          <div class="admin-form-group" id="cityGroup" style="display:none;">
+            <label for="institutionCity">City / Municipality *</label>
+            <select id="institutionCity" class="apply-select">
+              <option value="">Select City / Municipality</option>
+            </select>
+            <input type="text" id="institutionCityCustom" class="apply-input" placeholder="Type custom city/municipality" style="display:none;margin-top:0.4rem;" />
+          </div>
+        </div>
+
+        <!-- School Name with Autocomplete Suggestions Dropdown -->
+        <div style="margin-top:1rem;position:relative;">
+          <div class="admin-form-group" style="margin-bottom:0.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <label for="institution">School / University / College Name *</label>
+              <span id="schoolSearchStatus" style="font-size:0.72rem;color:rgba(255,255,255,0.4);font-family:'Nunito',sans-serif;"></span>
+            </div>
+            <input type="text" id="institution" class="apply-input" required minlength="2" maxlength="200"
+              placeholder="Type your school name (e.g. Surigao Del Norte State University)..." autocomplete="off" />
+          </div>
+
+          <!-- Live School Suggestions Dropdown -->
+          <div id="schoolSuggestionsContainer" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:50;background:#18182e;border:1px solid rgba(255,255,255,0.15);border-radius:10px;box-shadow:0 12px 28px rgba(0,0,0,0.5);max-height:260px;overflow-y:auto;padding:0.4rem;">
+            <div id="schoolSuggestionsList"></div>
+            <div id="schoolCustomOption" style="border-top:1px solid rgba(255,255,255,0.08);padding:0.5rem 0.75rem;font-size:0.78rem;color:#f5a623;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:0.25rem;"></div>
+          </div>
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:0.35rem;font-family:'Nunito',sans-serif;">
+            Tip: You can select a located school or freely type any custom school, high school, or institute.
+          </div>
+        </div>
+
+        <div class="apply-grid-2" style="margin-top:1.25rem;">
+          <div class="admin-form-group">
+            <label for="department">Department or Faculty *</label>
+            <input type="text" id="department" class="apply-input" required minlength="2" maxlength="150" placeholder="e.g. Computer Science & Engineering" />
+          </div>
+
+          <div class="admin-form-group">
+            <label for="positionTitle">Current Academic Title / Position *</label>
+            <select id="positionTitle" class="apply-select" required>
+              <option value="">Select your position</option>
+              <option value="Professor">Professor</option>
+              <option value="Associate Professor">Associate Professor</option>
+              <option value="Assistant Professor">Assistant Professor</option>
+              <option value="Department Chair / Head">Department Chair / Head</option>
+              <option value="Lecturer / Senior Lecturer">Lecturer / Senior Lecturer</option>
+              <option value="High School / K-12 Teacher">High School / K-12 Teacher</option>
+              <option value="Instructor / STEM Educator">Instructor / STEM Educator</option>
+              <option value="Adjunct Faculty">Adjunct Faculty</option>
+              <option value="Other Academic Role">Other Academic Role</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="admin-form-group" style="margin-top:1rem;">
+          <label for="subjectsTaught">Subject Areas You Plan to Teach *</label>
+          <input type="text" id="subjectsTaught" class="apply-input" required minlength="2" maxlength="300" placeholder="e.g. Operating Systems, Computer Architecture, Art Appreciation" />
+        </div>
+      </section>
+
+      <!-- Section 3: Verification Credentials & Real Teacher Proof -->
+      <section class="apply-card">
+        <h2 class="apply-section-heading">3. Faculty Identification & Teaching Proof</h2>
+        <p class="apply-section-sub">Upload clear photographic proof confirming you are an active educator.</p>
+
+        <div class="verification-notice">
+          <p>
+            <strong>Verification Standard:</strong> To protect student safety and maintain educational quality, applications are manually reviewed. Please provide a clear photograph or scan of your faculty credential AND photo evidence of your teaching role. Supported formats: JPG, PNG, WEBP, PDF (Maximum 10 MB per file).
+          </p>
+        </div>
+
+        <div class="apply-grid-2">
+          <!-- Document 1: Valid Institutional / Faculty ID -->
+          <div>
+            <label style="display:block;font-family:'Nunito',sans-serif;font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:0.4rem;">
+              Valid Faculty ID / Employee Badge *
+            </label>
+            <div class="upload-box" id="idDropZone">
+              <input type="file" id="idFileInput" accept="image/jpeg,image/png,image/webp,application/pdf" required />
+              <div class="upload-title">Choose File or Drag Here</div>
+              <div class="upload-hint">Upload institutional faculty badge, school ID card, or professional teaching license</div>
+            </div>
+            <div class="upload-preview" id="idPreview">
+              <img src="" alt="" class="upload-preview-thumb" id="idPreviewThumb" />
+              <div class="upload-preview-info">
+                <div class="upload-preview-name" id="idPreviewName">filename.jpg</div>
+                <div class="upload-preview-size" id="idPreviewSize">1.2 MB</div>
+              </div>
+              <button type="button" class="upload-preview-remove" id="idPreviewRemove">Remove</button>
+            </div>
+          </div>
+
+          <!-- Document 2: Photo Proof that one is really a teacher -->
+          <div>
+            <label style="display:block;font-family:'Nunito',sans-serif;font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:0.4rem;">
+              Real Teacher Proof / Classroom Photo *
+            </label>
+            <div class="upload-box" id="proofDropZone">
+              <input type="file" id="proofFileInput" accept="image/jpeg,image/png,image/webp,application/pdf" required />
+              <div class="upload-title">Choose File or Drag Here</div>
+              <div class="upload-hint">Upload a photo of you in your classroom, holding your faculty ID, or official certificate of employment</div>
+            </div>
+            <div class="upload-preview" id="proofPreview">
+              <img src="" alt="" class="upload-preview-thumb" id="proofPreviewThumb" />
+              <div class="upload-preview-info">
+                <div class="upload-preview-name" id="proofPreviewName">filename.jpg</div>
+                <div class="upload-preview-size" id="proofPreviewSize">1.5 MB</div>
+              </div>
+              <button type="button" class="upload-preview-remove" id="proofPreviewRemove">Remove</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Teaching Philosophy & Statement -->
+      <section class="apply-card">
+        <h2 class="apply-section-heading">4. Statement of Purpose</h2>
+        <p class="apply-section-sub">Describe your background and what courses or labs you intend to build on Odyssey.</p>
+
+        <div class="admin-form-group">
+          <label for="applyReason">Why do you want to teach on Odyssey? *</label>
+          <textarea id="applyReason" class="apply-textarea" required minlength="20" maxlength="2000" rows="5"
+            placeholder="Tell us about your teaching experience, your students, and how you plan to use Odyssey's classrooms, interactive simulations, and custom AI tutors..."></textarea>
+        </div>
+
+        <div class="affirmation-row">
+          <input type="checkbox" id="affirmationCheck" required />
+          <label for="affirmationCheck">
+            I certify under penalty of account termination that all submitted documents and information are genuine, unaltered, and accurately reflect my current teaching affiliation.
+          </label>
+        </div>
+
+        <div id="formErrorMessage" style="display:none;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:0.75rem 1rem;border-radius:8px;font-family:'Nunito',sans-serif;font-size:0.85rem;margin-bottom:1rem;"></div>
+
+        <button type="submit" class="btn-submit-app" id="submitAppBtn">
+          Submit Instructor Application
+        </button>
+      </section>
+
+    </form>
+
+  </main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/apply-instructor.js"></script>
+</body>
+
+</html>

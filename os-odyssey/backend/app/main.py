@@ -1,5 +1,5 @@
 """
-OS Odyssey — FastAPI Application Factory
+Odyssey — FastAPI Application Factory
 ─────────────────────────────────────────
 Production-hardened server with:
  • Helmet-style security headers
@@ -30,7 +30,7 @@ from app.config import settings
 from app.middleware.rate_limiter import limiter
 from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.middleware.request_id import RequestIDMiddleware
-from app.routers import auth, profile, progress, modules, stats, health, admin, classrooms, ai
+from app.routers import auth, profile, progress, modules, stats, health, admin, classrooms, ai, applications
 from app.services.thread_pool import pool
 
 # ─── Logging ────────────────────────────────────────────
@@ -39,7 +39,7 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
     datefmt="%H:%M:%S",
 )
-logger = logging.getLogger("os-odyssey")
+logger = logging.getLogger("odyssey")
 
 # ─── Keep-Alive Interval (13 min — under Render's 15 min sleep threshold)
 KEEPALIVE_INTERVAL = 13 * 60  # seconds
@@ -73,7 +73,7 @@ async def _keepalive_ping(stop_event: asyncio.Event):
 # ─── Lifespan (startup / shutdown) ──────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🚀  OS Odyssey API starting up")
+    logger.info("🚀  Odyssey API starting up")
     logger.info("   Environment : %s", settings.ENV)
     logger.info("   CORS origins: %s", ", ".join(settings.CORS_ORIGINS) or "(all)")
     logger.info("   Thread pool : %d workers", settings.WORKER_THREADS)
@@ -95,14 +95,14 @@ async def lifespan(app: FastAPI):
         except asyncio.CancelledError:
             pass
     pool.shutdown(wait=True)
-    logger.info("🛑  OS Odyssey API shut down gracefully")
+    logger.info("🛑  Odyssey API shut down gracefully")
 
 
 # ─── App Instance ───────────────────────────────────────
 app = FastAPI(
-    title="OS Odyssey API",
-    version="1.0.0",
-    description="Backend API for OS Odyssey — an interactive Operating Systems learning platform.",
+    title="Odyssey API",
+    version="1.1.0",
+    description="Backend API for Odyssey — an AI-powered, gamified multi-subject learning platform.",
     docs_url="/api/docs" if settings.DEBUG else None,
     redoc_url="/api/redoc" if settings.DEBUG else None,
     lifespan=lifespan,
@@ -177,13 +177,14 @@ app.include_router(stats.router, prefix="/api/stats", tags=["Stats"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(classrooms.router, prefix="/api/classrooms", tags=["Classrooms"])
 app.include_router(ai.router, prefix="/api/ai", tags=["AI"])
+app.include_router(applications.router, prefix="/api/applications", tags=["Applications"])
 
 
 # ─── Root Redirect ──────────────────────────────────────
 @app.get("/", include_in_schema=False)
 async def root():
     return {
-        "service": "OS Odyssey API",
-        "version": "1.0.0",
+        "service": "Odyssey API",
+        "version": "1.1.0",
         "docs": "/api/docs" if settings.DEBUG else None,
     }

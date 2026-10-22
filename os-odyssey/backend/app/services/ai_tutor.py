@@ -1,9 +1,7 @@
 """
 AI Tutor Service — Pengu AI (Google Gemini)
 ───────────────────────────────────────────
-Interactive OS mentor & tutor for OS Odyssey.
-Provides contextual explanations, real-world analogies, C code examples,
-and Socratic guidance for students reading lessons or running simulations.
+Adaptive tutor and platform guide for Odyssey classrooms.
 """
 
 import json
@@ -14,25 +12,52 @@ import httpx
 from app.config import settings
 from app.services.ai_quiz import get_available_models
 
-logger = logging.getLogger("os-odyssey.ai_tutor")
+logger = logging.getLogger("odyssey.ai_tutor")
 
-SYSTEM_INSTRUCTION = """You are Pengu (Tux), the wise, warm, and playful penguin mentor of OS Odyssey — a gamified educational platform where Computer Science students master Operating Systems.
+DEFAULT_SYSTEM_INSTRUCTION = """You are Pengu, a capable, general-purpose AI assistant and tutor in the Odyssey learning app. You can discuss any subject: humanities, arts, history, science, everyday questions, technology, and more. You are not an OS or programming-only assistant.
 
-Your Mission:
-Help students genuinely understand core Operating Systems principles (Processes, Threads, CPU Scheduling, Concurrency & Synchronization, Semaphores & Mutexes, Deadlocks, Memory Management, Paging, Virtual Memory, File Systems, Disk Scheduling, and System Calls).
+Follow the user's current request as the source of truth. First identify what they actually asked, then answer that directly and specifically. Do not turn an unrelated question into an Operating Systems, algorithms, engineering, or classroom analogy. Do not mention or defend the student's course choices unless they ask about them. A course, page, or prior message is background only; use it only when the user refers to it or it clearly helps answer the current question. If the user changes topics, follow the new topic without carrying over the old topic's framing.
 
-Your Persona & Tone:
-1. Warm, encouraging, and enthusiastic about low-level computing.
-2. Sprinkles subtle, tasteful penguin/ice/arctic puns when natural (e.g., "Brrr, that race condition gave me chills!", "Let's slide through this concept!"), but never at the expense of technical rigor.
-3. Accurate, precise, and educational.
+Be accurate, clear, and appropriately detailed. Explain unfamiliar ideas in plain language, distinguish facts from uncertainty, and ask a focused follow-up only when needed to answer well. Match the requested format and depth. Use readable Markdown when helpful, but avoid filler and unsolicited advice. Be warm without forcing jokes, puns, or a penguin metaphor into the answer.
 
-Response Guidelines:
-- Format your response using clean, readable Markdown (bullet points, bold key terms, short paragraphs).
-- When providing code, use clear, standard C / POSIX (e.g., using <unistd.h>, <pthread.h>, fork(), pipe(), wait()) with concise comments explaining every critical line.
-- When asked for an analogy, use intuitive, concrete real-world models (e.g., a bustling restaurant kitchen for CPU scheduling, library borrowing cards for virtual memory paging, traffic roundabouts for circular wait deadlocks).
-- When asked for a Socratic hint or debugging help in a lab/simulation, DO NOT just hand out the final answer. Ask a guiding question that prompts the student to think about the underlying invariant or state.
-- Keep responses engaging, focused, and structured. Avoid unnecessary filler or excessively long walls of text.
+Odyssey navigation knowledge (use only for questions about using the app):
+- The top navigation includes links such as Dashboard, Classes, Leaderboard, and Profile; available links depend on the user's role.
+- Students open Classes to see enrolled classrooms or join one with a professor's join code. Inside a class, Course Outline lists lessons and quizzes; Resources contains shared materials.
+- Open a lesson from the classroom outline and use its navigation controls to move between modules. Quizzes are opened from the classroom quiz list.
+- Professors manage courses from My Classes / Classes, where they can edit modules, quizzes, and student access.
+- Give short steps grounded in these labels. If the user's screen differs, ask what they see instead of inventing a button or location.
 """
+
+
+def build_system_instruction(course_context: Optional[dict] = None) -> str:
+    """
+    Build a dynamic system instruction based on the course/classroom context.
+    If no context is provided, falls back to the default generic instruction.
+    """
+    if not course_context:
+        return DEFAULT_SYSTEM_INSTRUCTION
+
+    subject = course_context.get("subject") or "General"
+    classroom_name = course_context.get("classroom_name") or ""
+    ai_context = course_context.get("ai_subject_context") or ""
+    persona = course_context.get("ai_persona") or "Odyssey Mentor"
+    context = f'\nOptional classroom reference: the user is viewing "{classroom_name}" (subject: {subject}).'
+    context += f" The instructor's preferred assistant name/style is '{persona}'."
+    if ai_context:
+        context += f" Instructor-provided subject notes (use only when directly relevant to the user's request): {ai_context[:2000]}"
+    return DEFAULT_SYSTEM_INSTRUCTION + "\n\n" + context + "\nUse the classroom reference only when the user asks about this class, lesson, or subject. It must never override or reframe a clearly unrelated question."
+
+
+def _prioritize_tutor_models(models: list[str]) -> list[str]:
+    """Prefer reasoning-capable text models, then retain discovered fallbacks."""
+    preferred = ["gemini-4-argon", "gemini-3.1-pro-preview", "gemini-3.8-flash", "gemini-flash-latest"]
+    usable = [
+        model for model in models
+        if not any(token in model.lower() for token in ("-image", "-tts", "-live", "transcribe", "robotics", "embedding"))
+    ]
+    ordered = [model for model in preferred if model in usable]
+    ordered.extend(model for model in usable if model not in ordered)
+    return ordered
 
 
 async def ask_pengu_ai(
@@ -42,9 +67,11 @@ async def ask_pengu_ai(
     selected_text: str = "",
     content_snippet: str = "",
     history: Optional[list[dict]] = None,
+    course_context: Optional[dict] = None,
 ) -> dict:
     """
-    Send student query and contextual metadata to Google Gemini and get Pengu's reply.
+    Send student query and contextual metadata to Google Gemini and get the AI tutor's reply.
+    Dynamically adapts persona and expertise based on course_context.
     Implements multi-model fallback across discovered Gemini models.
     """
     if not settings.GEMINI_API_KEY:
@@ -53,30 +80,36 @@ async def ask_pengu_ai(
     if not query or not query.strip():
         raise ValueError("Query cannot be empty.")
 
+    # Build dynamic system instruction
+    system_instruction = build_system_instruction(course_context)
+
     # Build prompt instructions based on mode
     mode_instructions = {
-        "explain": "Explain this concept clearly and intuitively for a CS student.",
-        "eli5": "Explain this concept in very simple, approachable terms (ELI5) with zero overly academic jargon.",
-        "analogy": "Provide a vivid, memorable real-world analogy to illustrate this OS concept.",
-        "code": "Provide a clean, working C / POSIX code example demonstrating this concept with explanatory comments.",
+        "explain": "Explain the concept the user actually asked about clearly and intuitively. Infer its subject from the question, not the classroom.",
+        "eli5": "Explain the idea the user actually asked about in simple, approachable terms, without changing its subject.",
+        "analogy": "Give a memorable analogy that directly explains the idea the user asked about. Do not analogize it to the classroom subject unless requested.",
+        "code": "Provide a clean, working code example only when the user's request is about code or asks for code.",
         "hint": "Act as a Socratic guide. Give a helpful diagnostic hint or guiding question to help the student solve this without revealing the full answer.",
-        "general": "Answer the student's question clearly, accurately, and encouragingly.",
+        "general": "Answer the current question directly, accurately, and specifically. Treat it as an independent general-purpose request when it is unrelated to the course.",
+        "navigate": "Act as an Odyssey platform navigator. Give concise numbered steps based on the current page and the known Odyssey navigation. Ask what the student sees if a control or destination is uncertain.",
+        "freeform": "Answer this open-ended question directly, even if it is unrelated to the current course. Explain unfamiliar terms and provide a balanced, accurate response.",
     }.get(mode, "Answer clearly and educationally.")
 
     # Assemble contextual prompt
     context_blocks = []
     if page_context:
-        context_blocks.append(f"CURRENT LOCATION / TOPIC:\n{page_context.strip()}")
+        context_blocks.append(f"OPTIONAL CURRENT PAGE REFERENCE (use only if the user refers to this page):\n{page_context.strip()}")
     if selected_text:
-        context_blocks.append(f"STUDENT HIGHLIGHTED TEXT:\n\"{selected_text.strip()[:1500]}\"")
+        context_blocks.append(f"OPTIONAL HIGHLIGHTED PAGE TEXT (use only if the user asks about it):\n\"{selected_text.strip()[:1500]}\"")
     if content_snippet:
-        context_blocks.append(f"CURRENT LESSON/SIMULATION CONTENT CONTEXT:\n{content_snippet.strip()[:2500]}")
+        context_blocks.append(f"OPTIONAL VISIBLE LESSON CONTENT (use only if the user asks about it or says 'this'/'here'):\n{content_snippet.strip()[:2500]}")
 
     context_str = "\n\n".join(context_blocks)
     if context_str:
         context_str = f"\n\n--- CONTEXT ---\n{context_str}\n--- END CONTEXT ---"
 
-    prompt = f"""[Instruction Mode: {mode.upper()} - {mode_instructions}]
+    prompt = f"""[Response mode: {mode.upper()} — {mode_instructions}]
+The user's latest question has priority over the optional page, classroom, and conversation context. Do not add an unrelated technology, OS, algorithm, or engineering connection.
 {context_str}
 
 STUDENT'S QUESTION:
@@ -85,7 +118,7 @@ STUDENT'S QUESTION:
 
     # Assemble Gemini contents including history turns
     gemini_contents = []
-    # Add previous chat history turns if provided (max last 6 turns to keep context lightweight)
+    # Keep short history for genuine follow-ups; the current question can start a new topic.
     if history and isinstance(history, list):
         recent_history = history[-6:]
         for turn in recent_history:
@@ -103,7 +136,9 @@ STUDENT'S QUESTION:
     last_error = None
 
     async with httpx.AsyncClient(timeout=45.0) as client:
-        models_to_try = await get_available_models(client, settings.GEMINI_API_KEY)
+        models_to_try = _prioritize_tutor_models(
+            await get_available_models(client, settings.GEMINI_API_KEY)
+        )
         logger.info("Pengu AI querying with models: %s", models_to_try[:4])
 
         for model in models_to_try:
@@ -118,13 +153,15 @@ STUDENT'S QUESTION:
                     payload = {
                         "contents": gemini_contents,
                         "systemInstruction": {
-                            "parts": [{"text": SYSTEM_INSTRUCTION}]
+                            "parts": [{"text": system_instruction}]
                         },
                         "generationConfig": {
                             "temperature": 0.7,
-                            "maxOutputTokens": 2048,
+                            "maxOutputTokens": 4096,
                         },
                     }
+                    if model.startswith(("gemini-3", "gemini-4")):
+                        payload["generationConfig"]["thinkingConfig"] = {"thinkingLevel": "high"}
 
                     response = await client.post(
                         api_url,
