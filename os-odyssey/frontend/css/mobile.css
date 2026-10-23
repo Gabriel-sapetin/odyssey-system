@@ -5420,6 +5420,81 @@ body.odyssey-home-page .home-mobile-stats,
 body.odyssey-home-page .home-mobile-greeting,
 body.odyssey-home-page .home-mobile-continue { display: none; }
 @media (max-width: 768px) {
+  body.odyssey-home-page .app-brand { display: none !important; }
+  body.odyssey-home-page .app-nav .mobile-home-menu-toggle {
+    order: 1;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    flex: 0 0 40px;
+    margin: 0;
+    padding: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e1e6ef;
+    border-radius: 50%;
+    background: #fff;
+    color: #172033;
+    box-shadow: 0 4px 12px rgba(20, 30, 50, .07);
+  }
+  body.odyssey-home-page .app-nav .mobile-home-menu-toggle svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  body.odyssey-home-page .app-nav .home-mobile-stats {
+    order: 2;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin: 0 0 0 auto;
+    padding: 0;
+    overflow: visible;
+  }
+  body.odyssey-home-page .app-nav .home-mobile-stat {
+    min-height: 36px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #34425c;
+    font-size: 13px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  body.odyssey-home-page .app-nav .home-mobile-stat > span:first-child { font-size: 16px; }
+  body.odyssey-home-page .app-nav .home-mobile-stat strong { color: #172139; font-size: 13px; font-weight: 950; }
+  body.odyssey-home-page .home-mobile-stat-label {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+  body.odyssey-home-page .dashboard-shell { padding-top: calc(var(--mobile-shell-header-height) + 16px); }
+  body.odyssey-home-page .home-mobile-stats::-webkit-scrollbar { display: none; }
+  body.odyssey-home-page .home-mobile-stats { scrollbar-width: none; }
+  body.odyssey-home-page:not(.light-mode) .app-nav .mobile-home-menu-toggle {
+    border-color: #35415b;
+    background: #252f46;
+    color: #edf1fa;
+  }
+  body.odyssey-home-page:not(.light-mode) .app-nav .home-mobile-stat,
+  body.odyssey-home-page:not(.light-mode) .app-nav .home-mobile-stat strong { color: #edf1fa; }
   body.odyssey-home-page .home-mobile-stats {
     display: flex;
     gap: 8px;

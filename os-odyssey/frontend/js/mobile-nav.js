@@ -121,9 +121,14 @@
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'mobile-more-toggle';
-    toggle.setAttribute('aria-label', 'More account options');
+    toggle.setAttribute('aria-label', body.classList.contains('odyssey-home-page') ? 'Open navigation menu' : 'More account options');
     toggle.setAttribute('aria-expanded', 'false');
-    toggle.textContent = 'More';
+    if (body.classList.contains('odyssey-home-page')) {
+      toggle.classList.add('mobile-home-menu-toggle');
+      toggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>';
+    } else {
+      toggle.textContent = 'More';
+    }
 
     const menu = document.createElement('div');
     menu.className = 'mobile-more-menu';
