@@ -5178,3 +5178,181 @@ body.explore-lessons-page .leaderboard-invite-spark-two { right: 5px; bottom: 20
   body.explore-lessons-page .leaderboard-invite-card,
   body.explore-lessons-page .leaderboard-invite-action { transition: none; }
 }
+
+/* Lively home welcome banner and quick-start destinations. */
+body.odyssey-home-page .explore-lessons-promo {
+  min-height: 330px;
+  border: 1px solid rgba(255, 255, 255, .38);
+  background:
+    radial-gradient(circle at 78% 18%, rgba(255, 218, 108, .24), transparent 22%),
+    linear-gradient(115deg, #292675 0%, #4f39bd 54%, #8750df 100%);
+  box-shadow: 0 18px 42px rgba(58, 47, 151, .22);
+}
+body.odyssey-home-page .explore-lessons-promo::before,
+body.odyssey-home-page .explore-lessons-promo::after {
+  position: absolute;
+  z-index: 0;
+  content: '';
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 50%;
+  pointer-events: none;
+}
+body.odyssey-home-page .explore-lessons-promo::before {
+  width: 360px;
+  height: 360px;
+  top: -230px;
+  right: -28px;
+}
+body.odyssey-home-page .explore-lessons-promo::after {
+  width: 240px;
+  height: 240px;
+  right: 90px;
+  bottom: -190px;
+}
+body.odyssey-home-page .explore-lessons-promo__copy .section-kicker { color: #b8edff; }
+body.odyssey-home-page .explore-lessons-promo h2 { color: #fff; }
+body.odyssey-home-page .explore-lessons-promo__copy > p:not(.section-kicker) { color: rgba(255, 255, 255, .84); }
+body.odyssey-home-page .explore-lessons-promo__action {
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, .55);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 5px 0 rgba(20, 19, 73, .25);
+  color: #382c91;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+body.odyssey-home-page .explore-lessons-promo__action span { font-size: 20px; line-height: .8; }
+body.odyssey-home-page .explore-lessons-promo__action:hover {
+  transform: translateY(-2px);
+  background: #fff;
+  box-shadow: 0 7px 0 rgba(20, 19, 73, .25);
+}
+body.odyssey-home-page .explore-lessons-promo__art {
+  position: relative;
+  z-index: 1;
+  width: min(36%, 240px);
+  height: 240px;
+  border-radius: 43% 38% 42% 36%;
+  background: rgba(255, 255, 255, .13);
+  animation: home-art-orbit 7s ease-in-out infinite;
+}
+body.odyssey-home-page .explore-lessons-promo__art img {
+  width: 88%;
+  height: 92%;
+  filter: drop-shadow(0 12px 8px rgba(20, 16, 67, .23));
+  animation: home-mascot-bob 3s ease-in-out infinite;
+}
+body.odyssey-home-page .home-quick-start { margin-top: 34px; }
+body.odyssey-home-page .home-quick-start__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+body.odyssey-home-page .home-quick-start__heading .section-kicker {
+  margin: 0 0 5px;
+  color: #72809a;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+body.odyssey-home-page .home-quick-start__heading h2 {
+  margin: 0;
+  color: #172139;
+  font-size: clamp(20px, 2vw, 25px);
+  font-weight: 900;
+  letter-spacing: -.035em;
+}
+body.odyssey-home-page .home-quick-start__spark {
+  color: #f1a620;
+  font-size: 29px;
+  animation: home-spark-twinkle 1.8s ease-in-out infinite alternate;
+}
+body.odyssey-home-page .home-quick-start__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+}
+body.odyssey-home-page .home-quick-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 106px;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  padding: 14px 13px;
+  border: 1px solid #e1e7f1;
+  border-radius: 19px;
+  background: linear-gradient(145deg, #fff, #f8f7ff);
+  box-shadow: 0 8px 22px rgba(19, 27, 49, .045);
+  color: #172139;
+  text-decoration: none;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+body.odyssey-home-page .home-quick-card:hover {
+  transform: translateY(-3px);
+  border-color: #c8baff;
+  box-shadow: 0 13px 25px rgba(58, 47, 151, .12);
+}
+body.odyssey-home-page .home-quick-card > img {
+  display: block;
+  width: 62px;
+  height: 54px;
+  flex: 0 0 62px;
+  object-fit: cover;
+  object-position: center;
+  image-rendering: pixelated;
+}
+body.odyssey-home-page .home-quick-card > span:nth-of-type(1) {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+body.odyssey-home-page .home-quick-card strong {
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+body.odyssey-home-page .home-quick-card small {
+  color: #69768c;
+  font-size: 11px;
+  line-height: 1.35;
+}
+body.odyssey-home-page .home-quick-card__arrow {
+  position: absolute;
+  top: 9px;
+  right: 11px;
+  color: #6d54da;
+  font-size: 17px;
+  font-weight: 900;
+  transition: transform .18s ease;
+}
+body.odyssey-home-page .home-quick-card:hover .home-quick-card__arrow { transform: translate(2px, -2px); }
+body.odyssey-home-page:not(.light-mode) .home-quick-start__heading h2 { color: #f4f6fb; }
+body.odyssey-home-page:not(.light-mode) .home-quick-start__heading .section-kicker { color: #aeb9cc; }
+body.odyssey-home-page:not(.light-mode) .home-quick-card {
+  border-color: #303b50;
+  background: linear-gradient(145deg, #202b40, #182236);
+  color: #f4f6fb;
+}
+body.odyssey-home-page:not(.light-mode) .home-quick-card small { color: #aeb9cc; }
+@keyframes home-mascot-bob { 0%, 100% { transform: translateY(3px) rotate(-2deg); } 50% { transform: translateY(-7px) rotate(2deg); } }
+@keyframes home-art-orbit { 0%, 100% { border-radius: 43% 38% 42% 36%; } 50% { border-radius: 38% 45% 36% 43%; } }
+@keyframes home-spark-twinkle { from { opacity: .55; transform: scale(.86) rotate(-10deg); } to { opacity: 1; transform: scale(1.12) rotate(10deg); } }
+@media (max-width: 768px) {
+  body.odyssey-home-page .explore-lessons-promo { min-height: 215px; }
+  body.odyssey-home-page .explore-lessons-promo__art { width: 94px; height: 110px; margin-right: -9px; }
+  body.odyssey-home-page .home-quick-start { margin-top: 25px; }
+  body.odyssey-home-page .home-quick-start__grid { grid-template-columns: 1fr; gap: 9px; }
+  body.odyssey-home-page .home-quick-card { min-height: 78px; padding: 10px 14px; }
+  body.odyssey-home-page .home-quick-card > img { width: 58px; height: 48px; flex-basis: 58px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.odyssey-home-page .explore-lessons-promo__art,
+  body.odyssey-home-page .explore-lessons-promo__art img,
+  body.odyssey-home-page .home-quick-start__spark { animation: none; }
+  body.odyssey-home-page .explore-lessons-promo__action,
+  body.odyssey-home-page .home-quick-card,
+  body.odyssey-home-page .home-quick-card__arrow { transition: none; }
+}
