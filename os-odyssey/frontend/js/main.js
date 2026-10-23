@@ -1275,63 +1275,65 @@
     const completedCount = completedModules.length;
     const overallPct = Math.round((completedCount / totalModules) * 100);
 
+    const nextModule = MODULE_META.find(meta => isModuleUnlocked(meta.id) && !completedModules.includes(meta.id));
+    const targetModule = nextModule || MODULE_META[MODULE_META.length - 1];
+    const targetNumber = (MODULE_LABELS[targetModule.id] || {}).num || targetModule.id.replace('module', '');
+    const actionLabel = nextModule ? (completedCount ? 'Continue' : 'Start') : 'Review';
     let html = `
-      <div class="progress-panel-header">
-        <span class="progress-panel-title">Course modules</span>
-        <span class="progress-panel-overall">${overallPct}% Complete</span>
-      </div>
-      <div class="progress-panel-bar-wrap">
-        <div class="progress-panel-bar" style="width: ${overallPct}%"></div>
-      </div>
-      <div class="progress-panel-stats-row">
-        <div class="progress-stat-mini">
-          <span class="progress-stat-num">${completedCount}</span>
-          <span class="progress-stat-label">Modules Done</span>
+      <section class="learning-path-summary" aria-label="Course progress">
+        <div class="learning-path-summary-heading">
+          <div>
+            <span class="learning-path-eyebrow">COURSE MODULES</span>
+            <h2>Keep your momentum</h2>
+          </div>
+          <span class="progress-panel-overall">${overallPct}% complete</span>
         </div>
-        <div class="progress-stat-mini">
-          <span class="progress-stat-num">${totalModules}</span>
-          <span class="progress-stat-label">Total Modules</span>
+        <div class="learning-path-progress-track" role="progressbar" aria-label="Course completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${overallPct}">
+          <span style="width:${overallPct}%"></span>
         </div>
-        <div class="progress-stat-mini">
-          <span class="progress-stat-num">${getTotalTopics()}</span>
-          <span class="progress-stat-label">Total Topics</span>
+        <div class="progress-panel-stats-row">
+          <div class="progress-stat-mini"><span class="progress-stat-num">${completedCount}</span><span class="progress-stat-label">Modules Done</span></div>
+          <div class="progress-stat-mini"><span class="progress-stat-num">${totalModules}</span><span class="progress-stat-label">Total Modules</span></div>
+          <div class="progress-stat-mini"><span class="progress-stat-num">${getTotalTopics()}</span><span class="progress-stat-label">Total Topics</span></div>
         </div>
+        <button class="odyssey-continue-button" type="button" data-start-module="${targetModule.id}">
+          <span>${actionLabel} Module ${targetNumber}</span><span aria-hidden="true">→</span>
+        </button>
+      </section>
+      <div class="learning-path-map-heading">
+        <div><span class="learning-path-eyebrow">YOUR ROUTE</span><h2>Follow the path</h2></div>
+        <span>${totalModules} modules <i aria-hidden="true">·</i> ${getTotalTopics()} topics</span>
       </div>
-      ${(() => {
-        const nextModule = MODULE_META.find(meta => isModuleUnlocked(meta.id) && !completedModules.includes(meta.id));
-        const targetModule = nextModule || MODULE_META[MODULE_META.length - 1];
-        const targetNumber = (MODULE_LABELS[targetModule.id] || {}).num || targetModule.id.replace('module', '');
-        const actionLabel = nextModule ? (completedCount ? 'Continue' : 'Start') : 'Review';
-        return `<button class="odyssey-continue-button" type="button" data-start-module="${targetModule.id}">${actionLabel} Module ${targetNumber}</button>`;
-      })()}
+      <div class="learning-path-map" aria-label="Course modules">
+        <span class="learning-path-route" aria-hidden="true"></span>
     `;
 
-    MODULE_META.forEach(meta => {
+    MODULE_META.forEach((meta, index) => {
       const label = MODULE_LABELS[meta.id] || { num: '?', title: meta.id, color: '#94a3b8' };
       const isDone = completedModules.includes(meta.id);
       const unlocked = isModuleUnlocked(meta.id);
       const statusClass = isDone ? 'completed' : (unlocked ? 'in-progress' : 'locked');
       const statusText = isDone ? 'Completed' : (unlocked ? 'In progress' : 'Locked');
-      const statusColor = isDone ? '#16a34a' : (unlocked ? '#f59e0b' : '#64748b');
       const topicPct = isDone ? 100 : (unlocked ? 15 : 0);
 
       html += `
-        <button class="progress-module-row ${statusClass}" type="button" data-start-module="${meta.id}" ${unlocked ? '' : 'disabled'}>
-          <span class="progress-module-number">${label.num}</span>
-
-          <span class="progress-module-info">
-            <strong>Module ${label.num}</strong>
-            <em>${label.title}</em>
-            <span class="progress-module-bar-wrap">
-              <span class="progress-module-bar" style="width: ${topicPct}%; background: ${unlocked ? label.color : '#475569'}"></span>
+        <div class="learning-path-step learning-path-step--${index % 2 === 0 ? 'left' : 'right'} ${statusClass}">
+          <span class="learning-path-marker" style="--module-color:${label.color}" aria-hidden="true"><span>${label.num}</span></span>
+          <button class="progress-module-row learning-path-module ${statusClass}" type="button" data-start-module="${meta.id}" aria-label="${statusText}: Module ${label.num}, ${label.title}, ${meta.statements} topics" ${unlocked ? '' : 'disabled'}>
+            <span class="learning-path-module-copy">
+              <span class="learning-path-module-meta">MODULE ${String(label.num).padStart(2, '0')} <i aria-hidden="true">·</i> ${meta.statements} TOPICS</span>
+              <strong>${label.title}</strong>
+              <em>${isDone ? 'Completed — open to review this module' : (unlocked ? 'Start learning and build your progress' : 'Complete the previous module to unlock')}</em>
+              <span class="progress-module-bar-wrap"><span class="progress-module-bar" style="width:${topicPct}%;background:${unlocked ? label.color : '#94a3b8'}"></span></span>
             </span>
-          </span>
-          <span class="progress-module-status" style="color: ${statusColor}">${statusText}</span>
-        </button>
+            <span class="learning-path-module-status">${isDone ? '✓' : (unlocked ? '→' : '🔒')}<span>${statusText}</span></span>
+          </button>
+        </div>
       `;
     });
 
-    panel.innerHTML = html;
+    panel.innerHTML = `${html}</div>`;
+    panel.setAttribute('aria-busy', 'false');
   }
 
   renderCourseProgressPanel();
@@ -2416,17 +2418,10 @@
       updateLessonOutline();
       elements.primaryAction.textContent = isLastReview ? 'Start Quiz' : 'Next';
       elements.primaryAction.disabled = false;
-      const intro = state.reviewIndex === 0 && module.intro ? module.intro : '';
-      const transition = state.reviewIndex === module.reviewTransitionIndex && module.reviewTransition ? module.reviewTransition : '';
       elements.body.innerHTML = `
-        ${intro}
-        ${transition}
         <h3>${statement.title}</h3>
         ${renderLessonCopy(statement.body)}
         ${renderCodeBlock(statement.code)}
-        <p class="lesson-prompt">${isLastReview
-          ? `🎉 You've completed all ${module.review.length} review statements! The quiz is now unlocked. Press <strong>[Start Quiz]</strong> to begin.`
-          : '→ <em>Press <strong>[Next]</strong> to continue.</em>'}</p>
       `;
     }
 
@@ -2444,13 +2439,8 @@
       updateLessonOutline();
       elements.primaryAction.disabled = type === 'multiple-choice';
       elements.primaryAction.textContent = 'Submit Answer';
-      const intro = state.quizIndex === 0 && module.quizIntro ? module.quizIntro : '';
-      const transition = state.quizIndex === module.questionTransitionIndex && module.questionTransition ? module.questionTransition : '';
-
       if (type === 'multiple-choice') {
         elements.body.innerHTML = `
-          ${intro}
-          ${transition}
           <h3>${item.question}</h3>
           ${renderCodeBlock(item.code)}
           <p class="lesson-prompt">Select your answer, then click Submit.</p>
@@ -2466,8 +2456,6 @@
       }
 
       elements.body.innerHTML = `
-        ${intro}
-        ${transition}
         <h3>${item.prompt}</h3>
         <blockquote class="blank-sentence">${item.sentence}</blockquote>
         <p class="lesson-prompt">Type your answer.</p>

@@ -18,7 +18,7 @@
 
 <body class="app-page course-page odyssey-course-page">
   <main class="course-shell">
-    <section class="netacad-course standalone" id="modules" aria-labelledby="courseTitle">
+    <section class="learning-path-page" id="modules" aria-labelledby="courseTitle">
       <header class="netacad-shell-header">
         <div class="course-shell-brand">
           <a href="dashboard.html" class="course-app-brand" aria-label="Odyssey dashboard">
@@ -39,26 +39,19 @@
         </nav>
       </header>
 
-      <div class="netacad-workspace">
-        <article class="netacad-reader-preview">
-          <div class="reader-topline">
-            <span>My Learning</span>
-            <span>Lessons and quizzes</span>
+      <div class="learning-path-layout">
+        <header class="learning-path-intro">
+          <p class="section-kicker">YOUR LEARNING PATH</p>
+          <h1 id="courseTitle">Operating Systems</h1>
+          <p>Build your understanding of operating systems one lesson at a time. Review each module, practice what you learn, and track your progress as you go.</p>
+          <a class="odyssey-explore-link" href="explore-lessons.html">Explore lessons across subjects <span aria-hidden="true">→</span></a>
+        </header>
+        <section class="learning-path-progress" id="courseProgressPanel" aria-label="Operating Systems learning path" aria-live="polite" aria-busy="true">
+          <div class="course-path-loading">
+            <img src="../../assets/pixelatedloading.png" alt="" />
+            <span>Loading your learning path…</span>
           </div>
-          <div class="reader-content-split">
-            <div>
-              <p class="section-kicker">YOUR LEARNING PATH</p>
-              <h1 id="courseTitle">Operating Systems</h1>
-              <p>
-                Build your understanding of operating systems one lesson at a time. Review each module, practice what you learn, and track your progress as you go.
-              </p>
-              <a class="odyssey-explore-link" href="explore-lessons.html">Explore lessons across subjects</a>
-            </div>
-            <div class="reader-topic-stack" id="courseProgressPanel" aria-label="Module progress">
-              <!-- Populated dynamically by main.js -->
-            </div>
-          </div>
-        </article>
+        </section>
       </div>
     </section>
 
@@ -120,14 +113,6 @@
       </div>
 
       <div class="netacad-player-grid">
-        <aside class="lesson-outline-panel" aria-label="Module outline">
-          <div class="netacad-tabs">
-            <button class="active" type="button">Course Outline</button>
-            <button type="button">Resources</button>
-          </div>
-          <div class="lesson-outline-list" id="lessonOutline"></div>
-        </aside>
-
         <section class="lesson-reader">
           <div class="lesson-topline">
             <span id="lessonProgress">Statement 1 of 5</span>

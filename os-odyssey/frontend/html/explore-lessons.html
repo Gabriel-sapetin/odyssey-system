@@ -31,11 +31,21 @@
   </nav>
 
   <main class="dashboard-shell lessons-shell">
-    <header class="lessons-heading">
-      <p class="section-kicker">LEARNING LIBRARY</p>
-      <h1>Explore Lessons</h1>
-      <p>Find a way to learn that fits you. Explore guided courses, check your understanding with quizzes, and practice with interactive activities across Odyssey.</p>
-    </header>
+    <section class="leaderboard-invite" aria-label="Leaderboard invitation">
+      <a class="leaderboard-invite-card" href="leaderboard.html" aria-label="Tap to view the Odyssey leaderboard">
+        <span class="leaderboard-invite-copy">
+          <span class="leaderboard-invite-kicker">YOUR NEXT CHALLENGE</span>
+          <strong class="leaderboard-invite-title">Ready to climb the ranks?</strong>
+          <span class="leaderboard-invite-description">See how your XP stacks up, cheer on other learners, and find your place on the Odyssey leaderboard.</span>
+          <span class="leaderboard-invite-action">Tap to view the leaderboard <span aria-hidden="true">→</span></span>
+        </span>
+        <span class="leaderboard-invite-art" aria-hidden="true">
+          <span class="leaderboard-invite-spark leaderboard-invite-spark-one">✦</span>
+          <span class="leaderboard-invite-spark leaderboard-invite-spark-two">✧</span>
+          <img src="../../assets/pixelatedleaderboard.png" alt="" loading="lazy" />
+        </span>
+      </a>
+    </section>
 
     <section class="lesson-discovery" aria-labelledby="learningFormatsTitle">
       <div class="lesson-section-heading">
@@ -60,22 +70,6 @@
       </div>
     </section>
 
-    <section class="leaderboard-invite" aria-label="Leaderboard invitation">
-      <a class="leaderboard-invite-card" href="leaderboard.html" aria-label="Tap to view the Odyssey leaderboard">
-        <span class="leaderboard-invite-copy">
-          <span class="leaderboard-invite-kicker">YOUR NEXT CHALLENGE</span>
-          <strong class="leaderboard-invite-title">Ready to climb the ranks?</strong>
-          <span class="leaderboard-invite-description">See how your XP stacks up, cheer on other learners, and find your place on the Odyssey leaderboard.</span>
-          <span class="leaderboard-invite-action">Tap to view the leaderboard <span aria-hidden="true">→</span></span>
-        </span>
-        <span class="leaderboard-invite-art" aria-hidden="true">
-          <span class="leaderboard-invite-spark leaderboard-invite-spark-one">✦</span>
-          <span class="leaderboard-invite-spark leaderboard-invite-spark-two">✧</span>
-          <img src="../../assets/pixelatedleaderboard.png" alt="" loading="lazy" />
-        </span>
-      </a>
-    </section>
-
     <section class="lesson-library-section lesson-course-catalog" aria-labelledby="availableCoursesTitle">
       <div class="lesson-section-heading">
         <div>
@@ -85,7 +79,7 @@
       </div>
       <p class="lesson-section-description">Choose a course to see its lessons and learning activities.</p>
       <a class="lesson-course-card lesson-course-link lesson-course-summary" href="course.html" aria-label="Open the Operating Systems course">
-          <span class="lesson-course-mark" aria-hidden="true">OS</span>
+          <span class="lesson-course-mark" aria-hidden="true"><img src="../../assets/pixelatedos.png" alt="" /></span>
           <span class="lesson-course-summary-copy">
             <span class="section-kicker">COMPUTER SCIENCE</span>
             <strong id="osCourseTitle">Operating Systems</strong>
