@@ -1,0 +1,68 @@
+{
+  "name": "Odyssey — Learn Without Limits",
+  "short_name": "Odyssey",
+  "description": "A gamified learning platform where AI meets education — master any subject, your way.",
+  "start_url": "/os-odyssey/frontend/html/index.html",
+  "scope": "/os-odyssey/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f0f1a",
+  "theme_color": "#1a1a2e",
+  "categories": ["education", "games"],
+  "icons": [
+    {
+      "src": "/os-odyssey/assets/favicon.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/os-odyssey/assets/pwa-icon-512.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/os-odyssey/assets/pwa-icon-512.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/os-odyssey/assets/pixelatedhome.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Odyssey Home"
+    },
+    {
+      "src": "/os-odyssey/assets/pixelatedcourses.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Explore Courses"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "url": "/os-odyssey/frontend/html/dashboard.html",
+      "description": "Open your learning dashboard"
+    },
+    {
+      "name": "Explore Lessons",
+      "short_name": "Lessons",
+      "url": "/os-odyssey/frontend/html/explore-lessons.html",
+      "description": "Explore available lessons and labs"
+    },
+    {
+      "name": "Leaderboard",
+      "short_name": "Leaderboard",
+      "url": "/os-odyssey/frontend/html/leaderboard.html",
+      "description": "View the leaderboard"
+    }
+  ]
+}

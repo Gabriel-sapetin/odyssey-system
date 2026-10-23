@@ -6250,3 +6250,94 @@ textarea {
   0%   { transform: translateY(0) scale(1); opacity: 1; }
   100% { transform: translateY(-120px) translateX(var(--dx)) scale(0); opacity: 0; }
 }
+
+/* ===== PWA INSTALL BANNER ===== */
+#pwa-install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-top: 1px solid rgba(124, 77, 255, 0.3);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+#pwa-install-banner.pwa-banner--visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+.pwa-banner__content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.pwa-banner__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(124, 77, 255, 0.3);
+}
+.pwa-banner__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pwa-banner__text strong {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+.pwa-banner__text span {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+.pwa-banner__actions {
+  display: flex;
+  gap: 10px;
+}
+.pwa-banner__install {
+  flex: 1;
+  padding: 10px 0;
+  background: linear-gradient(135deg, #7c4dff, #6200ea);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pwa-banner__install:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124, 77, 255, 0.4);
+}
+.pwa-banner__install:active {
+  transform: translateY(0);
+}
+.pwa-banner__dismiss {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.pwa-banner__dismiss:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+}
