@@ -15,7 +15,7 @@
 
 <body class="app-page dashboard-page odyssey-home-page" data-default-theme="light">
   <nav class="app-nav" aria-label="Main navigation">
-    <a href="dashboard.html" class="app-brand"><span class="brand-wordmark">Odyssey</span></a>
+    <a href="dashboard.html" class="app-brand"><img class="brand-penguin" src="../../assets/favicon.png" alt="" aria-hidden="true" /><span class="brand-wordmark">Odyssey</span></a>
     <button class="app-nav-mobile-toggle" type="button" aria-label="Toggle mobile menu">
       <span></span><span></span><span></span>
     </button>
@@ -37,19 +37,28 @@
 
   <main class="dashboard-shell odyssey-home">
     <div class="odyssey-home-main">
+      <div class="home-desktop-stats" aria-label="Your learner stats">
+        <span class="home-mobile-stat home-mobile-stat--xp"><span aria-hidden="true">✦</span><strong data-home-stat="xp">20</strong><span class="home-mobile-stat-label">XP</span></span>
+        <span class="home-mobile-stat home-mobile-stat--level"><span aria-hidden="true">⚡</span><strong data-home-stat="level">1</strong><span class="home-mobile-stat-label">Level</span></span>
+        <span class="home-mobile-stat home-mobile-stat--streak"><span aria-hidden="true">🔥</span><strong data-home-stat="streak">1</strong><span class="home-mobile-stat-label">day streak</span></span>
+      </div>
       <section class="home-mobile-greeting" aria-labelledby="mobileStudyTitle">
         <div>
           <p class="section-kicker">READY WHEN YOU ARE</p>
           <h1 id="mobileStudyTitle">What shall we study?</h1>
           <p>Pick a path and make a little progress today.</p>
         </div>
-        <span class="home-mobile-greeting__avatar" data-user-avatar aria-hidden="true">
-          <img src="../../assets/penguin-flower-removebg-preview.png" alt="" />
+        <span class="home-mobile-greeting__avatar" data-motion-mascot aria-hidden="true">
+          <img class="home-character-cutout-fallback" src="../../assets/penguin-flower-removebg-preview.png" alt="" />
+          <canvas class="home-character-cutout" width="380" height="340" aria-hidden="true"></canvas>
+          <video class="home-character-motion-source" muted loop playsinline autoplay preload="auto" aria-hidden="true">
+            <source src="../../assets/1023.mp4" type="video/mp4" />
+          </video>
         </span>
       </section>
 
       <a class="home-mobile-continue" href="course.html">
-        <span class="home-mobile-continue__icon" aria-hidden="true">OS</span>
+        <span class="home-mobile-continue__icon" aria-hidden="true"><img src="../../assets/pixelatedos.png" alt="" /></span>
         <span class="home-mobile-continue__copy">
           <small>JUMP BACK IN</small>
           <strong>Operating Systems</strong>
@@ -71,8 +80,12 @@
           <p>Find lessons, quizzes, and hands-on activities in the Odyssey learning library.</p>
           <a href="explore-lessons.html" class="explore-lessons-promo__action">Start exploring <span aria-hidden="true">→</span></a>
         </div>
-        <div class="explore-lessons-promo__art" aria-hidden="true">
-          <img src="../../assets/penguin-flower-removebg-preview.png" alt="" />
+        <div class="explore-lessons-promo__art" data-motion-mascot aria-hidden="true">
+          <img class="home-character-cutout-fallback" src="../../assets/penguin-flower-removebg-preview.png" alt="" />
+          <canvas class="home-character-cutout" width="380" height="340" aria-hidden="true"></canvas>
+          <video class="home-character-motion-source" muted loop playsinline autoplay preload="auto" aria-hidden="true">
+            <source src="../../assets/1023.mp4" type="video/mp4" />
+          </video>
         </div>
       </section>
 
@@ -132,6 +145,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase.js"></script>
   <script src="../js/main.js"></script>
+  <script src="../js/dashboard-character.js"></script>
 </body>
 
 </html>

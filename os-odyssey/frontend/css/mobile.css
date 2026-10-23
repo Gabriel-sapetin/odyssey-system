@@ -1643,6 +1643,13 @@ body.explore-lessons-page .app-brand {
   text-transform: none;
 }
 
+body.odyssey-home-page .app-brand .brand-penguin,
+body.explore-lessons-page .app-brand .brand-penguin {
+  width: 32px;
+  height: 32px;
+  image-rendering: auto;
+}
+
 .brand-wordmark {
   color: #111a2e;
 }
@@ -5240,8 +5247,23 @@ body.odyssey-home-page .explore-lessons-promo__art img {
   width: 88%;
   height: 92%;
   filter: drop-shadow(0 12px 8px rgba(20, 16, 67, .23));
-  animation: home-mascot-bob 3s ease-in-out infinite;
+  transform-origin: 50% 90%;
+  will-change: transform;
+  animation: home-mascot-hop 3.6s ease-in-out infinite;
 }
+body.odyssey-home-page .explore-lessons-promo__art .home-character-cutout-fallback,
+body.odyssey-home-page .explore-lessons-promo__art .home-character-cutout {
+  position: absolute;
+  inset: 0;
+  width: 92%;
+  height: 96%;
+  margin: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 8px rgba(20, 16, 67, .23));
+}
+body.odyssey-home-page .explore-lessons-promo__art .home-character-cutout { opacity: 0; }
+body.odyssey-home-page .explore-lessons-promo__art.has-motion-cutout .home-character-cutout { opacity: 1; }
+body.odyssey-home-page .explore-lessons-promo__art.has-motion-cutout .home-character-cutout-fallback { opacity: 0; }
 body.odyssey-home-page .home-quick-start { margin-top: 34px; }
 body.odyssey-home-page .home-quick-start__heading {
   display: flex;
@@ -5337,7 +5359,13 @@ body.odyssey-home-page:not(.light-mode) .home-quick-card {
   color: #f4f6fb;
 }
 body.odyssey-home-page:not(.light-mode) .home-quick-card small { color: #aeb9cc; }
-@keyframes home-mascot-bob { 0%, 100% { transform: translateY(3px) rotate(-2deg); } 50% { transform: translateY(-7px) rotate(2deg); } }
+@keyframes home-mascot-hop {
+  0%, 17%, 58%, 100% { transform: translateY(0) rotate(0) scale(1); }
+  22% { transform: translateY(2px) rotate(0) scale(1.04, .94); }
+  31% { transform: translateY(-12px) rotate(-5deg) scale(.98, 1.04); }
+  40% { transform: translateY(-9px) rotate(4deg) scale(1); }
+  49% { transform: translateY(0) rotate(0) scale(1.05, .92); }
+}
 @keyframes home-art-orbit { 0%, 100% { border-radius: 43% 38% 42% 36%; } 50% { border-radius: 38% 45% 36% 43%; } }
 @keyframes home-spark-twinkle { from { opacity: .55; transform: scale(.86) rotate(-10deg); } to { opacity: 1; transform: scale(1.12) rotate(10deg); } }
 @media (max-width: 768px) {
@@ -5347,10 +5375,35 @@ body.odyssey-home-page:not(.light-mode) .home-quick-card small { color: #aeb9cc;
   body.odyssey-home-page .home-quick-start__grid { grid-template-columns: 1fr; gap: 9px; }
   body.odyssey-home-page .home-quick-card { min-height: 78px; padding: 10px 14px; }
   body.odyssey-home-page .home-quick-card > img { width: 58px; height: 48px; flex-basis: 58px; }
+  body.odyssey-home-page .home-mobile-greeting__avatar {
+    position: relative;
+    overflow: visible;
+    animation: home-avatar-float 3.2s ease-in-out infinite;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar::after {
+    content: "✦";
+    position: absolute;
+    top: -8px;
+    right: -5px;
+    color: #f2aa24;
+    font-size: 19px;
+    line-height: 1;
+    text-shadow: 0 2px 8px rgba(242, 170, 36, .28);
+    animation: home-spark-twinkle 1.8s ease-in-out infinite alternate;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar img {
+    transform-origin: 50% 88%;
+    will-change: transform;
+    animation: home-mascot-hop 3.6s ease-in-out infinite;
+  }
 }
+@keyframes home-avatar-float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-4px) rotate(1deg); } }
 @media (prefers-reduced-motion: reduce) {
   body.odyssey-home-page .explore-lessons-promo__art,
   body.odyssey-home-page .explore-lessons-promo__art img,
+  body.odyssey-home-page .home-mobile-greeting__avatar,
+  body.odyssey-home-page .home-mobile-greeting__avatar img,
+  body.odyssey-home-page .home-mobile-greeting__avatar::after,
   body.odyssey-home-page .home-quick-start__spark { animation: none; }
   body.odyssey-home-page .explore-lessons-promo__action,
   body.odyssey-home-page .home-quick-card,
@@ -5685,6 +5738,270 @@ body.odyssey-home-page .home-mobile-continue { display: none; }
   body.odyssey-home-page:not(.light-mode) .home-mobile-greeting h1 { color: #f4f6fb; }
   body.odyssey-home-page:not(.light-mode) .home-mobile-greeting p:last-child { color: #aeb9cc; }
 }
+
+/* Let the motion mascot sit directly below the mobile XP / level / streak bar. */
+@media (max-width: 768px) {
+  body.odyssey-home-page .home-mobile-greeting {
+    justify-content: flex-start;
+    gap: 10px;
+    min-height: 176px;
+  }
+  body.odyssey-home-page .home-mobile-greeting > div {
+    order: 2;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar {
+    order: 1;
+    width: clamp(165px, 45vw, 185px);
+    height: 180px;
+    flex: 0 0 clamp(165px, 45vw, 185px);
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar::before {
+    position: absolute;
+    z-index: 0;
+    right: 18%;
+    bottom: 8px;
+    left: 18%;
+    height: 13px;
+    border-radius: 50%;
+    background: rgba(88, 105, 137, .12);
+    content: '';
+    filter: blur(5px);
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar::after {
+    z-index: 2;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar .home-character-cutout-fallback,
+  body.odyssey-home-page .home-mobile-greeting__avatar .home-character-cutout {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar .home-character-cutout-fallback {
+    z-index: 1;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar .home-character-cutout {
+    z-index: 1;
+    opacity: 0;
+    image-rendering: auto;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar.has-motion-cutout .home-character-cutout {
+    opacity: 1;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar.has-motion-cutout .home-character-cutout-fallback {
+    opacity: 0;
+  }
+  body.odyssey-home-page .home-mobile-greeting h1 {
+    font-size: clamp(22px, 6.3vw, 29px);
+  }
+  body.odyssey-home-page .home-mobile-greeting p:last-child {
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.odyssey-home-page .home-mobile-greeting__avatar::after { animation: none; }
+}
+body.odyssey-home-page .home-character-motion-source {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
 @media (prefers-reduced-motion: reduce) {
   body.odyssey-home-page .home-mobile-continue__arrow { transition: none; }
+}
+
+/* Keep the home composition consistent across phone and desktop layouts. */
+body.odyssey-home-page .odyssey-home-heading,
+body.odyssey-home-page .explore-lessons-promo { display: none; }
+body.odyssey-home-page .home-desktop-stats { display: none; }
+
+@media (min-width: 769px) {
+  body.odyssey-home-page .home-desktop-stats {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin: 0 0 18px;
+  }
+  body.odyssey-home-page .home-desktop-stats .home-mobile-stat {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 15px;
+    border: 1px solid #e0e6ef;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .92);
+    box-shadow: 0 4px 12px rgba(25, 37, 62, .06);
+    color: #34425c;
+    font-size: 14px;
+    font-weight: 850;
+  }
+  body.odyssey-home-page .home-desktop-stats .home-mobile-stat > span:first-child { font-size: 18px; }
+  body.odyssey-home-page .home-desktop-stats .home-mobile-stat strong { color: #172139; font-weight: 950; }
+  body.odyssey-home-page .home-desktop-stats .home-mobile-stat-label { display: none; }
+
+  body.odyssey-home-page .home-mobile-greeting {
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    margin: 0 0 22px;
+    padding: 24px 30px;
+    overflow: hidden;
+    border: 1px solid #e2e6f0;
+    border-radius: 28px;
+    background: linear-gradient(125deg, #fff 0%, #f2efff 100%);
+    box-shadow: 0 14px 36px rgba(19, 27, 49, .07);
+  }
+  body.odyssey-home-page .home-mobile-greeting > div { order: 1; min-width: 0; flex: 1 1 auto; }
+  body.odyssey-home-page .home-mobile-greeting .section-kicker {
+    margin: 0 0 8px;
+    color: #6f5bd5;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .13em;
+  }
+  body.odyssey-home-page .home-mobile-greeting h1 {
+    max-width: 620px;
+    margin: 0;
+    color: #172139;
+    font-size: clamp(34px, 4vw, 52px);
+    font-weight: 950;
+    letter-spacing: -.045em;
+    line-height: 1.08;
+  }
+  body.odyssey-home-page .home-mobile-greeting p:last-child {
+    margin: 12px 0 0;
+    color: #69768c;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar {
+    position: relative;
+    order: 2;
+    width: clamp(240px, 27vw, 320px);
+    height: 280px;
+    flex: 0 0 clamp(240px, 27vw, 320px);
+    display: block;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar::before {
+    position: absolute;
+    right: 18%;
+    bottom: 13px;
+    left: 18%;
+    height: 17px;
+    border-radius: 50%;
+    background: rgba(88, 105, 137, .12);
+    content: '';
+    filter: blur(6px);
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar::after {
+    position: absolute;
+    top: 9px;
+    right: 14px;
+    color: #f2aa24;
+    content: '✦';
+    font-size: 25px;
+    animation: home-spark-twinkle 1.8s ease-in-out infinite alternate;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar .home-character-cutout-fallback,
+  body.odyssey-home-page .home-mobile-greeting__avatar .home-character-cutout {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 12px 8px rgba(20, 16, 67, .18));
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar .home-character-cutout { opacity: 0; }
+  body.odyssey-home-page .home-mobile-greeting__avatar.has-motion-cutout .home-character-cutout { opacity: 1; }
+  body.odyssey-home-page .home-mobile-greeting__avatar.has-motion-cutout .home-character-cutout-fallback { opacity: 0; }
+
+  body.odyssey-home-page .home-mobile-continue {
+    position: relative;
+    min-height: 128px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 0 0 30px;
+    padding: 22px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .55);
+    border-radius: 24px;
+    background: linear-gradient(115deg, #292675 0%, #4f39bd 56%, #8750df 100%);
+    box-shadow: 0 13px 26px rgba(58, 47, 151, .19);
+    color: #fff;
+    text-decoration: none;
+  }
+  body.odyssey-home-page .home-mobile-continue__icon {
+    width: 62px;
+    height: 62px;
+    flex: 0 0 62px;
+    display: grid;
+    place-items: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, .17);
+    color: #fff;
+    font-size: 19px;
+    font-weight: 950;
+  }
+  body.odyssey-home-page .home-mobile-continue__icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: scale(1.55);
+  }
+  body.odyssey-home-page .home-mobile-continue__copy { position: relative; z-index: 1; display: grid; min-width: 0; gap: 4px; }
+  body.odyssey-home-page .home-mobile-continue__copy small { color: #bdeaff; font-size: 10px; font-weight: 900; letter-spacing: .13em; }
+  body.odyssey-home-page .home-mobile-continue__copy strong { color: #fff; font-size: 20px; font-weight: 950; }
+  body.odyssey-home-page .home-mobile-continue__copy > span { color: rgba(255,255,255,.82); font-size: 13px; }
+  body.odyssey-home-page .home-mobile-continue__arrow { position: relative; z-index: 1; margin-left: auto; color: #fff; font-size: 30px; }
+
+  body.odyssey-home-page:not(.light-mode) .home-desktop-stats .home-mobile-stat {
+    border-color: #35415b;
+    background: #252f46;
+    color: #edf1fa;
+  }
+  body.odyssey-home-page:not(.light-mode) .home-desktop-stats .home-mobile-stat strong { color: #edf1fa; }
+  body.odyssey-home-page:not(.light-mode) .home-mobile-greeting { border-color: #303c55; background: linear-gradient(125deg, #202a40, #29233f); }
+  body.odyssey-home-page:not(.light-mode) .home-mobile-greeting h1 { color: #f4f6fb; }
+  body.odyssey-home-page:not(.light-mode) .home-mobile-greeting p:last-child { color: #aeb9cc; }
+}
+
+@media (max-width: 768px) {
+  body.odyssey-home-page .home-desktop-stats { display: none; }
+}
+
+body.odyssey-home-page .home-mobile-continue__icon {
+  position: relative;
+  overflow: hidden;
+}
+body.odyssey-home-page .home-mobile-continue__icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(1.55);
 }

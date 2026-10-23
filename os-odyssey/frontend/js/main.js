@@ -809,12 +809,15 @@
 
   function renderMobileHomeStats(user) {
     if (!user) return;
-    const mobileXp = document.getElementById('mobileHomeXp');
-    const mobileLevel = document.getElementById('mobileHomeLevel');
-    const mobileStreak = document.getElementById('mobileHomeStreak');
-    if (mobileXp) mobileXp.textContent = displayXpWithBonus(user.xp);
-    if (mobileLevel) mobileLevel.textContent = user.level || 1;
-    if (mobileStreak) mobileStreak.textContent = user.streak || 1;
+    document.querySelectorAll('#mobileHomeXp, [data-home-stat="xp"]').forEach((node) => {
+      node.textContent = displayXpWithBonus(user.xp);
+    });
+    document.querySelectorAll('#mobileHomeLevel, [data-home-stat="level"]').forEach((node) => {
+      node.textContent = user.level || 1;
+    });
+    document.querySelectorAll('#mobileHomeStreak, [data-home-stat="streak"]').forEach((node) => {
+      node.textContent = user.streak || 1;
+    });
   }
 
   function formatXp(value) {

@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Odyssey Penguin · 3D Motion Preview</title>
+<style>
+  :root { color-scheme: light; --ink:#192238; --muted:#73809a; --violet:#7158e8; }
+  * { box-sizing:border-box }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; padding:26px; background:#f4f6fb; color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif }
+  .preview { width:min(1060px,100%); border:1px solid #e5e9f2; border-radius:28px; overflow:hidden; background:#fff; box-shadow:0 22px 70px #202c4514 }
+  header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:22px 30px; border-bottom:1px solid #edf0f6 }
+  .brand { display:flex; align-items:center; gap:12px; font-size:14px; font-weight:800; letter-spacing:.04em }
+  .brand-mark { width:34px; height:34px; display:grid; place-items:center; border-radius:12px; background:#f0ecff; color:var(--violet); font-size:19px }
+  .live { display:flex; align-items:center; gap:8px; color:#6d7890; font-size:12px; font-weight:700 }
+  .dot { width:8px; height:8px; border-radius:50%; background:#36c98b; box-shadow:0 0 0 4px #36c98b20 }
+  main { display:grid; grid-template-columns:1fr 310px; min-height:670px }
+  .stage { position:relative; overflow:hidden; display:grid; place-items:center; min-height:670px; background:radial-gradient(ellipse at 50% 42%,#fff 0,#fff 34%,#fbfcff 67%,#f5f7fc 100%) }
+  .stage:before { content:""; position:absolute; inset:0; opacity:.35; background-image:radial-gradient(#dfe4f0 1px,transparent 1px); background-size:22px 22px; mask-image:linear-gradient(transparent,#000 24%,#000 80%,transparent) }
+  .stage:after { content:""; position:absolute; width:320px; height:40px; bottom:62px; left:50%; transform:translateX(-50%); border-radius:50%; background:#66728a18; filter:blur(17px) }
+  .scene { position:relative; z-index:1; width:min(480px,89%); filter:drop-shadow(0 22px 20px #343e5314); perspective:1000px; touch-action:pan-y; cursor:grab; user-select:none }
+  .scene:active { cursor:grabbing }
+  svg { width:100%; height:auto; overflow:visible; display:block }
+  #turntable { transform-origin:50% 54%; transition:transform .65s cubic-bezier(.2,.75,.25,1) }
+  .view { display:none }
+  .view.active { display:inline }
+  #penguin { transform-origin:256px 520px; animation:bob 2.5s ease-in-out infinite }
+  #wing-wave { transform-origin:112px 361px; animation:wave 3.3s ease-in-out infinite }
+  #flower { transform-origin:313px 376px; animation:flower-sway 2.5s ease-in-out infinite }
+  .eye-lid { transform-box:fill-box; transform-origin:center; animation:blink 5.2s infinite }
+  .eye-lid.delay { animation-delay:.13s }
+  .spark { transform-box:fill-box; transform-origin:center; animation:twinkle 2.2s ease-in-out infinite }
+  @keyframes bob { 0%,100%{transform:translateY(0) rotate(0)} 47%{transform:translateY(-7px) rotate(-.5deg)} 58%{transform:translateY(-8px) rotate(.3deg)} }
+  @keyframes wave { 0%,48%,100%{transform:rotate(0)} 54%{transform:rotate(-8deg)} 62%{transform:rotate(10deg)} 70%{transform:rotate(-7deg)} 78%{transform:rotate(0)} }
+  @keyframes flower-sway { 0%,100%{transform:rotate(-2deg)} 50%{transform:rotate(3deg)} }
+  @keyframes blink { 0%,43%,46%,100%{transform:scaleY(1)} 44.5%{transform:scaleY(.08)} }
+  @keyframes twinkle { 0%,100%{opacity:.35;transform:scale(.85)} 50%{opacity:.95;transform:scale(1.12)} }
+  .hint { position:absolute; z-index:2; bottom:22px; left:50%; transform:translateX(-50%); color:#8b95a9; font-size:12px; font-weight:650; white-space:nowrap }
+  aside { padding:34px 28px; border-left:1px solid #edf0f6; background:#fff; display:flex; flex-direction:column }
+  .eyebrow { color:var(--violet); font-size:11px; font-weight:850; letter-spacing:.14em; text-transform:uppercase }
+  h1 { margin:12px 0 10px; font-size:29px; line-height:1.08; letter-spacing:-.045em }
+  .desc { color:#718099; font-size:14px; line-height:1.65; margin:0 0 25px }
+  .control-label { color:#8792a6; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px }
+  .views { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin-bottom:24px }
+  button { font:inherit; cursor:pointer }
+  .view-btn { padding:10px 4px; border:1px solid #e6eaf2; border-radius:12px; background:#fff; color:#68758d; font-size:12px; font-weight:750; transition:.18s ease }
+  .view-btn:hover { border-color:#c9c0fa; color:#4d3ec0 }
+  .view-btn[aria-pressed="true"] { border-color:#c8befb; background:#f3f0ff; color:#5140c8; box-shadow:inset 0 0 0 1px #ded8ff }
+  .action { display:flex; align-items:center; gap:11px; padding:13px 14px; border-radius:15px; background:#f8f9fc; margin-bottom:9px }
+  .action-icon { width:36px; height:36px; flex:none; display:grid; place-items:center; border-radius:12px; background:#fff; color:#7158e8; font-size:17px; box-shadow:0 2px 8px #1e29420b }
+  .action strong { display:block; font-size:13px; margin-bottom:3px }
+  .action span:last-child { display:block; color:#8590a3; font-size:11px; line-height:1.4 }
+  .buttons { margin-top:auto; padding-top:22px; display:grid; grid-template-columns:1fr 1fr; gap:9px }
+  .motion-btn { min-height:44px; border:1px solid #e5e9f2; border-radius:13px; background:#fff; color:#46536c; font-size:12px; font-weight:750 }
+  .motion-btn:hover { background:#f8f7ff; border-color:#d8d1ff }
+  .motion-btn.primary { border-color:var(--violet); background:var(--violet); color:#fff; box-shadow:0 6px 15px #7158e833 }
+  .motion-btn.primary:hover { background:#6047d6 }
+  .footer-note { color:#a0a8b8; font-size:10px; line-height:1.5; margin:15px 0 0 }
+  @media(max-width:760px) { body{padding:10px}.preview{border-radius:21px} header{padding:16px 19px} main{grid-template-columns:1fr}.stage{min-height:500px}.scene{width:min(390px,88%)}.stage:after{bottom:45px} aside{border-left:0;border-top:1px solid #edf0f6;padding:24px 22px}.buttons{margin-top:18px}.hint{bottom:15px} }
+  @media(prefers-reduced-motion:reduce) { *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important} #turntable{transition:none} }
+</style>
+</head>
+<body>
+<article class="preview">
+  <header>
+    <div class="brand"><span class="brand-mark">✦</span> ODYSSEY · CHARACTER PREVIEW</div>
+    <div class="live"><i class="dot"></i> ANIMATED</div>
+  </header>
+  <main>
+    <section class="stage" aria-label="Interactive animated penguin preview">
+      <div class="scene" id="scene" role="img" aria-label="A fluffy 3D-style penguin holding a flower">
+        <svg viewBox="0 0 512 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <radialGradient id="coat" cx="33%" cy="25%" r="78%"><stop stop-color="#536174"/><stop offset=".36" stop-color="#303a4a"/><stop offset=".78" stop-color="#1c2431"/><stop offset="1" stop-color="#101722"/></radialGradient>
+            <radialGradient id="face" cx="42%" cy="28%" r="78%"><stop stop-color="#fffefa"/><stop offset=".65" stop-color="#f8f3e9"/><stop offset="1" stop-color="#e6dfd4"/></radialGradient>
+            <radialGradient id="belly" cx="38%" cy="24%" r="82%"><stop stop-color="#fffefb"/><stop offset=".72" stop-color="#f6f1e8"/><stop offset="1" stop-color="#ded8cf"/></radialGradient>
+            <radialGradient id="iris" cx="35%" cy="26%" r="75%"><stop stop-color="#9b6341"/><stop offset=".45" stop-color="#603820"/><stop offset=".82" stop-color="#261b19"/><stop offset="1" stop-color="#11131a"/></radialGradient>
+            <linearGradient id="beak" x2=".2" y2="1"><stop stop-color="#ffc34f"/><stop offset=".48" stop-color="#ff941c"/><stop offset="1" stop-color="#d95810"/></linearGradient>
+            <linearGradient id="feet" x2=".15" y2="1"><stop stop-color="#ffb448"/><stop offset=".6" stop-color="#f18417"/><stop offset="1" stop-color="#c95b12"/></linearGradient>
+            <radialGradient id="petal" cx="28%" cy="25%" r="80%"><stop stop-color="#ffb0d1"/><stop offset=".62" stop-color="#ff659d"/><stop offset="1" stop-color="#d93676"/></radialGradient>
+            <radialGradient id="gold" cx="35%" cy="25%" r="80%"><stop stop-color="#fff08b"/><stop offset=".55" stop-color="#ffd13f"/><stop offset="1" stop-color="#f39a1f"/></radialGradient>
+            <linearGradient id="wing" x2="1" y2="1"><stop stop-color="#485467"/><stop offset=".55" stop-color="#263140"/><stop offset="1" stop-color="#111a27"/></linearGradient>
+            <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8"/></filter>
+            <filter id="fur" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="2" seed="8" result="noise"/><feColorMatrix in="noise" type="saturate" values="0" result="mono"/><feComponentTransfer><feFuncA type="table" tableValues="0 .055"/></feComponentTransfer><feBlend in="SourceGraphic" in2="mono" mode="soft-light"/></filter>
+            <filter id="eyeShadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/><feOffset dy="3"/><feComponentTransfer><feFuncA type="linear" slope=".3"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <g id="turntable">
+            <!-- FRONT -->
+            <g class="view active" data-view="front" id="view-front">
+              <g id="penguin">
+                <ellipse cx="256" cy="536" rx="126" ry="16" fill="#283348" opacity=".13" filter="url(#softShadow)"/>
+                <!-- feet -->
+                <g stroke="#b95717" stroke-width="3" stroke-linejoin="round">
+                  <path d="M172 496c-27 0-43 16-44 35-1 13 12 20 42 18l55-2c14-1 19-12 10-23-13-16-37-28-63-28Z" fill="url(#feet)"/>
+                  <path d="M337 496c27 0 43 16 44 35 1 13-12 20-42 18l-55-2c-14-1-19-12-10-23 13-16 37-28 63-28Z" fill="url(#feet)"/>
+                  <path d="M151 531c19 4 41 4 62 0M301 531c19 4 41 4 62 0" fill="none" stroke="#ffd07b" stroke-width="3" opacity=".75"/>
+                </g>
+                <!-- soft plush body and belly -->
+                <path d="M135 284c-43 30-61 96-53 160 8 65 49 105 105 112 46 6 93 7 139 0 57-9 95-54 104-116 9-63-12-129-56-158-67-44-172-42-239 2Z" fill="url(#coat)" filter="url(#fur)"/>
+                <path d="M171 309c-30 27-42 74-39 126 4 64 34 105 78 115 31 7 65 7 96-1 43-11 72-52 76-114 3-52-10-99-39-126-44-40-128-40-172 0Z" fill="url(#belly)"/>
+                <!-- wings -->
+                <g id="wing-wave" stroke="#18212e" stroke-width="4" stroke-linejoin="round">
+                  <path d="M143 338c-42-37-72-31-77 0-7 42 16 91 53 106 21 9 44-12 51-34Z" fill="url(#wing)"/>
+                  <path d="M369 340c42-35 70-28 74 4 5 39-15 83-49 98-20 9-42-10-51-31Z" fill="url(#wing)"/>
+                  <path d="M91 348c8 23 20 41 38 53" fill="none" stroke="#8290a3" stroke-width="4" opacity=".34"/>
+                </g>
+                <!-- head -->
+                <path d="M137 219c-1-86 46-153 119-163 77-11 137 51 140 151 2 55-20 98-60 119-48 26-120 27-170 3-22-11-35-46-29-110Z" fill="url(#coat)" filter="url(#fur)"/>
+                <path d="M159 216c0-63 34-116 92-124 63-9 107 36 110 105 2 48-14 79-47 97-36 20-83 20-119 2-25-13-36-40-36-80Z" fill="url(#face)"/>
+                <!-- feather crest -->
+                <path d="M236 65c-15-26-6-43 5-46 15 10 19 25 15 43 13-28 31-36 42-29 5 17-3 32-18 46 19-20 39-22 48-12-1 17-13 31-36 39Z" fill="url(#coat)" stroke="#202a38" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M246 57c-3-12-2-20 2-26m29 39c7-11 14-18 23-22" fill="none" stroke="#9aa5b3" stroke-width="3" opacity=".44" stroke-linecap="round"/>
+                <!-- eye patches -->
+                <ellipse cx="199" cy="211" rx="39" ry="49" fill="#fffdf7"/>
+                <ellipse cx="316" cy="207" rx="39" ry="49" fill="#fffdf7"/>
+                <!-- eyes -->
+                <g filter="url(#eyeShadow)">
+                  <ellipse cx="203" cy="218" rx="23" ry="31" fill="url(#iris)" stroke="#503a30" stroke-width="3"/>
+                  <ellipse cx="312" cy="214" rx="23" ry="31" fill="url(#iris)" stroke="#503a30" stroke-width="3"/>
+                  <ellipse cx="203" cy="222" rx="11" ry="18" fill="#101720"/>
+                  <ellipse cx="312" cy="218" rx="11" ry="18" fill="#101720"/>
+                  <circle cx="196" cy="207" r="8" fill="white"/><circle cx="305" cy="203" r="8" fill="white"/>
+                  <circle cx="212" cy="227" r="3.5" fill="#b6d9ff"/><circle cx="321" cy="223" r="3.5" fill="#b6d9ff"/>
+                  <ellipse class="eye-lid" cx="203" cy="217" rx="25" ry="34" fill="url(#face)"/>
+                  <ellipse class="eye-lid delay" cx="312" cy="213" rx="25" ry="34" fill="url(#face)"/>
+                </g>
+                <!-- rosy cheeks -->
+                <ellipse cx="158" cy="261" rx="22" ry="12" fill="#ff9ca2" opacity=".62" filter="url(#softShadow)"/>
+                <ellipse cx="355" cy="257" rx="22" ry="12" fill="#ff9ca2" opacity=".62" filter="url(#softShadow)"/>
+                <!-- beak -->
+                <path d="M232 253c8-17 21-27 29-27 8 0 21 10 29 27-6 24-17 34-29 34s-23-10-29-34Z" fill="url(#beak)" stroke="#a94d17" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M239 254c13 7 31 7 44 0" fill="none" stroke="#a94d17" stroke-width="3" stroke-linecap="round"/>
+                <path d="M246 238c5-5 11-8 15-8" fill="none" stroke="#ffe7a0" stroke-width="4" stroke-linecap="round"/>
+                <!-- original flower keeps the character recognizable -->
+                <g id="flower" stroke-linejoin="round" stroke="#9f3e68" stroke-width="3">
+                  <path d="M309 406c5 14 4 27-4 39m3-22c-10-8-16-7-20-4 4 10 11 14 21 13" fill="none" stroke="#438d59" stroke-width="5"/>
+                  <ellipse cx="289" cy="374" rx="13" ry="20" fill="url(#petal)" transform="rotate(-38 289 374)"/>
+                  <ellipse cx="317" cy="366" rx="13" ry="20" fill="url(#petal)" transform="rotate(14 317 366)"/>
+                  <ellipse cx="330" cy="390" rx="13" ry="20" fill="url(#petal)" transform="rotate(65 330 390)"/>
+                  <ellipse cx="307" cy="402" rx="13" ry="20" fill="url(#petal)" transform="rotate(130 307 402)"/>
+                  <ellipse cx="285" cy="394" rx="13" ry="20" fill="url(#petal)" transform="rotate(-105 285 394)"/>
+                  <circle cx="308" cy="385" r="11" fill="url(#gold)" stroke="#cb811e"/>
+                  <circle cx="305" cy="381" r="3" fill="#fff4b4" stroke="none"/>
+                </g>
+                <!-- tiny fur glints -->
+                <path d="M147 286c8-12 18-19 28-24m187 21c-7-11-16-18-26-22M119 407c4 11 9 19 15 25m258-25c-4 10-9 18-14 24" fill="none" stroke="#bbc5d0" stroke-width="3" opacity=".22" stroke-linecap="round"/>
+              </g>
+            </g>
+            <!-- LEFT PROFILE -->
+            <g class="view" data-view="left" id="view-left">
+              <g id="penguin-left">
+                <ellipse cx="256" cy="536" rx="119" ry="15" fill="#283348" opacity=".13" filter="url(#softShadow)"/>
+                <path d="M163 498c-25 2-42 15-41 32 1 14 20 20 52 16l41-6c10-2 12-12 3-22-13-14-33-22-55-20Z" fill="url(#feet)" stroke="#b95717" stroke-width="3"/>
+                <path d="M298 499c27-8 49 5 55 22 5 13-7 22-34 22l-47-4c-11-1-15-10-7-21 8-10 18-16 33-19Z" fill="url(#feet)" stroke="#b95717" stroke-width="3"/>
+                <path d="M173 302c-51 27-77 95-66 163 10 65 53 104 114 111 39 4 84 3 119-8 55-18 81-60 75-125-6-68-37-123-81-149-46-27-116-19-161 8Z" fill="url(#coat)" filter="url(#fur)"/>
+                <path d="M202 319c-34 34-48 82-38 140 10 57 38 91 77 101 30 8 64 4 90-8 36-16 53-54 47-109-6-56-29-99-61-123-34-26-86-25-115-1Z" fill="url(#belly)"/>
+                <path d="M144 356c-36 3-56 30-51 61 5 31 31 56 54 53 19-3 31-28 30-56-1-34-11-57-33-58Z" fill="url(#wing)" stroke="#18212e" stroke-width="4"/>
+                <path d="M172 219c-2-84 44-150 117-161 72-10 129 50 132 142 2 56-18 99-60 123-43 25-101 24-148 5-29-12-43-45-41-109Z" fill="url(#coat)" filter="url(#fur)"/>
+                <path d="M193 220c-1-63 34-116 92-124 62-8 105 36 108 102 2 49-15 82-47 101-35 21-80 20-117 3-26-12-36-41-36-82Z" fill="url(#face)"/>
+                <ellipse cx="237" cy="217" rx="35" ry="46" fill="#fffdf7"/>
+                <ellipse cx="239" cy="222" rx="22" ry="30" fill="url(#iris)" stroke="#503a30" stroke-width="3"/>
+                <ellipse cx="239" cy="226" rx="11" ry="18" fill="#101720"/><circle cx="232" cy="211" r="8" fill="white"/>
+                <ellipse class="eye-lid" cx="239" cy="221" rx="24" ry="33" fill="url(#face)"/>
+                <ellipse cx="192" cy="262" rx="19" ry="11" fill="#ff9ca2" opacity=".54"/>
+                <path d="M205 260c-25-13-55-12-83 0 19 21 48 29 75 20 13-4 20-11 8-20Z" fill="url(#beak)" stroke="#a94d17" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M125 262c22 8 43 9 66 4" fill="none" stroke="#ffe7a0" stroke-width="4" stroke-linecap="round"/>
+                <g id="flower-side" stroke-linejoin="round" stroke="#9f3e68" stroke-width="3">
+                  <path d="M326 410c2 13 0 25-6 36m2-20c-9-7-14-7-19-3 4 8 11 12 19 12" fill="none" stroke="#438d59" stroke-width="5"/>
+                  <ellipse cx="310" cy="382" rx="11" ry="17" fill="url(#petal)" transform="rotate(-38 310 382)"/>
+                  <ellipse cx="334" cy="376" rx="11" ry="17" fill="url(#petal)" transform="rotate(14 334 376)"/>
+                  <ellipse cx="343" cy="397" rx="11" ry="17" fill="url(#petal)" transform="rotate(65 343 397)"/>
+                  <ellipse cx="323" cy="406" rx="11" ry="17" fill="url(#petal)" transform="rotate(130 323 406)"/>
+                  <ellipse cx="305" cy="400" rx="11" ry="17" fill="url(#petal)" transform="rotate(-105 305 400)"/>
+                  <circle cx="324" cy="392" r="10" fill="url(#gold)" stroke="#cb811e"/>
+                </g>
+              </g>
+            </g>
+            <!-- RIGHT PROFILE -->
+            <g class="view" data-view="right" id="view-right">
+              <g transform="translate(512 0) scale(-1 1)">
+                <g id="penguin-right">
+                  <ellipse cx="256" cy="536" rx="119" ry="15" fill="#283348" opacity=".13" filter="url(#softShadow)"/>
+                  <path d="M163 498c-25 2-42 15-41 32 1 14 20 20 52 16l41-6c10-2 12-12 3-22-13-14-33-22-55-20Z" fill="url(#feet)" stroke="#b95717" stroke-width="3"/>
+                  <path d="M298 499c27-8 49 5 55 22 5 13-7 22-34 22l-47-4c-11-1-15-10-7-21 8-10 18-16 33-19Z" fill="url(#feet)" stroke="#b95717" stroke-width="3"/>
+                  <path d="M173 302c-51 27-77 95-66 163 10 65 53 104 114 111 39 4 84 3 119-8 55-18 81-60 75-125-6-68-37-123-81-149-46-27-116-19-161 8Z" fill="url(#coat)" filter="url(#fur)"/>
+                  <path d="M202 319c-34 34-48 82-38 140 10 57 38 91 77 101 30 8 64 4 90-8 36-16 53-54 47-109-6-56-29-99-61-123-34-26-86-25-115-1Z" fill="url(#belly)"/>
+                  <path d="M144 356c-36 3-56 30-51 61 5 31 31 56 54 53 19-3 31-28 30-56-1-34-11-57-33-58Z" fill="url(#wing)" stroke="#18212e" stroke-width="4"/>
+                  <path d="M172 219c-2-84 44-150 117-161 72-10 129 50 132 142 2 56-18 99-60 123-43 25-101 24-148 5-29-12-43-45-41-109Z" fill="url(#coat)" filter="url(#fur)"/>
+                  <path d="M193 220c-1-63 34-116 92-124 62-8 105 36 108 102 2 49-15 82-47 101-35 21-80 20-117 3-26-12-36-41-36-82Z" fill="url(#face)"/>
+                  <ellipse cx="237" cy="217" rx="35" ry="46" fill="#fffdf7"/><ellipse cx="239" cy="222" rx="22" ry="30" fill="url(#iris)" stroke="#503a30" stroke-width="3"/><ellipse cx="239" cy="226" rx="11" ry="18" fill="#101720"/><circle cx="232" cy="211" r="8" fill="white"/><ellipse class="eye-lid" cx="239" cy="221" rx="24" ry="33" fill="url(#face)"/>
+                  <ellipse cx="192" cy="262" rx="19" ry="11" fill="#ff9ca2" opacity=".54"/>
+                  <path d="M205 260c-25-13-55-12-83 0 19 21 48 29 75 20 13-4 20-11 8-20Z" fill="url(#beak)" stroke="#a94d17" stroke-width="4" stroke-linejoin="round"/>
+                  <path d="M125 262c22 8 43 9 66 4" fill="none" stroke="#ffe7a0" stroke-width="4" stroke-linecap="round"/>
+                  <g stroke-linejoin="round" stroke="#9f3e68" stroke-width="3"><path d="M326 410c2 13 0 25-6 36m2-20c-9-7-14-7-19-3 4 8 11 12 19 12" fill="none" stroke="#438d59" stroke-width="5"/><ellipse cx="310" cy="382" rx="11" ry="17" fill="url(#petal)" transform="rotate(-38 310 382)"/><ellipse cx="334" cy="376" rx="11" ry="17" fill="url(#petal)" transform="rotate(14 334 376)"/><ellipse cx="343" cy="397" rx="11" ry="17" fill="url(#petal)" transform="rotate(65 343 397)"/><ellipse cx="323" cy="406" rx="11" ry="17" fill="url(#petal)" transform="rotate(130 323 406)"/><ellipse cx="305" cy="400" rx="11" ry="17" fill="url(#petal)" transform="rotate(-105 305 400)"/><circle cx="324" cy="392" r="10" fill="url(#gold)" stroke="#cb811e"/></g>
+                </g>
+              </g>
+            </g>
+            <!-- BACK -->
+            <g class="view" data-view="back" id="view-back">
+              <g id="penguin-back">
+                <ellipse cx="256" cy="536" rx="125" ry="15" fill="#283348" opacity=".13" filter="url(#softShadow)"/>
+                <path d="M173 498c-26 1-43 15-42 32 1 13 19 19 49 16l45-5c11-1 14-11 5-21-14-15-34-23-57-22Zm166 0c26 1 43 15 42 32-1 13-19 19-49 16l-45-5c-11-1-14-11-5-21 14-15 34-23 57-22Z" fill="url(#feet)" stroke="#b95717" stroke-width="3"/>
+                <path d="M135 283c-44 32-63 95-54 160 9 65 50 106 107 113 47 6 94 6 141 0 57-8 98-51 107-115 9-65-11-128-56-159-67-46-178-43-245 1Z" fill="url(#coat)" filter="url(#fur)"/>
+                <path d="M160 321c-39 17-61 48-63 89-2 39 13 67 42 79 22 9 44-5 50-31l10-109Zm192 0c39 17 61 48 63 89 2 39-13 67-42 79-22 9-44-5-50-31l-10-109Z" fill="url(#wing)" stroke="#151e2b" stroke-width="4"/>
+                <path d="M206 104c-18-29-9-48 6-54 20 13 23 34 16 56 16-34 37-45 53-36 4 23-8 40-28 56 23-25 48-27 59-13-4 20-21 37-49 49Z" fill="url(#coat)" stroke="#202a38" stroke-width="4" stroke-linejoin="round"/>
+                <!-- soft feather chevrons across the rounded back -->
+                <g fill="none" stroke="#758194" stroke-linecap="round" opacity=".35">
+                  <path d="M204 242c16 15 33 19 52 18 19 1 36-3 52-18" stroke-width="5"/>
+                  <path d="M177 292c22 18 47 27 79 27s57-9 79-27" stroke-width="5"/>
+                  <path d="M160 350c25 20 56 30 96 30s71-10 96-30" stroke-width="5"/>
+                  <path d="M159 412c25 19 56 28 97 28s72-9 97-28" stroke-width="5"/>
+                  <path d="M176 467c22 15 48 23 80 23s58-8 80-23" stroke-width="5"/>
+                </g>
+                <path d="M207 205c15 7 31 11 49 11s34-4 49-11" fill="none" stroke="#aeb8c5" stroke-width="4" opacity=".28" stroke-linecap="round"/>
+              </g>
+            </g>
+          </g>
+          <g class="spark" fill="#ffc54a"><path d="M70 164l5 14 14 5-14 5-5 14-5-14-14-5 14-5z"/><circle cx="435" cy="322" r="4"/></g>
+        </svg>
+      </div>
+      <div class="hint">Drag the penguin or use the direction buttons to turn</div>
+    </section>
+    <aside>
+      <div class="eyebrow">Meet your study buddy</div>
+      <h1>A little penguin<br>with a big personality.</h1>
+      <p class="desc">A soft, plush-inspired take on your flower-holding mascot. Turn the model and preview its idle motion.</p>
+      <div class="control-label">Turn the character</div>
+      <div class="views" role="group" aria-label="Penguin direction">
+        <button class="view-btn" data-target="left" aria-pressed="false">Left</button>
+        <button class="view-btn" data-target="front" aria-pressed="true">Front</button>
+        <button class="view-btn" data-target="right" aria-pressed="false">Right</button>
+        <button class="view-btn" data-target="back" aria-pressed="false">Back</button>
+      </div>
+      <div class="action"><span class="action-icon">◌</span><div><strong>Soft idle bounce</strong><span>Gentle breathing, blinking, and a flower sway</span></div></div>
+      <div class="action"><span class="action-icon">✧</span><div><strong>Little wing wave</strong><span>Every few seconds, the penguin says hello</span></div></div>
+      <div class="buttons">
+        <button class="motion-btn primary" id="hopBtn">Make it hop ✦</button>
+        <button class="motion-btn" id="pauseBtn" aria-pressed="false">Pause motion</button>
+      </div>
+      <p class="footer-note">Standalone visual preview · Nothing has been added to the Odyssey app.</p>
+    </aside>
+  </main>
+</article>
+<script>
+(() => {
+  const turntable = document.querySelector('#turntable');
+  const scene = document.querySelector('#scene');
+  const views = [...document.querySelectorAll('.view')];
+  const buttons = [...document.querySelectorAll('.view-btn')];
+  const angles = { front: 0, right: 90, back: 180, left: -90 };
+  let current = 'front', startX = 0, dragging = false, paused = false;
+  function setView(name) {
+    if (!angles.hasOwnProperty(name)) return;
+    current = name;
+    views.forEach(v => v.classList.toggle('active', v.dataset.view === name));
+    buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.target === name)));
+    const tilt = name === 'left' ? -5 : name === 'right' ? 5 : 0;
+    turntable.style.transform = `rotateY(${tilt}deg)`;
+  }
+  buttons.forEach(b => b.addEventListener('click', () => setView(b.dataset.target)));
+  scene.addEventListener('pointerdown', e => { dragging = true; startX = e.clientX; scene.setPointerCapture(e.pointerId); });
+  scene.addEventListener('pointerup', e => {
+    if (!dragging) return; dragging = false;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 24) {
+      const order = ['front','right','back','left'];
+      let i = order.indexOf(current);
+      setView(order[(i + (dx < 0 ? 1 : 3)) % 4]);
+    }
+  });
+  scene.addEventListener('pointercancel', () => dragging = false);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') setView(({front:'left',left:'back',back:'right',right:'front'})[current]);
+    if (e.key === 'ArrowRight') setView(({front:'right',right:'back',back:'left',left:'front'})[current]);
+  });
+  document.querySelector('#hopBtn').addEventListener('click', () => {
+    const g = document.querySelector('.view.active');
+    g.classList.remove('hop'); void g.getBoundingClientRect(); g.classList.add('hop');
+    setTimeout(() => g.classList.remove('hop'), 850);
+  });
+  const style = document.createElement('style');
+  style.textContent = '.view.hop{animation:little-hop .82s cubic-bezier(.2,.75,.3,1)}@keyframes little-hop{0%,100%{translate:0 0}36%{translate:0 -54px}56%{translate:0 -58px}78%{translate:0 3px}}.paused #penguin,.paused #wing-wave,.paused #flower,.paused .eye-lid,.paused .spark{animation-play-state:paused!important}';
+  document.head.append(style);
+  document.querySelector('#pauseBtn').addEventListener('click', e => {
+    paused = !paused; document.body.classList.toggle('paused', paused);
+    e.currentTarget.setAttribute('aria-pressed', String(paused)); e.currentTarget.textContent = paused ? 'Resume motion' : 'Pause motion';
+  });
+})();
+</script>
+</body>
+</html>
