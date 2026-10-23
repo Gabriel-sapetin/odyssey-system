@@ -5420,6 +5420,18 @@ body.odyssey-home-page .home-mobile-stats,
 body.odyssey-home-page .home-mobile-greeting,
 body.odyssey-home-page .home-mobile-continue { display: none; }
 @media (max-width: 768px) {
+  body.odyssey-home-page .app-nav:not(.mobile-menu-open) {
+    background: transparent;
+    border-bottom-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  body.odyssey-home-page:not(.light-mode) .app-nav:not(.mobile-menu-open) {
+    background: transparent;
+    border-bottom-color: transparent;
+    box-shadow: none;
+  }
   body.odyssey-home-page .app-brand { display: none !important; }
   body.odyssey-home-page .app-nav .mobile-home-menu-toggle {
     order: 1;
