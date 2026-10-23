@@ -4547,15 +4547,18 @@ body.explore-lessons-page .lesson-discovery-icon {
   flex: 0 0 42px;
   display: grid;
   place-items: center;
+  overflow: hidden;
   border-radius: 14px;
   background: #eeedff;
   font-size: 21px;
 }
 body.explore-lessons-page .lesson-discovery-icon img {
   display: block;
-  width: 34px;
-  height: 34px;
+  width: 100px;
+  height: auto;
+  max-width: none;
   object-fit: contain;
+  object-position: center;
   image-rendering: pixelated;
 }
 body.explore-lessons-page .lesson-discovery-quizzes .lesson-discovery-icon { background: #fff2df; }
@@ -4706,6 +4709,7 @@ body.explore-lessons-page:not(.light-mode) .lesson-course-expanded { border-top-
     border-radius: 16px;
   }
   body.explore-lessons-page .lesson-discovery-icon { width: 38px; height: 38px; flex-basis: 38px; border-radius: 12px; }
+  body.explore-lessons-page .lesson-discovery-icon img { width: 90px; }
   body.explore-lessons-page .lesson-discovery-item h3 { font-size: 14px; }
   body.explore-lessons-page .lesson-discovery-item p { font-size: 12px; }
   body.explore-lessons-page .lesson-course-summary {
