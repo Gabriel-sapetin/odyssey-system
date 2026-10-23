@@ -311,6 +311,12 @@
       });
 
       if (!res.ok) {
+        if (res.status === 401) {
+          if (window.supa?.auth) await window.supa.auth.signOut();
+          localStorage.clear();
+          window.location.href = 'login.html';
+          return;
+        }
         if (res.status === 404) {
           throw new Error('The `/api/ai/tutor` endpoint is not yet live on the server. Commit and push the new backend files to GitHub (`git push origin main`) to trigger the Render deployment!');
         }

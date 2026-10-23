@@ -57,7 +57,8 @@ async def get_current_user(
         logger.error("Token verification failed: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token verification failed.",
+            detail="Session expired or invalid. Please sign in again.",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
 

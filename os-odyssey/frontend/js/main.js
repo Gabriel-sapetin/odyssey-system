@@ -82,6 +82,12 @@
       if (body) opts.body = JSON.stringify(body);
 
       const res = await fetch(`${BACKEND_API}${path}`, opts);
+      if (res.status === 401) {
+        await supa.auth.signOut();
+        localStorage.clear();
+        window.location.href = 'login.html';
+        return null;
+      }
       if (!res.ok) {
         console.error(`Backend ${method} ${path} failed:`, res.status, await res.text());
         return null;
@@ -2822,7 +2828,8 @@
   /* ---- Logout ---- */
   document.querySelectorAll('[data-logout]').forEach(button => {
     button.addEventListener('click', async () => {
-      await supa.auth.signOut();
+      try { await supa.auth.signOut(); } catch (_) {}
+      localStorage.clear();
       window.location.href = 'index.html';
     });
   });
