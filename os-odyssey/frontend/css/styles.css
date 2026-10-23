@@ -2189,6 +2189,12 @@ a {
   box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.34);
 }
 
+/* Keep the character setup panel in sync with the active theme so its text
+   remains readable when the saved light theme is applied. */
+.character-panel {
+  background: var(--app-panel);
+}
+
 .explore-card {
   min-height: 104px;
   display: grid;

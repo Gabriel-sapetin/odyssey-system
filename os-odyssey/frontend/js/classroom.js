@@ -251,15 +251,52 @@
       return;
     }
 
+    // Older API deployments omit professor details for the professor's own
+    // class list. Hydrate owned cards from the signed-in user's own profile so
+    // the owner never sees the placeholder name or zeroed profile stats.
+    try {
+      const session = await getSession();
+      if (session) {
+        const { data: ownProfile } = await supa
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .maybeSingle();
+        if (ownProfile) {
+          const savedBanner = ownProfile.profile_banner || localStorage.getItem('os-odyssey-profile-banner');
+          data.classrooms.forEach(classroom => {
+            if (String(classroom.professor_id) !== String(session.user.id)) return;
+            classroom.professor_username = ownProfile.username || classroom.professor_username;
+            classroom.professor_avatar = ownProfile.avatar || classroom.professor_avatar;
+            classroom.professor_character = ownProfile.character || classroom.professor_character;
+            classroom.professor_xp = ownProfile.xp ?? classroom.professor_xp;
+            classroom.professor_level = ownProfile.level ?? classroom.professor_level;
+            classroom.professor_banner = savedBanner || classroom.professor_banner;
+          });
+        }
+      }
+    } catch (error) {
+      console.warn('Could not load the current professor profile for classroom cards:', error);
+    }
+
     const classroomColors = ['#6757dc', '#e56a32', '#159b75', '#3478c5', '#c34e83'];
     grid.innerHTML = data.classrooms.map((c, index) => {
       // Only accept a CSS hex color from classroom data; avoid injecting arbitrary inline styles.
       const accent = /^#[\da-f]{3}(?:[\da-f]{3})?$/i.test(c.theme_color || '')
         ? c.theme_color
         : classroomColors[index % classroomColors.length];
+      const avatar = c.professor_avatar || '../../assets/penguin-flower-removebg-preview.png';
+      const professorFace = avatar === 'computer'
+        ? '<span class="computer-avatar mini" aria-hidden="true"><span class="screen-face"></span></span>'
+        : `<img src="${esc(avatar).replace(/\"/g, '&quot;')}" alt="${esc(c.professor_username || 'Professor')}" loading="lazy" />`;
+      const banner = (window.ODYSSEY_PROFILE_BANNER_OPTIONS || [])
+        .find(option => option.id === c.professor_banner)
+        || (window.ODYSSEY_PROFILE_BANNER_OPTIONS || [])[0]
+        || { src: '../../assets/bg-mountains-purple.jpg' };
+      const professorLevel = Number(c.professor_level) || 1;
+      const professorXp = Number(c.professor_xp) || 0;
       return `
         <button class="classroom-card" type="button" onclick="window._openStudentClass('${c.id}')" style="--class-accent:${accent}" aria-label="Open ${esc(c.name)} classroom">
-          <span class="classroom-card-accent" aria-hidden="true"></span>
           <span class="classroom-card-content">
             <span class="classroom-card-subject">${esc(c.subject || 'General')}</span>
             <strong class="classroom-card-title">${esc(c.name)}</strong>
@@ -269,6 +306,17 @@
               <span>${Number(c.member_count) || 0} students</span>
             </span>
             <span class="classroom-card-open">Open classroom</span>
+          </span>
+          <span class="classroom-professor-panel" aria-label="Professor ${esc(c.professor_username || 'Unknown')}, level ${professorLevel}, ${professorXp} XP">
+            <span class="classroom-professor-banner" style="background-image:url('${esc(banner.src).replace(/\"/g, '&quot;')}')"></span>
+            <span class="classroom-professor-summary">
+              <span class="classroom-professor-avatar">${professorFace}</span>
+              <span class="classroom-professor-name">${esc(c.professor_username || 'Professor')}</span>
+            </span>
+            <span class="classroom-professor-stats">
+              <span><small>LEVEL</small><strong>${professorLevel}</strong></span>
+              <span><small>XP</small><strong>${professorXp.toLocaleString()}</strong></span>
+            </span>
           </span>
         </button>
       `;

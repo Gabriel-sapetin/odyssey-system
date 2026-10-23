@@ -4045,7 +4045,30 @@ body.odyssey-classroom-page .classroom-card-accent {
   background: color-mix(in srgb, var(--class-accent) 16%, transparent);
   pointer-events: none;
 }
-body.odyssey-classroom-page .classroom-card-content { position: relative; display: grid; justify-items: start; gap: 8px; }
+body.odyssey-classroom-page .classroom-professor-avatar {
+  position: absolute;
+  z-index: 1;
+  top: 24px;
+  right: 28px;
+  display: grid;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, .92);
+  border-radius: 50%;
+  background: var(--odyssey-panel);
+  box-shadow: 0 5px 14px rgba(20, 31, 54, .2);
+}
+body.odyssey-classroom-page .classroom-professor-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+body.odyssey-classroom-page .classroom-professor-avatar .computer-avatar { transform: scale(.58); }
+body.odyssey-classroom-page .classroom-card-content { position: relative; z-index: 2; display: grid; justify-items: start; gap: 8px; padding-right: 82px; }
 body.odyssey-classroom-page .classroom-card-subject { color: var(--class-accent); font: 750 11px/1.3 Inter, Nunito, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
 body.odyssey-classroom-page .classroom-card-title { color: var(--odyssey-ink); font: 800 21px/1.25 Inter, Nunito, system-ui, sans-serif; }
 body.odyssey-classroom-page .classroom-card-desc { color: var(--odyssey-muted); font: 13px/1.5 Inter, Nunito, system-ui, sans-serif; }
@@ -4148,6 +4171,8 @@ body.odyssey-classroom-page .take-quiz-action-btn:focus-visible { outline: 3px s
   body.odyssey-classroom-page .classroom-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   body.odyssey-classroom-page .classroom-card { min-height: 164px; padding: 18px 16px 16px 21px; }
   body.odyssey-classroom-page .classroom-card-title { font-size: 18px; }
+  body.odyssey-classroom-page .classroom-professor-avatar { top: 18px; right: 17px; width: 62px; height: 62px; }
+  body.odyssey-classroom-page .classroom-card-content { padding-right: 66px; }
   body.odyssey-classroom-page .progress-module-row { grid-template-columns: minmax(0, 1fr); gap: 4px; padding-block: 8px; }
   body.odyssey-classroom-page .progress-module-open { grid-template-columns: 24px minmax(0, 1fr) auto; min-height: 54px; gap: 10px; }
   body.odyssey-classroom-page .progress-module-quiz { justify-self: start; min-width: 126px; margin: 0 0 8px 34px; }
@@ -4855,4 +4880,161 @@ body.odyssey-classroom-page .docx-document-paper table { display: block; max-wid
   body.odyssey-classroom-page .docx-wrapper > section.docx table { max-width: 100%; }
   body.odyssey-classroom-page .docx-document-paper { margin: 8px auto !important; padding: 16px !important; }
   body.odyssey-classroom-page .docx-document-paper table { font-size: 13px; }
+}
+
+/* Pixel-art navigation icons requested for Home, Learning, Lessons, and Classes. */
+body.dashboard-page .app-nav .app-nav-links > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+body.dashboard-page .dashboard-nav-icon {
+  display: block;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 30px;
+  object-fit: cover;
+  object-position: center;
+  image-rendering: pixelated;
+}
+@media (max-width: 768px) {
+  body.app-page .mobile-bottom-nav__item {
+    flex-direction: row;
+    gap: 2px;
+    padding: 4px 1px;
+    overflow: hidden;
+  }
+  body.app-page .mobile-bottom-nav__icon {
+    display: block;
+    flex: 0 0 27px;
+    width: 27px;
+    height: 23px;
+    object-fit: cover;
+    object-position: center;
+    image-rendering: pixelated;
+  }
+  body.app-page .mobile-bottom-nav__label {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    font-size: clamp(8px, 2.35vw, 9px);
+    line-height: 1.05;
+    white-space: normal;
+    text-align: left;
+  }
+}
+
+/* Reuse the selected Profile banner behind the dashboard account heading. */
+body.odyssey-home-page .odyssey-account-card {
+  --dashboard-account-padding: 22px;
+  position: relative;
+  overflow: hidden;
+  padding: var(--dashboard-account-padding);
+}
+body.odyssey-home-page .dashboard-profile-banner {
+  position: absolute;
+  z-index: 0;
+  inset: 0 0 auto;
+  height: 158px;
+  background-color: #253451;
+  background-position: center;
+  background-size: cover;
+  pointer-events: none;
+}
+body.odyssey-home-page .odyssey-account-card .profile-top {
+  position: relative;
+  z-index: 1;
+  min-height: 112px;
+  margin: calc(-1 * var(--dashboard-account-padding)) calc(-1 * var(--dashboard-account-padding)) 18px;
+  padding: 20px var(--dashboard-account-padding);
+  box-sizing: border-box;
+}
+body.odyssey-home-page .odyssey-account-card .odyssey-account-stats,
+body.odyssey-home-page .odyssey-account-card .profile-button {
+  position: relative;
+  z-index: 1;
+}
+body.odyssey-home-page .odyssey-account-card .profile-avatar {
+  border: 3px solid rgba(255, 255, 255, .92);
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(8, 14, 30, .22);
+}
+body.odyssey-home-page .odyssey-account-card .profile-top h2,
+body.odyssey-home-page .odyssey-account-card .profile-top p,
+body.odyssey-home-page .odyssey-account-card .profile-top a {
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(5, 10, 24, .8);
+}
+body.odyssey-home-page .odyssey-account-card .profile-top h2 { font-size: 18px; }
+body.odyssey-home-page .odyssey-account-card .profile-top a {
+  display: inline-block;
+  margin-top: 3px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+@media (max-width: 768px) {
+  body.odyssey-home-page .odyssey-account-card { --dashboard-account-padding: 18px; }
+  body.odyssey-home-page .dashboard-profile-banner { height: 150px; }
+  body.odyssey-home-page .odyssey-account-card .profile-top { min-height: 108px; }
+}
+
+/* Give each classroom a compact professor profile column with their chosen banner. */
+body.odyssey-classroom-page .classroom-card {
+  padding-right: 0;
+  border-radius: 18px !important;
+  background: linear-gradient(115deg, color-mix(in srgb, var(--class-accent) 17%, var(--odyssey-panel)), var(--odyssey-panel) 68%) !important;
+  box-shadow: 0 8px 24px rgba(28, 41, 68, .09) !important;
+}
+body.odyssey-classroom-page .classroom-grid { grid-template-columns: minmax(0, 1fr); }
+body.odyssey-classroom-page .classroom-card-accent { display: none; }
+body.odyssey-classroom-page .classroom-card-content {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: calc(100% - clamp(160px, calc(24% + 20px), 280px));
+  box-sizing: border-box;
+  justify-items: start;
+  gap: 8px;
+  padding-right: 12px;
+}
+body.odyssey-classroom-page .classroom-professor-panel {
+  inset: 10px 10px 10px auto;
+  width: clamp(140px, 24%, 260px);
+  border-radius: 18px;
+  box-shadow: 0 5px 16px rgba(19, 30, 53, .16);
+}
+body.odyssey-classroom-page .classroom-professor-banner { height: 34%; min-height: 72px; }
+body.odyssey-classroom-page .classroom-professor-panel::before {
+  background: linear-gradient(180deg, rgba(11, 18, 34, .04) 0, rgba(17, 27, 48, .52) 20%, #17233d 45%);
+}
+body.odyssey-classroom-page .classroom-professor-summary { grid-template-columns: 48px minmax(0, 1fr); gap: 10px; padding: 0 16px 10px; }
+body.odyssey-classroom-page .classroom-professor-avatar { position: relative; inset: auto; z-index: auto; width: 48px; height: 48px; }
+body.odyssey-classroom-page .classroom-professor-name { font-size: 13px; }
+body.odyssey-classroom-page .classroom-professor-stats { gap: 8px; padding: 0 16px 16px; }
+body.odyssey-classroom-page .classroom-professor-stats > span { padding: 8px; }
+body.odyssey-classroom-page .classroom-professor-stats small { font-size: 9px; }
+body.odyssey-classroom-page .classroom-professor-stats strong { font-size: 14px; }
+
+@media (max-width: 768px) {
+  body.odyssey-classroom-page .classroom-card {
+    min-height: 178px;
+    padding: 16px 0 14px 18px;
+  }
+  body.odyssey-classroom-page .classroom-grid { grid-template-columns: minmax(0, 1fr); }
+  body.odyssey-classroom-page .classroom-card-content {
+    width: calc(100% - 142px);
+    gap: 7px;
+    padding-right: 8px;
+  }
+  body.odyssey-classroom-page .classroom-card-title { font-size: 17px; }
+  body.odyssey-classroom-page .classroom-card-desc { font-size: 12px; }
+  body.odyssey-classroom-page .classroom-card .classroom-meta { flex-wrap: wrap; gap: 4px 10px; font-size: 10px; }
+  body.odyssey-classroom-page .classroom-professor-panel { inset: 8px 8px 8px auto; width: 126px; }
+  body.odyssey-classroom-page .classroom-professor-summary { grid-template-columns: 38px minmax(0, 1fr); gap: 7px; padding-inline: 9px; }
+  body.odyssey-classroom-page .classroom-professor-avatar { width: 38px; height: 38px; }
+  body.odyssey-classroom-page .classroom-professor-name { font-size: 11px; }
+  body.odyssey-classroom-page .classroom-professor-stats { gap: 5px; padding: 0 8px 10px; }
+  body.odyssey-classroom-page .classroom-professor-stats > span { padding: 6px 5px; }
+  body.odyssey-classroom-page .classroom-professor-stats small { font-size: 8px; }
+  body.odyssey-classroom-page .classroom-professor-stats strong { font-size: 12px; }
 }

@@ -35,7 +35,29 @@
   const SIGNUP_REQUIRED_CHARACTER = '__signup_required__';
   const GOOGLE_AUTH_MODE_KEY = 'os-odyssey-google-auth-mode';
   const AUTH_MESSAGE_KEY = 'os-odyssey-auth-message';
+  const PROFILE_BANNER_PREF_KEY = 'os-odyssey-profile-banner';
+  const PROFILE_BANNER_OPTIONS = [
+    { id: 'bg-mountains-purple', src: '../../assets/bg-mountains-purple.jpg', label: 'Purple Mountains' },
+    { id: 'bg-mountains-day', src: '../../assets/bg-mountains-day.jpg', label: 'Daytime Mountains' },
+    { id: 'bg-mountains-sunrise', src: '../../assets/bg-mountains-sunrise.jpg', label: 'Sunrise Mountains' },
+    { id: 'bg-forest-lantern', src: '../../assets/bg-forest-lantern.jpg', label: 'Forest Lantern' },
+    { id: 'hero-bg-day', src: '../../assets/hero-bg-day.jpg', label: 'Snowy Day' },
+    { id: 'hero-bg-night', src: '../../assets/hero-bg-night.jpg', label: 'Starry Night' }
+  ];
+  window.ODYSSEY_PROFILE_BANNER_OPTIONS = PROFILE_BANNER_OPTIONS;
   let activeProfile = null;
+
+  function applyDashboardProfileBanner(bannerId = localStorage.getItem(PROFILE_BANNER_PREF_KEY)) {
+    const banner = document.getElementById('dashboardProfileBanner');
+    if (!banner) return;
+    const selected = PROFILE_BANNER_OPTIONS.find(option => option.id === bannerId) || PROFILE_BANNER_OPTIONS[0];
+    banner.style.backgroundImage = `linear-gradient(115deg, rgba(10, 17, 35, .76), rgba(10, 17, 35, .26) 75%), linear-gradient(0deg, rgba(10, 17, 35, .74), transparent 82%), url("${selected.src}")`;
+  }
+
+  applyDashboardProfileBanner();
+  window.addEventListener('storage', event => {
+    if (event.key === PROFILE_BANNER_PREF_KEY) applyDashboardProfileBanner();
+  });
 
   /* ---- Backend API helper ---- */
   const BACKEND_API = 'https://os-odyssey-api.onrender.com/api';
@@ -671,6 +693,7 @@
     if (profileBadges) profileBadges.textContent = (displayUser.earned_badges || []).length;
     if (profileStreak) profileStreak.textContent = displayUser.streak;
     if (profileAvatar) renderAvatar(profileAvatar, displayUser);
+    applyDashboardProfileBanner(displayUser.profile_banner);
     updateProgressDisplay(displayUser);
     renderSimProgressDashboard();
     renderSystemLabState(displayUser);
@@ -1505,8 +1528,8 @@
   }
 
   /* ---- Handle auth callback (Google OAuth) ---- */
-  // Google signup stays on character-select. Google login either moves a
-  // known user to the dashboard or rejects an account that OAuth just created.
+  // Route existing Google users to the dashboard and reserve avatar setup for
+  // newly created accounts or profiles explicitly marked for signup.
   supa.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session) {
       const path = window.location.pathname;
@@ -1519,15 +1542,11 @@
 
       sessionStorage.removeItem(GOOGLE_AUTH_MODE_KEY);
 
-      let profile = null;
-      if (googleAuthMode === 'login') {
-        const { data } = await supa
-          .from('profiles')
-          .select('character')
-          .eq('id', session.user.id)
-          .single();
-        profile = data;
-      }
+      const { data: profile } = await supa
+        .from('profiles')
+        .select('character')
+        .eq('id', session.user.id)
+        .maybeSingle();
 
       const needsSignup = profile?.character === SIGNUP_REQUIRED_CHARACTER;
       const justCreatedByGoogleLogin = googleAuthMode === 'login' && isRecentlyCreatedUser(session.user);
@@ -1556,6 +1575,15 @@
         window.location.href = 'dashboard.html';
         return;
       } else if (googleAuthMode === 'signup') {
+        // A user can choose Google sign-up even when that Google identity
+        // already has an Odyssey profile. Keep returning users out of setup.
+        const isReturningProfile = profile
+          && profile.character !== SIGNUP_REQUIRED_CHARACTER
+          && !isRecentlyCreatedUser(session.user);
+        if (isReturningProfile) {
+          window.location.href = 'dashboard.html';
+          return;
+        }
         return;
       }
     }
@@ -1592,7 +1620,11 @@
         const { error } = await supa.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: window.location.origin + '/os-odyssey/frontend/html/character-select.html'
+            redirectTo: window.location.origin + '/os-odyssey/frontend/html/character-select.html',
+            queryParams: {
+              // Ask Google to let the user choose among accounts already in the browser.
+              prompt: 'select_account'
+            }
           }
         });
         if (error) {

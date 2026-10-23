@@ -727,6 +727,121 @@
   backdrop-filter: blur(8px);
 }
 
+.professor-classroom-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 194px;
+  padding-right: 0;
+}
+
+.classroom-professor-panel {
+  position: absolute;
+  z-index: 1;
+  inset: 10px 10px 10px auto;
+  display: flex;
+  width: clamp(140px, 38%, 220px);
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 18px;
+  background: #17233d;
+  color: #fff;
+  text-align: left;
+}
+
+.classroom-professor-banner {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 78px;
+  border-radius: 17px 17px 0 0;
+  background-color: #314365;
+  background-position: center;
+  background-size: cover;
+}
+
+.classroom-professor-panel::before {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(180deg, rgba(11, 18, 34, .08) 0, rgba(17, 27, 48, .62) 42px, #17233d 82px);
+  pointer-events: none;
+}
+
+.classroom-professor-summary,
+.classroom-professor-stats {
+  position: relative;
+  z-index: 1;
+}
+
+.classroom-professor-summary {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding: 0 13px 9px;
+}
+
+.classroom-professor-avatar {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, .9);
+  border-radius: 50%;
+  background: #f4f7fb;
+  box-shadow: 0 3px 10px rgba(10, 16, 32, .25);
+}
+
+.classroom-professor-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.classroom-professor-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #fff;
+  font: 750 .76rem/1.25 'Nunito', sans-serif;
+}
+
+.classroom-professor-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  padding: 0 13px 14px;
+}
+
+.classroom-professor-stats > span {
+  display: grid;
+  gap: 3px;
+  padding: 7px 8px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .08);
+}
+
+.classroom-professor-stats small {
+  color: rgba(255, 255, 255, .68);
+  font: 700 .56rem/1.2 'Nunito', sans-serif;
+  letter-spacing: .08em;
+}
+
+.classroom-professor-stats strong {
+  color: #fff;
+  font: 800 .8rem/1.1 'Nunito', sans-serif;
+}
+
+.professor-classroom-card > :not(.classroom-professor-panel) {
+  position: relative;
+  z-index: 2;
+  max-width: calc(100% - 165px);
+}
+
 .classroom-card:hover {
   transform: translateY(-4px);
   border-color: rgba(245, 166, 35, 0.45);
@@ -767,6 +882,14 @@
   border-radius: 6px;
   display: inline-block;
   margin-top: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .classroom-professor-panel { inset: 8px 8px 8px auto; width: 140px; }
+  .classroom-professor-summary { grid-template-columns: 36px minmax(0, 1fr); gap: 7px; padding-inline: 9px; }
+  .classroom-professor-avatar { width: 36px; height: 36px; }
+  .classroom-professor-stats { gap: 5px; padding-inline: 9px; }
+  .professor-classroom-card > :not(.classroom-professor-panel) { max-width: calc(100% - 148px); }
 }
 
 /* ── Classroom Detail View ───────────────────────── */

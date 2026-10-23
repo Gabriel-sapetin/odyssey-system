@@ -336,7 +336,9 @@ async def list_classrooms(
             )
             classrooms = result.data or []
 
-        # Enrich with member count and professor name
+        # Enrich with member count and the professor's public classroom identity.
+        # The avatar is visible to enrolled students as well as the owner so
+        # the classroom card has the same face for everyone who can see it.
         for c in classrooms:
             members = (
                 admin_client.table("classroom_members")
@@ -346,15 +348,20 @@ async def list_classrooms(
             )
             c["member_count"] = members.count or 0
 
-            if role != "professor":
-                prof = (
-                    admin_client.table("profiles")
-                    .select("username")
-                    .eq("id", c["professor_id"])
-                    .single()
-                    .execute()
-                )
-                c["professor_username"] = prof.data.get("username", "Unknown") if prof.data else "Unknown"
+            prof = (
+                admin_client.table("profiles")
+                .select("username, avatar, character, xp, level, profile_banner")
+                .eq("id", c["professor_id"])
+                .single()
+                .execute()
+            )
+            professor = prof.data or {}
+            c["professor_username"] = professor.get("username", "Unknown")
+            c["professor_avatar"] = professor.get("avatar")
+            c["professor_character"] = professor.get("character")
+            c["professor_xp"] = professor.get("xp", 0)
+            c["professor_level"] = professor.get("level", 1)
+            c["professor_banner"] = professor.get("profile_banner")
 
         return {"classrooms": classrooms}
 

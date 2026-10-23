@@ -25,7 +25,7 @@
   let TOTAL_TOPICS = MODULES.reduce((s, m) => s + m.topics, 0);
 
   /* ---- Available banner backgrounds ---- */
-  const BANNER_BG_OPTIONS = [
+  const BANNER_BG_OPTIONS = window.ODYSSEY_PROFILE_BANNER_OPTIONS || [
     { id: 'bg-mountains-purple', src: '../../assets/bg-mountains-purple.jpg', label: 'Purple Mountains' },
     { id: 'bg-mountains-day', src: '../../assets/bg-mountains-day.jpg', label: 'Daytime Mountains' },
     { id: 'bg-mountains-sunrise', src: '../../assets/bg-mountains-sunrise.jpg', label: 'Sunrise Mountains' },
@@ -120,6 +120,23 @@
         console.error('Profile fetch error:', error);
         return;
       }
+
+      const storedBanner = BANNER_BG_OPTIONS.find(bg => bg.id === user.profile_banner);
+      const localBanner = BANNER_BG_OPTIONS.find(bg => bg.id === localStorage.getItem(BANNER_PREF_KEY));
+      // Carry forward older browser-only selections while making the account
+      // value authoritative for future devices and classroom views.
+      const selectedBanner = storedBanner && (storedBanner.id !== BANNER_BG_OPTIONS[0].id || !localBanner)
+        ? storedBanner
+        : (localBanner || storedBanner || BANNER_BG_OPTIONS[0]);
+      localStorage.setItem(BANNER_PREF_KEY, selectedBanner.id);
+      if (user.profile_banner !== selectedBanner.id) {
+        const { error: bannerError } = await supa
+          .from('profiles')
+          .update({ profile_banner: selectedBanner.id })
+          .eq('id', session.user.id);
+        if (bannerError) console.warn('Could not sync profile banner:', bannerError);
+      }
+      applySavedBanner();
 
       const level = calculateLevel(user.xp);
       const rank = calculateRank(level);
@@ -506,11 +523,26 @@
         // Save and apply
         localStorage.setItem(BANNER_PREF_KEY, bgId);
         applySavedBanner();
+        saveBannerToProfile(bgId);
 
         // Close after brief delay
         setTimeout(close, 350);
       });
     });
+  }
+
+  async function saveBannerToProfile(bannerId) {
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      if (!session) return;
+      const { error } = await supa
+        .from('profiles')
+        .update({ profile_banner: bannerId })
+        .eq('id', session.user.id);
+      if (error) console.warn('Could not save profile banner:', error);
+    } catch (error) {
+      console.warn('Could not save profile banner:', error);
+    }
   }
 
   /* ---- Init ---- */

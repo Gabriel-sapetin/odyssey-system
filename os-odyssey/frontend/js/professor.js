@@ -479,8 +479,30 @@
       return;
     }
 
-    grid.innerHTML = data.classrooms.map(c => `
-      <div class="classroom-card" onclick="window._openClass('${c.id}')" style="border-left:3px solid ${c.theme_color || '#6366f1'}">
+    grid.innerHTML = data.classrooms.map(c => {
+      const avatar = c.professor_avatar || '../../assets/penguin-flower-removebg-preview.png';
+      const professorFace = avatar === 'computer'
+        ? '<span class="computer-avatar mini" aria-hidden="true"><span class="screen-face"></span></span>'
+        : `<img src="${esc(avatar).replace(/\"/g, '&quot;')}" alt="Your profile avatar" loading="lazy" />`;
+      const banner = (window.ODYSSEY_PROFILE_BANNER_OPTIONS || [])
+        .find(option => option.id === c.professor_banner)
+        || (window.ODYSSEY_PROFILE_BANNER_OPTIONS || [])[0]
+        || { src: '../../assets/bg-mountains-purple.jpg' };
+      const professorLevel = Number(c.professor_level) || 1;
+      const professorXp = Number(c.professor_xp) || 0;
+      return `
+      <div class="classroom-card professor-classroom-card" onclick="window._openClass('${c.id}')" style="border-left:3px solid ${c.theme_color || '#6366f1'}">
+        <span class="classroom-professor-panel">
+          <span class="classroom-professor-banner" style="background-image:url('${esc(banner.src).replace(/\"/g, '&quot;')}')"></span>
+          <span class="classroom-professor-summary">
+            <span class="classroom-professor-avatar">${professorFace}</span>
+            <span class="classroom-professor-name">${esc(c.professor_username || 'Professor')}</span>
+          </span>
+          <span class="classroom-professor-stats">
+            <span><small>LEVEL</small><strong>${professorLevel}</strong></span>
+            <span><small>XP</small><strong>${professorXp.toLocaleString()}</strong></span>
+          </span>
+        </span>
         <h3>${c.theme_emoji ? c.theme_emoji + ' ' : ''}${esc(c.name)}</h3>
         <span style="display:inline-block;font-size:0.7rem;padding:0.15rem 0.5rem;border-radius:20px;background:${c.theme_color || '#6366f1'}22;color:${c.theme_color || '#6366f1'};border:1px solid ${c.theme_color || '#6366f1'}44;margin-top:0.3rem;font-family:'Nunito',sans-serif;">${esc(c.subject || 'General')}</span>
         ${c.description ? `<p style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-top:0.2rem">${esc(c.description)}</p>` : ''}
@@ -490,7 +512,8 @@
         </div>
         <span class="join-code">${esc(c.join_code)}</span>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
   /* ── Open Classroom Detail ─────────────────── */

@@ -12,10 +12,10 @@
   ]);
   const isSimulation = simNames.has(currentFile);
 
-  const home = { key: 'home', label: 'Home', href: 'dashboard.html', files: ['dashboard.html'] };
-  const learn = { key: 'learn', label: 'My Learning', href: 'course.html', files: ['course.html'] };
-  const explore = { key: 'explore', label: 'Explore Lessons', href: 'explore-lessons.html', files: ['explore-lessons.html'] };
-  const classes = { key: 'classes', label: 'Classes', href: 'classroom.html', files: ['classroom.html'] };
+  const home = { key: 'home', label: 'Home', icon: 'pixelatedhome.png', href: 'dashboard.html', files: ['dashboard.html'] };
+  const learn = { key: 'learn', label: 'My Learning', icon: 'pixelatedlearning.png', href: 'course.html', files: ['course.html'] };
+  const explore = { key: 'explore', label: 'Explore Lessons', icon: 'pixelatedlessons.png', href: 'explore-lessons.html', files: ['explore-lessons.html'] };
+  const classes = { key: 'classes', label: 'Classes', icon: 'pixelatedclasses1.png', href: 'classroom.html', files: ['classroom.html'] };
   const profile = { key: 'profile', label: 'Profile', href: 'profile.html', files: ['profile.html', 'leaderboard.html', 'character-select.html'] };
   const management = { key: 'management', label: 'Management', href: 'admin.html', files: ['admin.html'] };
 
@@ -101,7 +101,10 @@
     nav.setAttribute('aria-label', 'Main navigation');
     nav.innerHTML = tabs.map(tab => {
       const isActive = tab.key === active;
-      return `<a class="mobile-bottom-nav__item${isActive ? ' is-active' : ''}" href="${tab.href}"${isActive ? ' aria-current="page"' : ''}>${tab.label}</a>`;
+      const icon = tab.icon
+        ? `<img class="mobile-bottom-nav__icon" src="../../assets/${tab.icon}" alt="" aria-hidden="true">`
+        : '';
+      return `<a class="mobile-bottom-nav__item${isActive ? ' is-active' : ''}" href="${tab.href}"${isActive ? ' aria-current="page"' : ''}>${icon}<span class="mobile-bottom-nav__label">${tab.label}</span></a>`;
     }).join('');
     body.appendChild(nav);
     body.classList.add('mobile-nav-ready');
