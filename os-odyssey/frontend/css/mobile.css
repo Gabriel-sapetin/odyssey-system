@@ -4551,6 +4551,13 @@ body.explore-lessons-page .lesson-discovery-icon {
   background: #eeedff;
   font-size: 21px;
 }
+body.explore-lessons-page .lesson-discovery-icon img {
+  display: block;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
 body.explore-lessons-page .lesson-discovery-quizzes .lesson-discovery-icon { background: #fff2df; }
 body.explore-lessons-page .lesson-discovery-paced .lesson-discovery-icon { background: #e5f8ef; }
 body.explore-lessons-page .lesson-discovery-item h3 {
