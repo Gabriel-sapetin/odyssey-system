@@ -1,119 +1,173 @@
 (() => {
-  const mascots = document.querySelectorAll('[data-motion-mascot]');
+  const wrapper = document.querySelector('[data-motion-mascot]');
+  if (!wrapper) return;
 
-  function setupCutout(wrapper) {
-    const video = wrapper.querySelector('.home-character-motion-source');
-    const canvas = wrapper.querySelector('.home-character-cutout');
-    if (!video || !canvas) return;
+  const video = wrapper.querySelector('.home-character-motion-source');
+  const canvas = wrapper.querySelector('.home-character-cutout');
+  if (!video || !canvas) return;
 
-    const output = canvas.getContext('2d', { alpha: true });
-    const work = document.createElement('canvas');
-    work.width = canvas.width;
-    work.height = canvas.height;
-    const workContext = work.getContext('2d', { willReadFrequently: true });
-    if (!output || !workContext) return;
+  // Key the green screen in a fragment shader. This avoids copying every
+  // frame back to JavaScript and looping over 130k pixels on the main thread.
+  const gl = canvas.getContext('webgl', {
+    alpha: true,
+    antialias: false,
+    premultipliedAlpha: false,
+    powerPreference: 'low-power',
+  });
+  if (!gl) return;
 
-    const width = work.width;
-    const height = work.height;
-    let framePending = false;
-
-    // A green screen separates cleanly from the penguin's black, white, blue,
-    // and yellow colors. Estimate transparency from excess green, then unmix
-    // the green channel on soft edges to avoid a bright green fringe.
-    function removeGreenScreen(data) {
-      for (let offset = 0; offset < data.length; offset += 4) {
-        const red = data[offset];
-        const green = data[offset + 1];
-        const blue = data[offset + 2];
-        const spill = green - Math.max(red, blue);
-        if (spill <= 20) continue;
-
-        const alpha = Math.max(0, Math.min(255, Math.round(255 - spill)));
-        data[offset + 3] = alpha;
-        if (alpha === 0) continue;
-
-        const scale = 255 / alpha;
-        data[offset] = Math.min(255, Math.round(red * scale));
-        data[offset + 2] = Math.min(255, Math.round(blue * scale));
-        data[offset + 1] = Math.max(0, Math.min(255,
-          Math.round((green * 255 - (255 - alpha) * 255) / alpha)));
-      }
+  const vertexSource = `
+    attribute vec2 aPosition;
+    attribute vec2 aTexCoord;
+    varying vec2 vTexCoord;
+    void main() {
+      gl_Position = vec4(aPosition, 0.0, 1.0);
+      vTexCoord = aTexCoord;
     }
-
-    function renderFrame() {
-      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || framePending) return;
-      framePending = true;
-
-      const sourceWidth = video.videoWidth;
-      const sourceHeight = video.videoHeight;
-      if (!sourceWidth || !sourceHeight) {
-        framePending = false;
-        return;
-      }
-
-      const targetRatio = width / height;
-      const sourceRatio = sourceWidth / sourceHeight;
-      let sx = 0;
-      let sy = 0;
-      let sw = sourceWidth;
-      let sh = sourceHeight;
-      if (sourceRatio > targetRatio) {
-        sw = sourceHeight * targetRatio;
-        sx = (sourceWidth - sw) / 2;
+  `;
+  const fragmentSource = `
+    precision mediump float;
+    uniform sampler2D uVideo;
+    varying vec2 vTexCoord;
+    void main() {
+      vec4 color = texture2D(uVideo, vTexCoord);
+      float spill = max(color.g - max(color.r, color.b), 0.0);
+      if (spill <= 0.0784) {
+        gl_FragColor = color;
       } else {
-        sh = sourceWidth / targetRatio;
-        sy = (sourceHeight - sh) / 2;
-      }
-
-      workContext.drawImage(video, sx, sy, sw, sh, 0, 0, width, height);
-      const frame = workContext.getImageData(0, 0, width, height);
-      removeGreenScreen(frame.data);
-
-      output.putImageData(frame, 0, 0);
-      wrapper.classList.add('has-motion-cutout');
-      framePending = false;
-    }
-
-    function scheduleFrame() {
-      if (video.paused || video.ended) return;
-      if (typeof video.requestVideoFrameCallback === 'function') {
-        video.requestVideoFrameCallback(() => {
-          renderFrame();
-          scheduleFrame();
-        });
-      } else {
-        requestAnimationFrame(() => {
-          renderFrame();
-          scheduleFrame();
-        });
+        float alpha = clamp(1.0 - spill, 0.0, 1.0);
+        if (alpha < 0.0039) {
+          gl_FragColor = vec4(0.0);
+        } else {
+          vec3 unkeyed = clamp((color.rgb - vec3(0.0, 1.0 - alpha, 0.0)) / alpha, 0.0, 1.0);
+          gl_FragColor = vec4(unkeyed, alpha);
+        }
       }
     }
+  `;
 
-    video.addEventListener('play', () => {
-      renderFrame();
-      if (!video.__cutoutFramesStarted) {
-        video.__cutoutFramesStarted = true;
-        scheduleFrame();
-      }
-    });
-    video.addEventListener('loadeddata', () => {
-      renderFrame();
-      // Some mobile browsers finish loading the first frame before firing
-      // `play`; retry here so the visible phone mascot cannot stay on fallback.
-      if (video.paused) video.play().catch(() => {});
-      else if (!video.__cutoutFramesStarted) {
-        video.__cutoutFramesStarted = true;
-        scheduleFrame();
-      }
-    }, { once: true });
-    video.addEventListener('canplay', () => {
-      if (video.paused) video.play().catch(() => {});
-    }, { once: true });
-    video.play().catch(() => {});
+  function compileShader(type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
   }
 
-  // Start both responsive placements. Mobile emulation can change viewport
-  // dimensions after this script runs, so a one-time matchMedia choice can
-  // accidentally animate only the hidden desktop mascot.
-  mascots.forEach(setupCutout);
+  const vertexShader = compileShader(gl.VERTEX_SHADER, vertexSource);
+  const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
+  if (!vertexShader || !fragmentShader) return;
+
+  const program = gl.createProgram();
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+
+  gl.useProgram(program);
+  const positionLocation = gl.getAttribLocation(program, 'aPosition');
+  const texCoordLocation = gl.getAttribLocation(program, 'aTexCoord');
+  const textureLocation = gl.getUniformLocation(program, 'uVideo');
+  const vertices = new Float32Array([
+    -1, -1, 0, 0,
+     1, -1, 1, 0,
+    -1,  1, 0, 1,
+     1,  1, 1, 1,
+  ]);
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(positionLocation);
+  gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 16, 0);
+  gl.enableVertexAttribArray(texCoordLocation);
+  gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 16, 8);
+
+  const texture = gl.createTexture();
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.uniform1i(textureLocation, 0);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.clearColor(0, 0, 0, 0);
+
+  let frameCallbackPending = false;
+  let sourceSize = '';
+  let textureInitialized = false;
+
+  function renderFrame() {
+    if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || frameCallbackPending) return;
+    frameCallbackPending = true;
+
+    try {
+      const width = video.videoWidth;
+      const height = video.videoHeight;
+      if (!width || !height) return;
+
+      const dimensions = `${width}x${height}`;
+      if (dimensions !== sourceSize) {
+        const sourceRatio = width / height;
+        const targetRatio = canvas.width / canvas.height;
+        const uMin = sourceRatio > targetRatio ? (1 - targetRatio / sourceRatio) / 2 : 0;
+        const uMax = sourceRatio > targetRatio ? 1 - uMin : 1;
+        const vMin = sourceRatio < targetRatio ? (1 - sourceRatio / targetRatio) / 2 : 0;
+        const vMax = sourceRatio < targetRatio ? 1 - vMin : 1;
+        vertices[2] = uMin; vertices[3] = vMin;
+        vertices[6] = uMax; vertices[7] = vMin;
+        vertices[10] = uMin; vertices[11] = vMax;
+        vertices[14] = uMax; vertices[15] = vMax;
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices);
+        sourceSize = dimensions;
+      }
+
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      if (textureInitialized) {
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, video);
+      } else {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+        textureInitialized = true;
+      }
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      wrapper.classList.add('has-motion-cutout');
+    } catch (_) {
+      // Keep the static penguin visible if a browser cannot upload video frames.
+    } finally {
+      frameCallbackPending = false;
+    }
+  }
+
+  function scheduleFrame() {
+    if (video.paused || video.ended) return;
+    if (typeof video.requestVideoFrameCallback === 'function') {
+      video.requestVideoFrameCallback(() => {
+        renderFrame();
+        scheduleFrame();
+      });
+    } else {
+      requestAnimationFrame(() => {
+        renderFrame();
+        scheduleFrame();
+      });
+    }
+  }
+
+  function start() {
+    if (video.paused) video.play().catch(() => {});
+    if (!video.__cutoutFramesStarted) {
+      video.__cutoutFramesStarted = true;
+      scheduleFrame();
+    }
+  }
+
+  video.addEventListener('play', start);
+  video.addEventListener('loadeddata', start, { once: true });
+  video.play().catch(() => {});
 })();
