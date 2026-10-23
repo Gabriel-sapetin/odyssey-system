@@ -371,6 +371,7 @@
       activeProfile.last_active_date = today;
       const streakEl = document.getElementById('profileStreak');
       if (streakEl) streakEl.textContent = result.streak;
+      renderMobileHomeStats(activeProfile);
     }
   }
 
@@ -698,6 +699,7 @@
     if (profileRank) profileRank.textContent = displayUser.rank;
     if (profileBadges) profileBadges.textContent = (displayUser.earned_badges || []).length;
     if (profileStreak) profileStreak.textContent = displayUser.streak;
+    renderMobileHomeStats(displayUser);
     if (profileAvatar) renderAvatar(profileAvatar, displayUser);
     applyDashboardProfileBanner(displayUser.profile_banner);
     updateProgressDisplay(displayUser);
@@ -802,6 +804,17 @@
     if (profileLevel) profileLevel.textContent = `Level ${user.level}`;
     if (profileXp) profileXp.textContent = displayXpWithBonus(user.xp);
     if (profileRank) profileRank.textContent = user.rank;
+    renderMobileHomeStats(user);
+  }
+
+  function renderMobileHomeStats(user) {
+    if (!user) return;
+    const mobileXp = document.getElementById('mobileHomeXp');
+    const mobileLevel = document.getElementById('mobileHomeLevel');
+    const mobileStreak = document.getElementById('mobileHomeStreak');
+    if (mobileXp) mobileXp.textContent = displayXpWithBonus(user.xp);
+    if (mobileLevel) mobileLevel.textContent = user.level || 1;
+    if (mobileStreak) mobileStreak.textContent = user.streak || 1;
   }
 
   function formatXp(value) {

@@ -5356,3 +5356,243 @@ body.odyssey-home-page:not(.light-mode) .home-quick-card small { color: #aeb9cc;
   body.odyssey-home-page .home-quick-card,
   body.odyssey-home-page .home-quick-card__arrow { transition: none; }
 }
+
+/* Keep auth copy readable and modern even when the saved app theme is dark. */
+body.auth-page .navbar {
+  background: rgba(255, 255, 255, .97);
+  border-bottom: 1px solid #e2e8f0;
+}
+body.auth-page .nav-logo,
+body.auth-page .navbar .nav-logo {
+  color: #172033;
+  font-family: var(--font-body, 'Nunito', system-ui, sans-serif);
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+body.auth-page .auth-card {
+  color: #172033;
+  background: #fff;
+  border-color: #e3e8f0;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, .16);
+}
+body.auth-page .auth-headline {
+  color: #172033;
+  font-family: var(--font-body, 'Nunito', system-ui, sans-serif);
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 900;
+  letter-spacing: -.035em;
+  line-height: 1.2;
+}
+body.auth-page .auth-back {
+  color: #52627a;
+  font-family: var(--font-body, 'Nunito', system-ui, sans-serif);
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+body.auth-page .auth-back:hover { color: #24324b; }
+body.auth-page .auth-divider {
+  color: #65738a;
+  font-family: var(--font-body, 'Nunito', system-ui, sans-serif);
+  font-weight: 800;
+}
+body.auth-page .auth-login,
+body.auth-page .auth-terms {
+  color: #58677e;
+  font-size: 14px;
+  font-weight: 600;
+}
+body.auth-page .auth-login a,
+body.auth-page .auth-terms a {
+  color: #a34d00;
+  font-weight: 900;
+  text-underline-offset: 3px;
+}
+body.auth-page .auth-input::placeholder { color: #67758a; opacity: 1; }
+body.auth-page .btn-google,
+body.auth-page .auth-submit {
+  font-family: var(--font-body, 'Nunito', system-ui, sans-serif);
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+body.odyssey-home-page .home-mobile-stats,
+body.odyssey-home-page .home-mobile-greeting,
+body.odyssey-home-page .home-mobile-continue { display: none; }
+@media (max-width: 768px) {
+  body.odyssey-home-page .home-mobile-stats {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  body.odyssey-home-page .home-mobile-stats::-webkit-scrollbar { display: none; }
+  body.odyssey-home-page .home-mobile-stat {
+    min-height: 38px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 13px;
+    border: 1px solid #e0e6ef;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .9);
+    box-shadow: 0 4px 12px rgba(25, 37, 62, .05);
+    color: #56647b;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  body.odyssey-home-page .home-mobile-stat strong { color: #172139; font-weight: 900; }
+  body.odyssey-home-page .home-mobile-stat > span { font-size: 15px; }
+  body.odyssey-home-page .home-mobile-stat--xp > span { color: #e9a51e; }
+  body.odyssey-home-page .home-mobile-stat--level > span { color: #6654d9; }
+  body.odyssey-home-page .home-mobile-greeting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 0 0 18px;
+  }
+  body.odyssey-home-page .home-mobile-greeting .section-kicker {
+    margin: 0 0 5px;
+    color: #6f5bd5;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .13em;
+  }
+  body.odyssey-home-page .home-mobile-greeting h1 {
+    margin: 0;
+    color: #172139;
+    font-size: clamp(26px, 7.4vw, 34px);
+    font-weight: 950;
+    letter-spacing: -.045em;
+    line-height: 1.08;
+  }
+  body.odyssey-home-page .home-mobile-greeting p:last-child {
+    margin: 7px 0 0;
+    color: #69768c;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar {
+    width: 68px;
+    height: 68px;
+    flex: 0 0 68px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid #e8e1ff;
+    border-radius: 24px;
+    background: linear-gradient(145deg, #f0eaff, #fff0dd);
+    box-shadow: 0 8px 18px rgba(77, 58, 157, .12);
+  }
+  body.odyssey-home-page .home-mobile-greeting__avatar img {
+    width: 86%;
+    height: 86%;
+    object-fit: contain;
+  }
+  body.odyssey-home-page .home-mobile-continue {
+    position: relative;
+    display: flex;
+    min-height: 112px;
+    align-items: center;
+    gap: 13px;
+    margin: 0 0 25px;
+    padding: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .55);
+    border-radius: 23px;
+    background: linear-gradient(115deg, #292675 0%, #4f39bd 56%, #8750df 100%);
+    box-shadow: 0 13px 26px rgba(58, 47, 151, .19);
+    color: #fff;
+    text-decoration: none;
+  }
+  body.odyssey-home-page .home-mobile-continue::after {
+    position: absolute;
+    top: -43px;
+    right: -32px;
+    width: 150px;
+    height: 150px;
+    border: 1px solid rgba(255, 255, 255, .2);
+    border-radius: 50%;
+    content: '';
+    pointer-events: none;
+  }
+  body.odyssey-home-page .home-mobile-continue__icon {
+    width: 54px;
+    height: 54px;
+    flex: 0 0 54px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .17);
+    color: #fff;
+    font-size: 17px;
+    font-weight: 950;
+    letter-spacing: -.04em;
+  }
+  body.odyssey-home-page .home-mobile-continue__copy {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    min-width: 0;
+    gap: 3px;
+  }
+  body.odyssey-home-page .home-mobile-continue__copy small {
+    color: #bdeaff;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .13em;
+  }
+  body.odyssey-home-page .home-mobile-continue__copy strong {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 950;
+    line-height: 1.15;
+  }
+  body.odyssey-home-page .home-mobile-continue__copy > span {
+    color: rgba(255, 255, 255, .82);
+    font-size: 11px;
+    line-height: 1.3;
+  }
+  body.odyssey-home-page .home-mobile-continue__arrow {
+    position: relative;
+    z-index: 1;
+    margin-left: auto;
+    color: #fff;
+    font-size: 24px;
+    transition: transform .18s ease;
+  }
+  body.odyssey-home-page .home-mobile-continue:hover .home-mobile-continue__arrow { transform: translateX(3px); }
+  body.odyssey-home-page .odyssey-home-heading,
+  body.odyssey-home-page .explore-lessons-promo { display: none; }
+  body.odyssey-home-page .home-quick-start { margin-top: 0; }
+  body.odyssey-home-page .home-quick-start__heading { margin-bottom: 12px; }
+  body.odyssey-home-page .home-quick-start__heading h2 { font-size: 21px; }
+  body.odyssey-home-page .home-quick-start__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  body.odyssey-home-page .home-quick-card {
+    min-height: 94px;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 12px 10px;
+    border-radius: 18px;
+  }
+  body.odyssey-home-page .home-quick-card > img { width: 48px; height: 42px; flex-basis: 48px; }
+  body.odyssey-home-page .home-quick-card > span:nth-of-type(1) { padding-top: 10px; }
+  body.odyssey-home-page .home-quick-card strong { font-size: 12px; }
+  body.odyssey-home-page .home-quick-card small { font-size: 10px; }
+  body.odyssey-home-page:not(.light-mode) .home-mobile-stat {
+    border-color: #34415a;
+    background: rgba(28, 38, 58, .94);
+    color: #bdc7d8;
+  }
+  body.odyssey-home-page:not(.light-mode) .home-mobile-stat strong,
+  body.odyssey-home-page:not(.light-mode) .home-mobile-greeting h1 { color: #f4f6fb; }
+  body.odyssey-home-page:not(.light-mode) .home-mobile-greeting p:last-child { color: #aeb9cc; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.odyssey-home-page .home-mobile-continue__arrow { transition: none; }
+}
