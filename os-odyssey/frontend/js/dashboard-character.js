@@ -8,7 +8,7 @@
 
   // Key the green screen in a fragment shader. This avoids copying every
   // frame back to JavaScript and looping over 130k pixels on the main thread.
-  const gl = canvas.getContext('webgl', {
+  let gl = canvas.getContext('webgl', {
     alpha: true,
     antialias: false,
     premultipliedAlpha: false,
@@ -52,6 +52,28 @@
     }
   `;
 
+  /* ── Track whether the GL context is currently valid ── */
+  let contextLost = false;
+
+  /* ── GL resource handles (rebuilt on context restore) ── */
+  let program = null;
+  let positionLocation = -1;
+  let texCoordLocation = -1;
+  let textureLocation = null;
+  let buffer = null;
+  let texture = null;
+
+  const vertices = new Float32Array([
+    -1, -1, 0, 0,
+     1, -1, 1, 0,
+    -1,  1, 0, 1,
+     1,  1, 1, 1,
+  ]);
+
+  let frameCallbackPending = false;
+  let sourceSize = '';
+  let textureInitialized = false;
+
   function compileShader(type, source) {
     const shader = gl.createShader(type);
     gl.shaderSource(shader, source);
@@ -63,50 +85,55 @@
     return shader;
   }
 
-  const vertexShader = compileShader(gl.VERTEX_SHADER, vertexSource);
-  const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
-  if (!vertexShader || !fragmentShader) return;
+  /** Create (or recreate) the entire GL pipeline: shaders, buffers, texture. */
+  function initGL() {
+    const vertexShader = compileShader(gl.VERTEX_SHADER, vertexSource);
+    const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
+    if (!vertexShader || !fragmentShader) return false;
 
-  const program = gl.createProgram();
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+    program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return false;
 
-  gl.useProgram(program);
-  const positionLocation = gl.getAttribLocation(program, 'aPosition');
-  const texCoordLocation = gl.getAttribLocation(program, 'aTexCoord');
-  const textureLocation = gl.getUniformLocation(program, 'uVideo');
-  const vertices = new Float32Array([
-    -1, -1, 0, 0,
-     1, -1, 1, 0,
-    -1,  1, 0, 1,
-     1,  1, 1, 1,
-  ]);
-  const buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-  gl.enableVertexAttribArray(positionLocation);
-  gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 16, 0);
-  gl.enableVertexAttribArray(texCoordLocation);
-  gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 16, 8);
+    gl.useProgram(program);
+    positionLocation = gl.getAttribLocation(program, 'aPosition');
+    texCoordLocation = gl.getAttribLocation(program, 'aTexCoord');
+    textureLocation = gl.getUniformLocation(program, 'uVideo');
 
-  const texture = gl.createTexture();
-  gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.uniform1i(textureLocation, 0);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-  gl.clearColor(0, 0, 0, 0);
+    buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 16, 0);
+    gl.enableVertexAttribArray(texCoordLocation);
+    gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 16, 8);
 
-  let frameCallbackPending = false;
-  let sourceSize = '';
-  let textureInitialized = false;
+    texture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.uniform1i(textureLocation, 0);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.clearColor(0, 0, 0, 0);
+
+    /* Reset per-frame state so the next renderFrame() does a full texImage2D */
+    textureInitialized = false;
+    sourceSize = '';
+    contextLost = false;
+
+    return true;
+  }
+
+  /* ── Initial GL setup ── */
+  if (!initGL()) return;
 
   function renderFrame() {
+    if (contextLost) return;
     if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || frameCallbackPending) return;
     frameCallbackPending = true;
 
@@ -151,7 +178,7 @@
   }
 
   function scheduleFrame() {
-    if (video.paused || video.ended) return;
+    if (contextLost || video.paused || video.ended) return;
     if (typeof video.requestVideoFrameCallback === 'function' && !IS_MOBILE) {
       video.requestVideoFrameCallback(() => {
         renderFrame();
@@ -171,6 +198,7 @@
   }
 
   function start() {
+    if (contextLost) return;
     if (video.paused) video.play().catch(() => {});
     if (!video.__cutoutFramesStarted) {
       video.__cutoutFramesStarted = true;
@@ -181,6 +209,45 @@
   video.addEventListener('play', start);
   video.addEventListener('loadeddata', start, { once: true });
   video.play().catch(() => {});
+
+  /* ── Handle WebGL context loss (bfcache, GPU reset, etc.) ── */
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();           // Allow the context to be restored later
+    contextLost = true;
+    video.__cutoutFramesStarted = false;
+    wrapper.classList.remove('has-motion-cutout');   // Show the static PNG fallback
+  });
+
+  canvas.addEventListener('webglcontextrestored', () => {
+    if (initGL()) {
+      start();
+    }
+  });
+
+  /* ── Handle bfcache page restore ── */
+  window.addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    // The page was restored from the back/forward cache.
+    // The WebGL context may have been lost and auto-restored already,
+    // or it may still be lost. Either way, reset and restart.
+    if (gl.isContextLost()) {
+      // Context is still lost – the 'webglcontextrestored' listener will
+      // handle re-init once the browser restores it. Just make sure the
+      // fallback image is showing in the meantime.
+      contextLost = true;
+      video.__cutoutFramesStarted = false;
+      wrapper.classList.remove('has-motion-cutout');
+    } else {
+      // Context survived (or was already restored before pageshow fired).
+      // Re-init the pipeline to be safe and restart rendering.
+      contextLost = false;
+      video.__cutoutFramesStarted = false;
+      textureInitialized = false;
+      sourceSize = '';
+      initGL();
+      start();
+    }
+  });
 
   /* ── Pause when tab is hidden to save battery ── */
   document.addEventListener('visibilitychange', () => {
