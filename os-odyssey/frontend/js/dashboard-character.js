@@ -72,7 +72,6 @@
 
   let frameCallbackPending = false;
   let sourceSize = '';
-  let textureInitialized = false;
 
   function compileShader(type, source) {
     const shader = gl.createShader(type);
@@ -121,8 +120,6 @@
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.clearColor(0, 0, 0, 0);
 
-    /* Reset per-frame state so the next renderFrame() does a full texImage2D */
-    textureInitialized = false;
     sourceSize = '';
     contextLost = false;
 
@@ -162,12 +159,7 @@
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.bindTexture(gl.TEXTURE_2D, texture);
-      if (textureInitialized) {
-        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, video);
-      } else {
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
-        textureInitialized = true;
-      }
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       wrapper.classList.add('has-motion-cutout');
     } catch (_) {

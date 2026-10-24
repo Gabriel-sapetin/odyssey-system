@@ -12,13 +12,16 @@
     const mainScriptUrl = document.currentScript && document.currentScript.src;
     if (mainScriptUrl) {
       const mobileCssUrlObject = new URL('../css/mobile.css', mainScriptUrl);
-      mobileCssUrlObject.searchParams.set('v', '9');
+      mobileCssUrlObject.searchParams.set('v', '13');
       const mobileCssUrl = mobileCssUrlObject.href;
       if (!document.querySelector(`link[href="${mobileCssUrl}"]`)) {
         const mobileCss = document.createElement('link');
         mobileCss.rel = 'stylesheet';
         mobileCss.href = mobileCssUrl;
+        mobileCss.onload = function () { document.body.style.visibility = 'visible'; };
         document.head.appendChild(mobileCss);
+      } else {
+        document.body.style.visibility = 'visible';
       }
 
       if (hasMobileAppShell || hasMobileLanding || hasMobileInstructorPage) {

@@ -2116,8 +2116,10 @@ body.explore-lessons-page .lessons-shell {
 
 @media (min-width: 769px) {
   body.odyssey-home-page .app-nav,
-  body.explore-lessons-page .app-nav {
+  body.explore-lessons-page .app-nav,
+  body.odyssey-course-page .app-nav {
     position: fixed;
+    z-index: 100;
     inset: 0 auto 0 0;
     width: 238px;
     min-height: 100dvh;
@@ -2133,18 +2135,21 @@ body.explore-lessons-page .lessons-shell {
   }
 
   body.odyssey-home-page .app-brand,
-  body.explore-lessons-page .app-brand {
+  body.explore-lessons-page .app-brand,
+  body.odyssey-course-page .app-brand {
     min-height: 42px;
     padding: 0 8px;
   }
 
   body.odyssey-home-page .app-nav-mobile-toggle,
-  body.explore-lessons-page .app-nav-mobile-toggle {
+  body.explore-lessons-page .app-nav-mobile-toggle,
+  body.odyssey-course-page .app-nav-mobile-toggle {
     display: none;
   }
 
   body.odyssey-home-page .app-nav .app-nav-links,
-  body.explore-lessons-page .app-nav .app-nav-links {
+  body.explore-lessons-page .app-nav .app-nav-links,
+  body.odyssey-course-page .app-nav .app-nav-links {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -2156,8 +2161,10 @@ body.explore-lessons-page .lessons-shell {
 
   body.odyssey-home-page .app-nav .app-nav-links > a,
   body.explore-lessons-page .app-nav .app-nav-links > a,
+  body.odyssey-course-page .app-nav .app-nav-links > a,
   body.odyssey-home-page .app-nav .app-nav-links > button,
-  body.explore-lessons-page .app-nav .app-nav-links > button {
+  body.explore-lessons-page .app-nav .app-nav-links > button,
+  body.odyssey-course-page .app-nav .app-nav-links > button {
     min-height: 48px;
     padding: 0 14px;
     display: flex;
@@ -2176,44 +2183,51 @@ body.explore-lessons-page .lessons-shell {
 
   body.odyssey-home-page .app-nav .app-nav-links > a:hover,
   body.explore-lessons-page .app-nav .app-nav-links > a:hover,
+  body.odyssey-course-page .app-nav .app-nav-links > a:hover,
   body.odyssey-home-page .app-nav .app-nav-links > a[aria-current="page"],
-  body.explore-lessons-page .app-nav .app-nav-links > a[aria-current="page"] {
+  body.explore-lessons-page .app-nav .app-nav-links > a[aria-current="page"],
+  body.odyssey-course-page .app-nav .app-nav-links > a[aria-current="page"] {
     background: #f0f3f8;
     color: #172033;
   }
 
   body.odyssey-home-page .app-nav .app-nav-links > .app-theme-toggle,
-  body.explore-lessons-page .app-nav .app-nav-links > .app-theme-toggle {
+  body.explore-lessons-page .app-nav .app-nav-links > .app-theme-toggle,
+  body.odyssey-course-page .app-nav .app-nav-links > .app-theme-toggle {
     margin-top: auto;
     border: 1px solid #e1e6ef;
   }
 
   body.odyssey-home-page .dashboard-shell,
-  body.explore-lessons-page .dashboard-shell {
-    width: min(calc(100% - 286px), 1320px);
-    margin-left: calc(238px + max(24px, (100vw - 238px - min(1320px, 100vw - 286px)) / 2));
+  body.explore-lessons-page .dashboard-shell,
+  body.odyssey-course-page .dashboard-shell {
+    width: min(1320px, calc(100vw - 286px));
+    margin-left: max(262px, calc((100vw - 1082px) / 2));
     margin-right: 24px;
   }
 
   body.explore-lessons-page .dashboard-shell {
-    width: min(calc(100% - 286px), 1100px);
-    margin-left: calc(238px + max(24px, (100vw - 238px - min(1100px, 100vw - 286px)) / 2));
+    width: min(1100px, calc(100vw - 286px));
+    margin-left: max(262px, calc((100vw - 862px) / 2));
   }
 }
 
 @media (max-width: 768px) {
   body.odyssey-home-page .app-nav,
-  body.explore-lessons-page .app-nav {
+  body.explore-lessons-page .app-nav,
+  body.odyssey-course-page .app-nav {
     background: rgba(255, 255, 255, 0.96);
   }
 
   body.odyssey-home-page .app-brand,
-  body.explore-lessons-page .app-brand {
+  body.explore-lessons-page .app-brand,
+  body.odyssey-course-page .app-brand {
     font-size: 20px;
   }
 
   body.odyssey-home-page .dashboard-shell,
-  body.explore-lessons-page .dashboard-shell {
+  body.explore-lessons-page .dashboard-shell,
+  body.odyssey-course-page .dashboard-shell {
     width: min(100% - 28px, 620px);
     padding-top: calc(var(--mobile-shell-header-height) + 24px);
     padding-bottom: calc(var(--mobile-bottom-nav-height) + var(--mobile-safe-bottom) + 30px);
@@ -2410,30 +2424,37 @@ body.explore-lessons-page:not(.light-mode) {
 }
 
 body.odyssey-home-page:not(.light-mode) .app-nav,
-body.explore-lessons-page:not(.light-mode) .app-nav {
+body.explore-lessons-page:not(.light-mode) .app-nav,
+body.odyssey-course-page:not(.light-mode) .app-nav {
   border-color: #2b3548;
   background: #151e2f;
 }
 
 body.odyssey-home-page:not(.light-mode) .brand-wordmark,
 body.explore-lessons-page:not(.light-mode) .brand-wordmark,
+body.odyssey-course-page:not(.light-mode) .brand-wordmark,
 body.odyssey-home-page:not(.light-mode) .app-nav .app-nav-links > a,
 body.explore-lessons-page:not(.light-mode) .app-nav .app-nav-links > a,
+body.odyssey-course-page:not(.light-mode) .app-nav .app-nav-links > a,
 body.odyssey-home-page:not(.light-mode) .app-nav .app-nav-links > button,
-body.explore-lessons-page:not(.light-mode) .app-nav .app-nav-links > button {
+body.explore-lessons-page:not(.light-mode) .app-nav .app-nav-links > button,
+body.odyssey-course-page:not(.light-mode) .app-nav .app-nav-links > button {
   color: #d9e1ef;
 }
 
 body.odyssey-home-page:not(.light-mode) .app-nav .app-nav-links > a:hover,
 body.explore-lessons-page:not(.light-mode) .app-nav .app-nav-links > a:hover,
+body.odyssey-course-page:not(.light-mode) .app-nav .app-nav-links > a:hover,
 body.odyssey-home-page:not(.light-mode) .app-nav .app-nav-links > a[aria-current="page"],
-body.explore-lessons-page:not(.light-mode) .app-nav .app-nav-links > a[aria-current="page"] {
+body.explore-lessons-page:not(.light-mode) .app-nav .app-nav-links > a[aria-current="page"],
+body.odyssey-course-page:not(.light-mode) .app-nav .app-nav-links > a[aria-current="page"] {
   background: #263149;
   color: #fff;
 }
 
 body.odyssey-home-page:not(.light-mode) .app-nav .app-theme-toggle,
-body.explore-lessons-page:not(.light-mode) .app-nav .app-theme-toggle {
+body.explore-lessons-page:not(.light-mode) .app-nav .app-theme-toggle,
+body.odyssey-course-page:not(.light-mode) .app-nav .app-theme-toggle {
   border-color: #34415a;
 }
 
@@ -6077,7 +6098,6 @@ body.odyssey-course-page .learning-path-eyebrow {
   font-weight: 900;
   letter-spacing: .14em;
 }
-body.odyssey-course-page { visibility: visible; }
 body.odyssey-course-page .learning-path-intro h1 {
   position: relative;
   z-index: 1;
@@ -6777,4 +6797,154 @@ body.odyssey-course-page .learning-path-mascot .course-penguin-image {
   body.odyssey-course-page #courseProgressPanel .learning-path-summary { min-height: 270px; padding-right: 8px; }
   body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading h2 { font-size: 15px; }
   body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-label { font-size: 8px; }
+}
+
+/* Keep the leaderboard readable and scrollable on narrow screens. */
+@media (max-width: 768px) {
+  body.app-page.leaderboard-page {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  body.app-page.leaderboard-page .leaderboard-shell {
+    width: min(calc(100% - 24px), 560px);
+    box-sizing: border-box;
+    min-height: 0;
+    flex: 1 0 auto;
+    gap: 14px;
+    padding: calc(var(--mobile-shell-header-height) + 16px) 0 calc(var(--mobile-bottom-nav-height) + var(--mobile-safe-bottom) + 18px);
+  }
+  body.app-page.leaderboard-page .leaderboard-hero {
+    min-width: 0;
+    gap: 8px;
+    padding: 16px 8px;
+  }
+  body.app-page.leaderboard-page .leaderboard-hero img { width: 58px; height: 58px; }
+  body.app-page.leaderboard-page .leaderboard-hero h1 {
+    max-width: 100%;
+    font-size: clamp(20px, 6vw, 24px);
+    line-height: 1.2;
+    white-space: normal;
+  }
+  body.app-page.leaderboard-page .leaderboard-user-rank {
+    max-width: 100%;
+    font-size: 10px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+  body.app-page.leaderboard-page .leaderboard-panel {
+    min-width: 0;
+    min-height: auto;
+    flex: 0 0 auto;
+    gap: 12px;
+    overflow: visible;
+    padding: 14px;
+    border-radius: 20px;
+  }
+  body.app-page.leaderboard-page .leaderboard-panel-head {
+    min-width: 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+  body.app-page.leaderboard-page .leaderboard-panel-head > div:first-child { min-width: 0; }
+  body.app-page.leaderboard-page .leaderboard-panel h2 {
+    max-width: 100%;
+    font-size: clamp(12px, 4vw, 16px);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  body.app-page.leaderboard-page .leaderboard-sort { width: min(100%, 220px); }
+  body.app-page.leaderboard-page .leaderboard-sort button { min-width: 0; padding-inline: 9px; }
+  body.app-page.leaderboard-page .leaderboard-list {
+    width: 100%;
+    min-height: 0;
+    max-height: none;
+    gap: 8px;
+    overflow: visible;
+    padding: 0;
+  }
+  body.app-page.leaderboard-page .leaderboard-row {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    grid-template-columns: 32px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 8px 10px;
+    align-items: center;
+    overflow: hidden;
+    margin: 0;
+    padding: 11px;
+    border-radius: 15px;
+  }
+  body.app-page.leaderboard-page .leaderboard-position {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    width: 30px;
+    height: 30px;
+    font-size: 10px;
+  }
+  body.app-page.leaderboard-page .leaderboard-player {
+    grid-column: 2;
+    grid-row: 1;
+    gap: 9px;
+  }
+  body.app-page.leaderboard-page .leaderboard-player > span:last-child { min-width: 0; }
+  body.app-page.leaderboard-page .leaderboard-avatar,
+  body.app-page.leaderboard-page .leaderboard-avatar img { width: 34px; height: 34px; }
+  body.app-page.leaderboard-page .leaderboard-player strong {
+    max-width: 100%;
+    font-size: 9px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+  }
+  body.app-page.leaderboard-page .leaderboard-player small { margin-top: 2px; font-size: 10px; }
+  body.app-page.leaderboard-page .leaderboard-stat {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    font-size: 11px;
+  }
+  body.app-page.leaderboard-page .leaderboard-stat small { margin: 0; font-size: 10px; }
+  body.app-page.leaderboard-page .leaderboard-rank { display: none; }
+  body.app-page.leaderboard-page .leaderboard-xp,
+  body.app-page.leaderboard-page .leaderboard-badges {
+    grid-column: 2;
+    grid-row: 3;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 9px;
+    text-align: right;
+    white-space: normal;
+  }
+  body.app-page.leaderboard-page .leaderboard-xp::after,
+  body.app-page.leaderboard-page .leaderboard-badges::after { font-size: 8px; }
+}
+
+@media (max-width: 380px) {
+  body.app-page.leaderboard-page .leaderboard-shell { width: min(calc(100% - 20px), 560px); }
+  body.app-page.leaderboard-page .leaderboard-panel { padding: 11px; }
+  body.app-page.leaderboard-page .leaderboard-row { grid-template-columns: 30px minmax(0, 1fr); gap: 7px 8px; padding: 9px; }
+}
+
+/* The desktop course sidebar is fixed, so give the course canvas its own column. */
+@media (min-width: 769px) {
+  body.app-page.odyssey-course-page.course-page > main.course-shell.dashboard-shell {
+    box-sizing: border-box;
+    width: calc(100vw - 238px);
+    max-width: none;
+    margin: 0 0 0 238px;
+  }
 }
