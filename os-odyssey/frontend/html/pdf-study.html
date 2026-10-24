@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f7fc" />
+  <title>Study session · Odyssey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../../assets/favicon.png" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/mobile.css?v=17" />
+</head>
+<body class="pdf-study-page">
+  <main class="pdf-session" id="pdfSession" aria-live="polite">
+    <header class="pdf-session__header">
+      <a class="pdf-session__exit" href="dashboard.html" aria-label="Back to dashboard">×</a>
+      <div class="pdf-session__identity">
+        <span class="pdf-session__mascot" aria-hidden="true">🐧</span>
+        <span><strong id="pdfSessionTitle">Study session</strong><small id="pdfSessionMode">PENGU STUDY</small></span>
+      </div>
+      <span class="pdf-session__source" id="pdfSessionSource">PDF study deck</span>
+    </header>
+
+    <section class="pdf-session__body" id="pdfSessionBody">
+      <div class="pdf-session__intro">
+        <p class="pdf-session__eyebrow" id="pdfSessionEyebrow">YOUR STUDY SESSION</p>
+        <h1 id="pdfSessionHeading">Let’s make this stick.</h1>
+        <p id="pdfSessionSubheading">One question at a time. You’ve got this.</p>
+      </div>
+
+      <div class="pdf-session__progress-wrap">
+        <div class="pdf-session__progress-copy"><span id="pdfSessionProgressLabel">Card 1 of 1</span><strong id="pdfSessionProgressPercent">0%</strong></div>
+        <div class="pdf-session__progress"><span id="pdfSessionProgress"></span></div>
+      </div>
+
+      <div class="pdf-session__content" id="pdfSessionContent"></div>
+    </section>
+    <footer class="pdf-session__footer"><span>✦</span> Made for curious minds <span class="pdf-session__footer-dot">·</span> Powered by Pengu</footer>
+  </main>
+  <script src="../js/pdf-study.js"></script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; worker-src 'self'; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://localhost:4000 http://127.0.0.1:4000 https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://os-odyssey-api.onrender.com https://cdn.jsdelivr.net; media-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self' https://*.supabase.co; worker-src 'self' blob: https://cdn.jsdelivr.net; child-src 'self' blob: https://cdn.jsdelivr.net; upgrade-insecure-requests" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Odyssey - Home</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -61,6 +61,33 @@
             <source src="../../assets/1023.mp4" type="video/mp4" />
           </video>
         </span>
+      </section>
+
+      <section class="home-flashcard-studio" id="flashcardStudio" aria-label="Create flashcards or a quiz from a PDF">
+        <div class="home-flashcard-builder">
+          <input id="flashcardPdfInput" type="file" accept="application/pdf,.pdf" hidden />
+          <div class="home-flashcard-dropzone home-flashcard-composer" id="flashcardDropzone" data-has-file="false">
+            <button class="home-flashcard-composer__attach" type="button" id="flashcardUploadBtn" aria-label="Choose a PDF to upload">＋</button>
+            <label class="home-flashcard-composer__prompt" for="flashcardPrompt">
+              <span class="home-flashcard-composer__eyebrow">STUDY WITH PENGU</span>
+              <input id="flashcardPrompt" type="text" readonly placeholder="Upload something to make flashcards or a quiz…" aria-label="Upload something to make flashcards or a quiz" />
+            </label>
+            <button class="home-flashcard-composer__send" type="button" id="flashcardGenerateBtn" disabled aria-label="Continue to study chat">↑</button>
+          </div>
+          <div class="home-flashcard-composer__tools" aria-label="Supported study formats">
+            <span><strong aria-hidden="true">↑</strong> PDF</span>
+            <span>Flashcards</span>
+            <span>Quiz</span>
+            <small>PDF up to 10 MB</small>
+          </div>
+          <div class="home-flashcard-filechip" id="flashcardFileChip" hidden>
+            <span class="home-flashcard-filechip__pdf" aria-hidden="true">PDF</span>
+            <span class="home-flashcard-filechip__copy"><strong id="flashcardFileName"></strong><small id="flashcardFileMeta"></small></span>
+            <button type="button" id="flashcardClearFile" aria-label="Remove selected PDF">×</button>
+          </div>
+        </div>
+        <p class="home-flashcard-status" id="flashcardStatus" role="status" aria-live="polite"></p>
+        <div class="home-flashcard-decks" id="flashcardDecks" hidden></div>
       </section>
 
       <a class="home-mobile-continue" href="course.html">
@@ -144,10 +171,37 @@
     </aside>
   </main>
 
+  <div class="pdf-chat-overlay" id="pdfChatOverlay" hidden>
+    <section class="pdf-chat" role="dialog" aria-modal="true" aria-labelledby="pdfChatTitle">
+      <header class="pdf-chat__header">
+        <button class="pdf-chat__back" id="pdfChatBack" type="button" aria-label="Close study chat">←</button>
+        <span class="pdf-chat__avatar"><img src="../../assets/favicon.png" alt="Pengu AI" /></span>
+        <div class="pdf-chat__identity"><strong id="pdfChatTitle">Pengu study chat</strong><small><i></i> Your PDF is the source</small></div>
+        <button class="flashcard-study__close" id="pdfChatClose" type="button" aria-label="Close study chat">×</button>
+      </header>
+      <div class="pdf-chat__source" id="pdfChatSource"><span aria-hidden="true">📄</span><span><strong></strong><small>PDF · ready to explore</small></span></div>
+      <div class="pdf-chat__messages" id="pdfChatMessages" aria-live="polite" aria-label="Conversation with Pengu"></div>
+      <div class="pdf-chat__activity" id="pdfChatActivity">
+        <p>How would you like to study?</p>
+        <div class="pdf-chat__choices">
+          <button type="button" class="pdf-chat__choice" id="pdfMakeFlashcards"><span><img src="../../assets/pixelatedfile-icon.png" alt="" /></span><strong>Memorize</strong><small>Make flashcards</small></button>
+          <button type="button" class="pdf-chat__choice" id="pdfMakeQuiz"><span><img src="../../assets/pixelatedchallenge-icon.png" alt="" /></span><strong>Challenge</strong><small>Take a quiz</small></button>
+        </div>
+      </div>
+      <form class="pdf-chat__composer" id="pdfChatForm">
+        <span class="pdf-chat__composer-avatar" aria-hidden="true"><img src="../../assets/favicon.png" alt="" /></span>
+        <input id="pdfChatInput" type="text" maxlength="1000" placeholder="Ask Pengu about your PDF…" autocomplete="off" aria-label="Ask Pengu about your PDF" />
+        <button type="submit" aria-label="Send message">↑</button>
+      </form>
+      <p class="pdf-chat__notice" id="pdfChatNotice" role="status" aria-live="polite"></p>
+    </section>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase.js"></script>
   <script src="../js/main.js"></script>
   <script src="../js/dashboard-character.js"></script>
+  <script src="../js/flashcards.js"></script>
   <script src="../js/pwa-register.js"></script>
 </body>
 

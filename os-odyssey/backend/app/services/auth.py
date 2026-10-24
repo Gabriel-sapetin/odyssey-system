@@ -38,6 +38,16 @@ async def get_current_user(
 
     try:
         admin = get_admin_client()
+    except RuntimeError as exc:
+        # A backend configuration problem must not masquerade as a bad user
+        # token. Clients treat 401 as a session error and may sign users out.
+        logger.error("Supabase auth service is not configured: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The backend authentication service is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, then restart the backend.",
+        )
+
+    try:
         result = admin.auth.get_user(token)
 
         if not result or not result.user:

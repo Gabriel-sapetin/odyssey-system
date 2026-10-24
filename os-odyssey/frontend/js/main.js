@@ -12,7 +12,7 @@
     const mainScriptUrl = document.currentScript && document.currentScript.src;
     if (mainScriptUrl) {
       const mobileCssUrlObject = new URL('../css/mobile.css', mainScriptUrl);
-      mobileCssUrlObject.searchParams.set('v', '13');
+      mobileCssUrlObject.searchParams.set('v', '20');
       const mobileCssUrl = mobileCssUrlObject.href;
       if (!document.querySelector(`link[href="${mobileCssUrl}"]`)) {
         const mobileCss = document.createElement('link');
