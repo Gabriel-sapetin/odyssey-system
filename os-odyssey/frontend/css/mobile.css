@@ -6442,3 +6442,321 @@ body.odyssey-course-page:not(.light-mode) .lesson-actions { background: color-mi
   body.odyssey-course-page .lesson-actions { margin: 24px -18px -22px; padding: 12px 18px max(14px, env(safe-area-inset-bottom)); border-radius: 0 0 20px 20px; }
   body.odyssey-course-page .lesson-actions .profile-button { min-width: 0; flex: 1; min-height: 46px; }
 }
+
+/* Course overview: animated mascot and progress statistics share the first card. */
+body.odyssey-course-page .learning-path-layout { width: min(1120px, calc(100% - 48px)); margin: 38px auto 70px; }
+body.odyssey-course-page .learning-path-hero {
+  display: grid;
+  grid-template-columns: minmax(190px, .72fr) minmax(0, 1.8fr);
+  align-items: center;
+  gap: 26px;
+}
+body.odyssey-course-page .learning-path-mascot {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 250px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--odyssey-line);
+  border-radius: 28px;
+  background: radial-gradient(ellipse at 50% 65%, rgba(112, 94, 225, .17), transparent 67%), var(--odyssey-panel);
+}
+body.odyssey-course-page .learning-path-mascot .course-penguin-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 9px rgba(20, 25, 55, .18));
+}
+body.odyssey-course-page #courseProgressPanel { min-width: 0; padding: 0; border: 0; background: transparent; }
+body.odyssey-course-page #courseProgressPanel .learning-path-summary { min-height: 250px; }
+body.odyssey-course-page .learning-path-modules { min-width: 0; }
+body.odyssey-course-page .learning-path-map-heading { margin-top: 42px; }
+body.odyssey-course-page:not(.light-mode) .learning-path-mascot { border-color: #303b50; background: radial-gradient(ellipse at 50% 65%, rgba(112, 94, 225, .2), transparent 67%), #202b40; }
+
+/* Keep lab status rows readable in both themes. */
+body.odyssey-course-page .course-activities .lesson-progress-card { background: var(--odyssey-panel); }
+body.odyssey-course-page .course-activities .lesson-progress-card #simProgressSummary { color: var(--odyssey-muted); }
+body.odyssey-course-page .course-activities .sim-progress-item {
+  min-height: 54px;
+  padding: 12px 15px;
+  border: 1px solid #dfe5ef;
+  border-radius: 13px;
+  background: #f8faff;
+  color: #26334b;
+}
+body.odyssey-course-page .course-activities .sim-progress-item span { color: #26334b; font: 750 13px/1.4 Inter, Nunito, system-ui, sans-serif; }
+body.odyssey-course-page .course-activities .sim-progress-item strong { color: #65738b; font: 750 11px/1.4 Inter, Nunito, system-ui, sans-serif; }
+body.odyssey-course-page .course-activities .sim-progress-item.complete { border-color: #a8e3c5; background: #f0fbf5; }
+body.odyssey-course-page .course-activities .sim-progress-item.complete strong { color: #148452; }
+body.odyssey-course-page:not(.light-mode) .course-activities .lesson-progress-card { background: #182236; }
+body.odyssey-course-page:not(.light-mode) .course-activities .sim-progress-item { border-color: #36445e; background: #202b40; color: #edf2fb; }
+body.odyssey-course-page:not(.light-mode) .course-activities .sim-progress-item span { color: #edf2fb; }
+body.odyssey-course-page:not(.light-mode) .course-activities .sim-progress-item strong { color: #bac5d8; }
+body.odyssey-course-page:not(.light-mode) .course-activities .sim-progress-item.complete { border-color: #23774f; background: #173b32; }
+body.odyssey-course-page:not(.light-mode) .course-activities .sim-progress-item.complete strong { color: #8fe0b3; }
+
+/* Professor class detail contrast over the light dashboard surface. */
+body.odyssey-professor-page #profClassDetail { color: #1b2941; }
+body.odyssey-professor-page #profClassDetail .classroom-detail-header h1 { color: #172139; }
+body.odyssey-professor-page #profClassDetail #classDetailMeta { color: #64748b !important; }
+body.odyssey-professor-page #profClassDetail .classroom-inner-tabs { border-bottom-color: #dbe2ec; }
+body.odyssey-professor-page #profClassDetail .classroom-inner-tab { color: #64748b; }
+body.odyssey-professor-page #profClassDetail .classroom-inner-tab:hover { color: #26344d; }
+body.odyssey-professor-page #profClassDetail .classroom-inner-tab.active { color: #c47a08; border-bottom-color: #f2a51a; }
+body.odyssey-professor-page #profClassDetail .admin-table-wrap { border-color: #dbe2ec; background: #fff; }
+body.odyssey-professor-page #profClassDetail .admin-table th { color: #64748b; border-bottom-color: #e4e9f1; }
+body.odyssey-professor-page #profClassDetail .admin-table td { color: #33415a; border-bottom-color: #e9edf3; }
+body.odyssey-professor-page #profClassDetail .admin-table tbody tr:hover { background: #f6f8fc; }
+body.odyssey-professor-page #profClassDetail .admin-table .user-cell .user-name { color: #172139; }
+body.odyssey-professor-page #profClassDetail .admin-table .user-cell .user-email { color: #687790; }
+body.odyssey-professor-page .classroom-detail-header .admin-btn,
+body.odyssey-professor-page #profClassDetail .admin-btn:not(.primary):not(.danger) { border-color: #d3dbe8; background: #fff; color: #34425a; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail { color: #e8eef8; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .classroom-detail-header h1,
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .admin-table .user-cell .user-name { color: #f4f6fb; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail #classDetailMeta { color: #aeb9cc !important; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .classroom-inner-tabs { border-bottom-color: #344158; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .classroom-inner-tab { color: #aeb9cc; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .classroom-inner-tab:hover { color: #fff; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .classroom-inner-tab.active { color: #ffd073; border-bottom-color: #f2a51a; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .admin-table-wrap { border-color: #344158; background: #182236; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .admin-table th { color: #aeb9cc; border-bottom-color: #344158; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .admin-table td { color: #d6deeb; border-bottom-color: #2c3850; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .admin-table tbody tr:hover { background: #202b40; }
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .admin-table .user-cell .user-email { color: #aeb9cc; }
+body.odyssey-professor-page:not(.light-mode) .classroom-detail-header .admin-btn,
+body.odyssey-professor-page:not(.light-mode) #profClassDetail .admin-btn:not(.primary):not(.danger) { border-color: #3b4963; background: #26324a; color: #e8eef8; }
+
+@media (max-width: 700px) {
+  body.odyssey-course-page .learning-path-layout { width: min(100% - 28px, 560px); margin: 20px auto 48px; }
+  body.odyssey-course-page .learning-path-hero { grid-template-columns: minmax(92px, 31%) minmax(0, 1fr); gap: 12px; }
+  body.odyssey-course-page .learning-path-mascot { min-height: 230px; border-radius: 20px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary { min-height: 0; padding: 15px 13px; border-radius: 18px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading h2 { font-size: 16px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-panel-overall { font-size: 11px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-progress-track { height: 7px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-panel-stats-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-num { font-size: 18px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-label { font-size: 9px; line-height: 1.2; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .odyssey-continue-button { min-height: 42px; padding: 0 12px; font-size: 11px; }
+  body.odyssey-course-page .learning-path-map-heading { margin-top: 32px; }
+}
+
+@media (max-width: 420px) {
+  body.odyssey-course-page .learning-path-hero { grid-template-columns: 88px minmax(0, 1fr); gap: 9px; }
+  body.odyssey-course-page .learning-path-mascot { min-height: 216px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary { padding: 12px 10px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading h2 { font-size: 14px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-num { font-size: 16px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-label { font-size: 8px; }
+}
+
+/* Gizmo-style course hero: mascot and learning progress share one banner. */
+body.odyssey-course-page .learning-path-layout { width: min(1160px, calc(100% - 48px)); margin: 38px auto 72px; }
+body.odyssey-course-page .learning-path-hero {
+  position: relative;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 18px;
+  min-height: 340px;
+  padding: 16px 24px 16px 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.86);
+  border-radius: 30px;
+  background: radial-gradient(ellipse at 15% 58%, rgba(128, 105, 235, .18), transparent 34%), linear-gradient(112deg, #fff 0%, #f7f6ff 55%, #efedff 100%);
+  box-shadow: 0 18px 46px rgba(50, 54, 111, .11);
+}
+body.odyssey-course-page .learning-path-hero::after {
+  position: absolute;
+  z-index: 0;
+  top: -190px;
+  right: -105px;
+  width: 400px;
+  height: 400px;
+  border: 1px solid rgba(116, 97, 220, .1);
+  border-radius: 50%;
+  box-shadow: 0 0 0 26px rgba(116, 97, 220, .03), 0 0 0 54px rgba(116, 97, 220, .02);
+  content: '';
+  pointer-events: none;
+}
+body.odyssey-course-page .learning-path-mascot {
+  z-index: 1;
+  min-height: 306px;
+  border: 0;
+  border-radius: 24px;
+  background: radial-gradient(ellipse at 50% 72%, rgba(130, 111, 235, .17), transparent 63%);
+  overflow: hidden;
+}
+body.odyssey-course-page .learning-path-mascot::before {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: min(84%, 270px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(130, 111, 235, .18), rgba(153, 137, 240, .08) 58%, transparent 72%);
+  content: '';
+  transform: translate(-50%, -50%);
+}
+body.odyssey-course-page .learning-path-mascot .course-penguin-image {
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  width: auto;
+  height: 82%;
+  max-width: none;
+  object-fit: contain;
+  transform: translate(-50%, -50%);
+}
+body.odyssey-course-page #courseProgressPanel { z-index: 1; align-self: stretch; display: flex; align-items: center; }
+body.odyssey-course-page #courseProgressPanel .learning-path-summary {
+  width: 100%;
+  min-height: 306px;
+  grid-template-columns: minmax(0, 1fr) minmax(170px, 220px);
+  align-items: center;
+  gap: 17px 24px;
+  padding: 24px 10px 24px 18px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading { align-items: center; }
+body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading h2 { margin-top: 4px; font-size: clamp(21px, 2.3vw, 28px); }
+body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-panel-overall { padding: 8px 12px; border: 1px solid #d9d3ff; border-radius: 999px; background: rgba(255,255,255,.76); font-size: 12px; white-space: nowrap; }
+body.odyssey-course-page #courseProgressPanel .learning-path-progress-track { height: 8px; margin: 0; background: rgba(111, 101, 190, .12); }
+body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-panel-stats-row { gap: 10px; padding: 0; border: 0; }
+body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-mini {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 4px;
+  text-align: left;
+}
+body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-num { font-size: clamp(22px, 2.5vw, 29px); line-height: 1.05; }
+body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-label { font-size: 11px; line-height: 1.25; }
+body.odyssey-course-page #courseProgressPanel .learning-path-summary .odyssey-continue-button {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  min-height: 60px;
+  margin: 0;
+  padding: 0 20px;
+  border-radius: 18px;
+  box-shadow: 0 11px 23px rgba(77, 58, 183, .2);
+  font-size: 14px;
+}
+body.odyssey-course-page .learning-path-map-heading { margin-top: 44px; }
+body.odyssey-course-page:not(.light-mode) .learning-path-hero { border-color: #38435a; background: radial-gradient(ellipse at 15% 58%, rgba(128, 105, 235, .22), transparent 34%), linear-gradient(112deg, #202b40 0%, #20283e 58%, #292542 100%); box-shadow: 0 18px 46px rgba(0, 0, 0, .2); }
+body.odyssey-course-page:not(.light-mode) .learning-path-mascot { background: radial-gradient(ellipse at 50% 72%, rgba(130, 111, 235, .24), transparent 63%); }
+body.odyssey-course-page:not(.light-mode) .learning-path-hero::after { border-color: rgba(190,180,255,.1); }
+body.odyssey-course-page:not(.light-mode) .learning-path-mascot::before { background: radial-gradient(circle, rgba(130, 111, 235, .28), rgba(153, 137, 240, .12) 58%, transparent 72%); }
+body.odyssey-course-page:not(.light-mode) #courseProgressPanel .learning-path-summary .progress-panel-overall { border-color: #4b5273; background: rgba(255,255,255,.08); }
+body.odyssey-course-page:not(.light-mode) #courseProgressPanel .learning-path-progress-track { background: #364258; }
+
+@media (max-width: 700px) {
+  body.odyssey-course-page .learning-path-layout { width: min(100% - 28px, 560px); margin: 18px auto 48px; }
+  body.odyssey-course-page .learning-path-hero {
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 10px;
+    min-height: 246px;
+    padding: 10px 12px 10px 6px;
+    border-radius: 23px;
+  }
+  body.odyssey-course-page .learning-path-mascot { min-height: 220px; border-radius: 18px; }
+  /* The PNG has wide transparent side gutters, so height-based scaling can
+     make the flippers wider than this narrow mobile stage. Keep them inside. */
+  body.odyssey-course-page .learning-path-mascot .course-penguin-image { height: 54%; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 9px 0;
+  }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading h2 { font-size: 17px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-panel-overall { padding: 5px 9px; font-size: 10px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-panel-stats-row { gap: 2px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-mini { padding: 4px 2px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-num { font-size: 20px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-label { font-size: 8px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .odyssey-continue-button { grid-column: 1; grid-row: auto; min-height: 40px; padding: 0 12px; border-radius: 13px; font-size: 10px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .odyssey-continue-button > span:last-child { font-size: 18px; }
+  body.odyssey-course-page .learning-path-map-heading { margin-top: 32px; }
+}
+
+@media (max-width: 380px) {
+  body.odyssey-course-page .learning-path-hero { grid-template-columns: 96px minmax(0, 1fr); gap: 7px; padding-right: 9px; }
+  body.odyssey-course-page .learning-path-mascot { min-height: 214px; }
+  body.odyssey-course-page .learning-path-mascot .course-penguin-image { height: 62%; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading h2 { font-size: 15px; }
+}
+
+/* Give the course overview a generous mascot stage on phones. */
+body.odyssey-course-page .learning-path-mascot { isolation: isolate; }
+body.odyssey-course-page .learning-path-mascot .course-penguin-image {
+  right: auto;
+  bottom: auto;
+  mix-blend-mode: normal;
+  animation: course-penguin-bounce 1.65s cubic-bezier(.42, 0, .28, 1) infinite;
+  animation-play-state: running;
+  transform-origin: 50% 88%;
+}
+@keyframes course-penguin-bounce {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(0) scale(1, 1); }
+  38% { transform: translate(-50%, -50%) translateY(-22px) rotate(-3deg) scale(1.035, 1.035); }
+  58% { transform: translate(-50%, -50%) translateY(0) rotate(1deg) scale(1.08, .91); }
+  74% { transform: translate(-50%, -50%) translateY(-7px) rotate(-1deg) scale(.98, 1.025); }
+}
+
+@media (max-width: 700px) {
+  body.odyssey-course-page .learning-path-hero {
+    grid-template-columns: minmax(128px, .9fr) minmax(0, 1.1fr);
+    gap: 8px;
+    min-height: 314px;
+    padding: 12px 12px 12px 4px;
+    border-radius: 23px;
+  }
+  body.odyssey-course-page .learning-path-mascot { min-height: 288px; border-radius: 18px; }
+  body.odyssey-course-page .learning-path-mascot .course-penguin-image { height: 42%; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 11px;
+    min-height: 288px;
+    padding: 18px 12px 18px 4px;
+  }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading h2 { font-size: 17px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-panel-overall { padding: 6px 8px; font-size: 9px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-panel-stats-row { gap: 2px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-mini { padding: 5px 1px; text-align: center; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-num { font-size: 19px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-label { font-size: 8px; line-height: 1.2; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .odyssey-continue-button {
+    grid-column: 1;
+    grid-row: auto;
+    min-height: 42px;
+    padding: 0 9px;
+    border-radius: 12px;
+    font-size: 10px;
+  }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .odyssey-continue-button > span:last-child { font-size: 20px; }
+}
+
+@media (max-width: 380px) {
+  body.odyssey-course-page .learning-path-hero { grid-template-columns: minmax(116px, .88fr) minmax(0, 1.12fr); gap: 5px; }
+  body.odyssey-course-page .learning-path-mascot { min-height: 270px; }
+  body.odyssey-course-page .learning-path-mascot .course-penguin-image { height: 38%; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary { min-height: 270px; padding-right: 8px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading h2 { font-size: 15px; }
+  body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-label { font-size: 8px; }
+}

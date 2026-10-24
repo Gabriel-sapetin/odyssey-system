@@ -8,7 +8,7 @@
  * API calls always go to the network (no caching of dynamic data).
  */
 
-const CACHE_NAME = 'odyssey-v1';
+const CACHE_NAME = 'odyssey-v3';
 
 // Core app shell files to pre-cache on install
 const APP_SHELL = [
@@ -66,6 +66,10 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
+  // Media players use Range requests and receive 206 Partial Content responses.
+  // Let the browser handle those directly; partial responses cannot be cached.
+  if (request.headers.has('range')) return;
+
   // Skip API / Supabase / external service requests — always go to network
   if (
     url.hostname.includes('supabase.co') ||
@@ -82,9 +86,11 @@ self.addEventListener('fetch', (event) => {
       caches.match(request).then((cached) => {
         if (cached) return cached;
         return fetch(request).then((response) => {
-          if (response.ok) {
+          if (response.status === 200 && response.type !== 'opaque') {
             const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            caches.open(CACHE_NAME)
+              .then((cache) => cache.put(request, clone))
+              .catch((error) => console.warn('[SW] Could not cache static asset:', error));
           }
           return response;
         });
@@ -98,9 +104,11 @@ self.addEventListener('fetch', (event) => {
     caches.match(request).then((cached) => {
       const fetchPromise = fetch(request)
         .then((response) => {
-          if (response.ok) {
+          if (response.status === 200 && response.type !== 'opaque') {
             const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            caches.open(CACHE_NAME)
+              .then((cache) => cache.put(request, clone))
+              .catch((error) => console.warn('[SW] Could not cache page:', error));
           }
           return response;
         })

@@ -11,7 +11,9 @@
   if (hasMobileAppShell || hasMobileLanding || hasMobileAuth || hasMobileInstructorPage) {
     const mainScriptUrl = document.currentScript && document.currentScript.src;
     if (mainScriptUrl) {
-      const mobileCssUrl = new URL('../css/mobile.css', mainScriptUrl).href;
+      const mobileCssUrlObject = new URL('../css/mobile.css', mainScriptUrl);
+      mobileCssUrlObject.searchParams.set('v', '8');
+      const mobileCssUrl = mobileCssUrlObject.href;
       if (!document.querySelector(`link[href="${mobileCssUrl}"]`)) {
         const mobileCss = document.createElement('link');
         mobileCss.rel = 'stylesheet';
@@ -28,6 +30,20 @@
         }
       }
     }
+  }
+
+  const coursePenguin = document.querySelector('.course-penguin-image');
+  if (coursePenguin) {
+    const resumeCoursePenguin = () => {
+      if (document.visibilityState !== 'visible') return;
+      const bounce = coursePenguin.getAnimations().find((animation) => animation.animationName === 'course-penguin-bounce');
+      if (!bounce) return;
+      if (bounce.playState === 'finished') bounce.currentTime = 0;
+      if (bounce.playState !== 'running') bounce.play();
+    };
+    window.addEventListener('load', resumeCoursePenguin, { once: true });
+    window.addEventListener('pageshow', resumeCoursePenguin);
+    document.addEventListener('visibilitychange', resumeCoursePenguin);
   }
 
   const DEFAULT_AVATAR = '../../assets/penguin-flower-removebg-preview.png';
@@ -1258,10 +1274,11 @@
   renderSessionUI();
   loadPlatformStats();
 
-  /* ---- Course page: Live progress panel (right side) ---- */
+  /* ---- Course page: progress summary and module path ---- */
   function renderCourseProgressPanel() {
     const panel = document.getElementById('courseProgressPanel');
-    if (!panel) return;
+    const modulesPanel = document.getElementById('learningPathModules');
+    if (!panel || !modulesPanel) return;
 
     const MODULE_LABELS = {
       module1: { num: '1', title: 'Introduction to Operating Systems', color: '#22c55e' },
@@ -1279,12 +1296,12 @@
     const targetModule = nextModule || MODULE_META[MODULE_META.length - 1];
     const targetNumber = (MODULE_LABELS[targetModule.id] || {}).num || targetModule.id.replace('module', '');
     const actionLabel = nextModule ? (completedCount ? 'Continue' : 'Start') : 'Review';
-    let html = `
+    panel.innerHTML = `
       <section class="learning-path-summary" aria-label="Course progress">
         <div class="learning-path-summary-heading">
           <div>
             <span class="learning-path-eyebrow">COURSE MODULES</span>
-            <h2>Keep your momentum</h2>
+            <h2>Learning progress</h2>
           </div>
           <span class="progress-panel-overall">${overallPct}% complete</span>
         </div>
@@ -1300,6 +1317,9 @@
           <span>${actionLabel} Module ${targetNumber}</span><span aria-hidden="true">→</span>
         </button>
       </section>
+    `;
+
+    let modulesHtml = `
       <div class="learning-path-map-heading">
         <div><span class="learning-path-eyebrow">YOUR ROUTE</span><h2>Follow the path</h2></div>
         <span>${totalModules} modules <i aria-hidden="true">·</i> ${getTotalTopics()} topics</span>
@@ -1316,7 +1336,7 @@
       const statusText = isDone ? 'Completed' : (unlocked ? 'In progress' : 'Locked');
       const topicPct = isDone ? 100 : (unlocked ? 15 : 0);
 
-      html += `
+      modulesHtml += `
         <div class="learning-path-step learning-path-step--${index % 2 === 0 ? 'left' : 'right'} ${statusClass}">
           <span class="learning-path-marker" style="--module-color:${label.color}" aria-hidden="true"><span>${label.num}</span></span>
           <button class="progress-module-row learning-path-module ${statusClass}" type="button" data-start-module="${meta.id}" aria-label="${statusText}: Module ${label.num}, ${label.title}, ${meta.statements} topics" ${unlocked ? '' : 'disabled'}>
@@ -1332,8 +1352,9 @@
       `;
     });
 
-    panel.innerHTML = `${html}</div>`;
+    modulesPanel.innerHTML = `${modulesHtml}</div>`;
     panel.setAttribute('aria-busy', 'false');
+    modulesPanel.setAttribute('aria-busy', 'false');
   }
 
   renderCourseProgressPanel();

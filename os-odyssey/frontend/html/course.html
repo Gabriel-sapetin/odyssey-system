@@ -24,7 +24,7 @@
 
 <body class="app-page course-page odyssey-course-page">
   <main class="course-shell">
-    <section class="learning-path-page" id="modules" aria-labelledby="courseTitle">
+    <section class="learning-path-page" id="modules" aria-label="Operating Systems learning path">
       <header class="netacad-shell-header">
         <div class="course-shell-brand">
           <a href="dashboard.html" class="course-app-brand" aria-label="Odyssey dashboard">
@@ -46,16 +46,21 @@
       </header>
 
       <div class="learning-path-layout">
-        <header class="learning-path-intro">
-          <p class="section-kicker">YOUR LEARNING PATH</p>
-          <h1 id="courseTitle">Operating Systems</h1>
-          <p>Build your understanding of operating systems one lesson at a time. Review each module, practice what you learn, and track your progress as you go.</p>
-          <a class="odyssey-explore-link" href="explore-lessons.html">Explore lessons across subjects <span aria-hidden="true">→</span></a>
-        </header>
-        <section class="learning-path-progress" id="courseProgressPanel" aria-label="Operating Systems learning path" aria-live="polite" aria-busy="true">
+        <section class="learning-path-hero" aria-label="Course progress and penguin guide">
+          <div class="learning-path-mascot" aria-hidden="true">
+            <img class="course-penguin-image" src="../../assets/penguin-glasses-fallback.png" alt="" />
+          </div>
+          <section class="learning-path-progress" id="courseProgressPanel" aria-label="Operating Systems learning path" aria-live="polite" aria-busy="true">
+            <div class="course-path-loading">
+              <img src="../../assets/pixelatedloading.png" alt="" />
+              <span>Loading your learning path…</span>
+            </div>
+          </section>
+        </section>
+        <section class="learning-path-modules" id="learningPathModules" aria-label="Course modules" aria-live="polite" aria-busy="true">
           <div class="course-path-loading">
             <img src="../../assets/pixelatedloading.png" alt="" />
-            <span>Loading your learning path…</span>
+            <span>Loading modules…</span>
           </div>
         </section>
       </div>
