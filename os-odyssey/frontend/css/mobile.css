@@ -6077,6 +6077,7 @@ body.odyssey-course-page .learning-path-eyebrow {
   font-weight: 900;
   letter-spacing: .14em;
 }
+body.odyssey-course-page { visibility: visible; }
 body.odyssey-course-page .learning-path-intro h1 {
   position: relative;
   z-index: 1;
@@ -6110,10 +6111,7 @@ body.odyssey-course-page .course-path-loading {
   padding: 56px 20px;
   color: var(--odyssey-muted);
   font-size: 13px;
-  opacity: 0;
-  animation: course-path-loading-reveal .3s ease-out .6s forwards;
 }
-@keyframes course-path-loading-reveal { to { opacity: 1; } }
 body.odyssey-course-page .course-path-loading img {
   width: 58px;
   height: 58px;
