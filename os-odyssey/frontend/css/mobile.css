@@ -6467,8 +6467,6 @@ body.odyssey-course-page .learning-path-hero {
   grid-template-columns: minmax(190px, .72fr) minmax(0, 1.8fr);
   align-items: center;
   gap: 26px;
-  opacity: 1;
-  transition: opacity .25s ease-out;
 }
 body.odyssey-course-page .learning-path-mascot {
   position: relative;
@@ -6490,6 +6488,7 @@ body.odyssey-course-page .learning-path-mascot .course-penguin-image {
   margin: auto;
   object-fit: contain;
   filter: drop-shadow(0 12px 9px rgba(20, 25, 55, .18));
+  visibility: visible;
 }
 body.odyssey-course-page #courseProgressPanel { min-width: 0; padding: 0; border: 0; background: transparent; }
 body.odyssey-course-page #courseProgressPanel .learning-path-summary { min-height: 250px; }
