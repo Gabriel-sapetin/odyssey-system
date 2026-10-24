@@ -16,6 +16,12 @@
   });
   if (!gl) return;
 
+  /* ── Mobile performance: throttle rendering to ~15fps ── */
+  const IS_MOBILE = window.matchMedia('(max-width: 768px)').matches;
+  const TARGET_FPS = IS_MOBILE ? 15 : 60;
+  const FRAME_INTERVAL = 1000 / TARGET_FPS;
+  let lastFrameTime = 0;
+
   const vertexSource = `
     attribute vec2 aPosition;
     attribute vec2 aTexCoord;
@@ -146,13 +152,18 @@
 
   function scheduleFrame() {
     if (video.paused || video.ended) return;
-    if (typeof video.requestVideoFrameCallback === 'function') {
+    if (typeof video.requestVideoFrameCallback === 'function' && !IS_MOBILE) {
       video.requestVideoFrameCallback(() => {
         renderFrame();
         scheduleFrame();
       });
     } else {
-      requestAnimationFrame(() => {
+      requestAnimationFrame((timestamp) => {
+        if (timestamp - lastFrameTime < FRAME_INTERVAL) {
+          scheduleFrame();
+          return;
+        }
+        lastFrameTime = timestamp;
         renderFrame();
         scheduleFrame();
       });
@@ -170,4 +181,13 @@
   video.addEventListener('play', start);
   video.addEventListener('loadeddata', start, { once: true });
   video.play().catch(() => {});
+
+  /* ── Pause when tab is hidden to save battery ── */
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      video.pause();
+    } else {
+      start();
+    }
+  });
 })();

@@ -24,6 +24,11 @@
 }
 
 @media (max-width: 768px) {
+  /* Hide background video on mobile — saves bandwidth + GPU */
+  .modules-bg-video {
+    display: none !important;
+  }
+
   body.home-page .navbar {
     position: fixed;
     inset: 0 0 auto;
@@ -36,7 +41,7 @@
     background: rgba(255, 255, 255, 0.94);
     border: 0;
     border-bottom: 1px solid #e7ebf2;
-    backdrop-filter: blur(18px);
+    backdrop-filter: blur(10px);
   }
 
   body.home-page .nav-logo {
@@ -148,7 +153,7 @@
     background: rgba(255, 255, 255, 0.95);
     border: 0;
     border-bottom: 1px solid #e7ebf2;
-    backdrop-filter: blur(18px);
+    backdrop-filter: blur(10px);
   }
 
   body.auth-page .nav-logo {
@@ -331,8 +336,8 @@
     border: 0;
     border-bottom: 1px solid #e7ebf2;
     box-shadow: 0 2px 12px rgba(24, 35, 61, 0.05);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   body.app-page:not(.light-mode) .app-nav {
@@ -564,8 +569,8 @@
     background: rgba(255, 255, 255, 0.96);
     border-top: 1px solid #e7ebf2;
     box-shadow: 0 -6px 22px rgba(24, 35, 61, 0.07);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   body.app-page:not(.light-mode) .mobile-bottom-nav {
@@ -655,8 +660,8 @@
     background: rgba(255, 255, 255, 0.97);
     border-top: 1px solid #e5eaf2;
     box-shadow: 0 -6px 22px rgba(24, 35, 61, 0.08);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   body.app-page:not(.light-mode) .mobile-sim-dock {

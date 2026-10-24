@@ -11,9 +11,7 @@
   if (hasMobileAppShell || hasMobileLanding || hasMobileAuth || hasMobileInstructorPage) {
     const mainScriptUrl = document.currentScript && document.currentScript.src;
     if (mainScriptUrl) {
-      const mobileCssUrlObject = new URL('../css/mobile.css', mainScriptUrl);
-      mobileCssUrlObject.searchParams.set('v', '8');
-      const mobileCssUrl = mobileCssUrlObject.href;
+      const mobileCssUrl = new URL('../css/mobile.css', mainScriptUrl).href;
       if (!document.querySelector(`link[href="${mobileCssUrl}"]`)) {
         const mobileCss = document.createElement('link');
         mobileCss.rel = 'stylesheet';
@@ -122,30 +120,31 @@
     const POS_KEY = 'os-odyssey-bgm-position';
     const BGM_VOLUME = 0.3;
 
-    const bgm = new Audio(BGM_SRC);
-    bgm.loop = true;
-    bgm.volume = BGM_VOLUME;
+    let bgm = null;
+    let userMuted = localStorage.getItem(MUTE_KEY) === 'true';
 
-    /* Restore mute preference */
-    const isMuted = localStorage.getItem(MUTE_KEY) === 'true';
-    bgm.muted = isMuted;
-
-    /* Restore playback position so music doesn't restart on navigation */
-    const savedPos = parseFloat(sessionStorage.getItem(POS_KEY));
-    if (!isNaN(savedPos) && savedPos > 0) {
-      bgm.currentTime = savedPos;
+    /** Lazily create Audio element — avoids downloading 5.7 MB until needed */
+    function ensureBgm() {
+      if (bgm) return bgm;
+      bgm = new Audio(BGM_SRC);
+      bgm.loop = true;
+      bgm.volume = BGM_VOLUME;
+      bgm.muted = userMuted;
+      const savedPos = parseFloat(sessionStorage.getItem(POS_KEY));
+      if (!isNaN(savedPos) && savedPos > 0) bgm.currentTime = savedPos;
+      return bgm;
     }
 
-    /* Periodically save position so page transitions are seamless */
+    /* Periodically save position (reduced from 500ms → 2s for perf) */
     setInterval(() => {
-      if (!bgm.paused) {
+      if (bgm && !bgm.paused) {
         sessionStorage.setItem(POS_KEY, bgm.currentTime);
       }
-    }, 500);
+    }, 2000);
 
     /* Save position right before navigating away */
     window.addEventListener('beforeunload', () => {
-      sessionStorage.setItem(POS_KEY, bgm.currentTime);
+      if (bgm) sessionStorage.setItem(POS_KEY, bgm.currentTime);
     });
 
     /* — Inject floating mute/unmute toggle — */
@@ -157,8 +156,8 @@
       || document.body.classList.contains('explore-lessons-page');
     const updateAudioLabel = () => {
       btn.textContent = usePlainAudioLabel
-        ? (bgm.muted ? 'Sound off' : 'Sound on')
-        : (bgm.muted ? '🔇' : '🔊');
+        ? (userMuted ? 'Sound off' : 'Sound on')
+        : (userMuted ? '🔇' : '🔊');
     };
     updateAudioLabel();
     document.body.appendChild(btn);
@@ -167,8 +166,9 @@
 
     btn.addEventListener('click', (e) => {
       e.stopPropagation(); // don't trigger the document-level tryStartBgm
-      bgm.muted = !bgm.muted;
-      localStorage.setItem(MUTE_KEY, bgm.muted);
+      userMuted = !userMuted;
+      if (bgm) bgm.muted = userMuted;
+      localStorage.setItem(MUTE_KEY, userMuted);
       updateAudioLabel();
     });
 
@@ -185,7 +185,7 @@
       if (bgmStarted) return;
       bgmStarted = true;
 
-      bgm.play().then(() => {
+      ensureBgm().play().then(() => {
         // Successfully playing — remove listeners so we never re-trigger
         removeStartListeners();
       }).catch(err => {
@@ -196,7 +196,7 @@
 
     document.addEventListener('click', tryStartBgm, true);
     document.addEventListener('keydown', tryStartBgm, true);
-    document.addEventListener('touchstart', tryStartBgm, true);
+    document.addEventListener('touchstart', tryStartBgm, { passive: true, capture: true });
   })();
 
   /* ---- Module stats metadata (update as new modules are built) ---- */
@@ -1189,6 +1189,9 @@
 
   /* ---- Snow particle effect over hero ---- */
   function spawnSnow() {
+    /* Skip snow on reduced-motion preference */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     const hero = document.querySelector('.hero');
     const dashboard = document.querySelector('.dashboard-shell');
     const profile = document.querySelector('.profile-shell');
@@ -1205,7 +1208,9 @@
         z-index: 6;
         image-rendering: pixelated;
         animation: fall linear infinite;
-        border-radius: 0; /* pixel square flakes */
+        border-radius: 0;
+        will-change: transform, opacity;
+        contain: strict;
       }
       @keyframes fall {
         0%   { transform: translateY(-20px) translateX(0px); opacity: 0; }
@@ -1216,8 +1221,9 @@
     `;
     document.head.appendChild(style);
 
-    /* Fewer, subtler flakes on the dashboard so they don't distract */
-    const count = hero ? 35 : 22;
+    /* Fewer flakes on mobile and dashboard for performance */
+    const isMobile = window.innerWidth <= 768;
+    const count = isMobile ? (hero ? 8 : 5) : (hero ? 35 : 22);
     const maxOpacity = hero ? 0.5 : 0.35;
 
     /* Dashboard needs position:relative so absolute flakes stay inside */
@@ -1244,6 +1250,21 @@
   }
 
   spawnSnow();
+
+  /* ---- Lazy-load background video when visible ---- */
+  (function lazyLoadBgVideo() {
+    const bgVideo = document.querySelector('.modules-bg-video');
+    if (!bgVideo || window.innerWidth <= 768) return;
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          bgVideo.play().catch(() => {});
+          videoObserver.unobserve(bgVideo);
+        }
+      });
+    }, { threshold: 0.1 });
+    videoObserver.observe(bgVideo);
+  })();
 
   /* ---- Module card click ripple ---- */
   document.querySelectorAll('.module-card').forEach(card => {

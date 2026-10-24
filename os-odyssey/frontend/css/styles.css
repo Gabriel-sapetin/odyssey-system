@@ -505,6 +505,8 @@ a {
   margin: 0;
   overflow: hidden;
   background: var(--bg);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
 }
 
 .modules-bg-video {
@@ -545,6 +547,7 @@ a {
 .penguin-icon {
   width: 80px;
   animation: float 2.5s ease-in-out infinite;
+  will-change: transform;
 }
 
 @keyframes float {
@@ -660,6 +663,7 @@ a {
   cursor: pointer;
   filter: drop-shadow(2px 3px 0px rgba(0,0,0,0.35));
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+  will-change: transform;
 }
 
 .card-pengu img {
@@ -738,6 +742,26 @@ a {
   }
 }
 
+/* ---- Accessibility: reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .penguin-icon,
+  .auth-penguin,
+  .card-pengu--wave,
+  .card-pengu--peek,
+  .card-pengu--bounce,
+  .card-pengu--spin,
+  .card-pengu--wobble,
+  .card-pengu--slide {
+    animation: none !important;
+  }
+
+  .module-card,
+  .btn,
+  .card-pengu {
+    transition: none !important;
+  }
+}
+
 /* ---- CTA SECTION ----
    Background: bg-mountains-day.jpg (light) / hero-bg-night.jpg (dark)
    Overlaid with semi-transparent scrim for legibility
@@ -747,6 +771,8 @@ a {
   padding: 100px 40px;
   text-align: center;
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
 
   background-image: url('../../assets/bg-mountains-day.jpg');
   background-size: cover;
