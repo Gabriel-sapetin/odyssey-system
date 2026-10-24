@@ -6467,6 +6467,8 @@ body.odyssey-course-page .learning-path-hero {
   grid-template-columns: minmax(190px, .72fr) minmax(0, 1.8fr);
   align-items: center;
   gap: 26px;
+  opacity: 1;
+  transition: opacity .25s ease-out;
 }
 body.odyssey-course-page .learning-path-mascot {
   position: relative;

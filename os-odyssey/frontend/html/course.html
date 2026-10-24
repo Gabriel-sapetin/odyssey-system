@@ -20,6 +20,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Odyssey" />
   <link rel="apple-touch-icon" href="../../assets/pwa-icon-512.jpg" />
+  <!-- Prevent flash of unstyled penguin image before mobile.css loads dynamically -->
+  <style>
+    .learning-path-hero { opacity: 0; }
+  </style>
 </head>
 
 <body class="app-page course-page odyssey-course-page">
