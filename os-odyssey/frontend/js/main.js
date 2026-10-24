@@ -11,7 +11,9 @@
   if (hasMobileAppShell || hasMobileLanding || hasMobileAuth || hasMobileInstructorPage) {
     const mainScriptUrl = document.currentScript && document.currentScript.src;
     if (mainScriptUrl) {
-      const mobileCssUrl = new URL('../css/mobile.css', mainScriptUrl).href;
+      const mobileCssUrlObject = new URL('../css/mobile.css', mainScriptUrl);
+      mobileCssUrlObject.searchParams.set('v', '9');
+      const mobileCssUrl = mobileCssUrlObject.href;
       if (!document.querySelector(`link[href="${mobileCssUrl}"]`)) {
         const mobileCss = document.createElement('link');
         mobileCss.rel = 'stylesheet';

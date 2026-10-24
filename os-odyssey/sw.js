@@ -8,7 +8,7 @@
  * API calls always go to the network (no caching of dynamic data).
  */
 
-const CACHE_NAME = 'odyssey-v4';
+const CACHE_NAME = 'odyssey-v5';
 
 // Core app shell files to pre-cache on install
 const APP_SHELL = [
