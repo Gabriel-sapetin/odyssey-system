@@ -510,7 +510,7 @@
             <span><small>XP</small><strong>${professorXp.toLocaleString()}</strong></span>
           </span>
         </span>
-        <h3>${c.theme_emoji ? c.theme_emoji + ' ' : ''}${esc(c.name)}</h3>
+        <h3>${esc(c.name)}</h3>
         <span style="display:inline-block;font-size:0.7rem;padding:0.15rem 0.5rem;border-radius:20px;background:${c.theme_color || '#6366f1'}22;color:${c.theme_color || '#6366f1'};border:1px solid ${c.theme_color || '#6366f1'}44;margin-top:0.3rem;font-family:'Nunito',sans-serif;">${esc(c.subject || 'General')}</span>
         ${c.description ? `<p style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-top:0.2rem">${esc(c.description)}</p>` : ''}
         <div class="classroom-meta">

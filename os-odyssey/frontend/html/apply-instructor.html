@@ -12,392 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/styles.css" />
   <link rel="stylesheet" href="../css/admin.css" />
-  <style>
-    .instructor-apply-shell {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 2rem 1.25rem 5rem;
-    }
-
-    .apply-hero {
-      background: linear-gradient(135deg, rgba(30, 30, 58, 0.7), rgba(20, 20, 40, 0.9));
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
-      padding: 2.25rem 2rem;
-      margin-bottom: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .apply-hero::before {
-      content: '';
-      position: absolute;
-      top: -40px;
-      right: -40px;
-      width: 180px;
-      height: 180px;
-      background: radial-gradient(circle, rgba(245, 166, 35, 0.15) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .apply-kicker {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.65rem;
-      color: var(--accent, #f5a623);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 0.75rem;
-    }
-
-    .apply-title {
-      font-family: 'Press Start 2P', monospace;
-      font-size: clamp(1.1rem, 2.8vw, 1.6rem);
-      color: #fff;
-      line-height: 1.4;
-      margin-bottom: 0.85rem;
-    }
-
-    .apply-desc {
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.95rem;
-      color: rgba(255, 255, 255, 0.7);
-      line-height: 1.6;
-      max-width: 720px;
-      margin: 0;
-    }
-
-    .apply-card {
-      background: linear-gradient(160deg, #1b1b33, #141427);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 2rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-    }
-
-    .apply-section-heading {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.8rem;
-      color: #fff;
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-    .apply-section-sub {
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.82rem;
-      color: rgba(255, 255, 255, 0.5);
-      margin-bottom: 1.25rem;
-    }
-
-    .apply-grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .apply-grid-3 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .apply-input,
-    .apply-select,
-    .apply-textarea {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 10px;
-      padding: 0.75rem 1rem;
-      color: #fff;
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-      box-sizing: border-box;
-    }
-
-    .apply-input:focus,
-    .apply-select:focus,
-    .apply-textarea:focus {
-      outline: none;
-      border-color: var(--accent, #f5a623);
-      background: rgba(255, 255, 255, 0.08);
-      box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15);
-    }
-
-    .apply-select option {
-      background: #1b1b33;
-      color: #fff;
-    }
-
-    .upload-box {
-      border: 2px dashed rgba(255, 255, 255, 0.18);
-      border-radius: 12px;
-      padding: 1.5rem 1rem;
-      text-align: center;
-      background: rgba(255, 255, 255, 0.02);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .upload-box:hover,
-    .upload-box.drag-over {
-      border-color: var(--accent, #f5a623);
-      background: rgba(245, 166, 35, 0.04);
-    }
-
-    .upload-box input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
-    }
-
-    .upload-title {
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 0.3rem;
-    }
-
-    .upload-hint {
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.45);
-      line-height: 1.4;
-    }
-
-    .upload-preview {
-      display: none;
-      margin-top: 1rem;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      padding: 0.75rem;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-    }
-
-    .upload-preview.active {
-      display: flex;
-    }
-
-    .upload-preview-thumb {
-      width: 48px;
-      height: 48px;
-      border-radius: 6px;
-      object-fit: cover;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .upload-preview-info {
-      flex: 1;
-      text-align: left;
-      overflow: hidden;
-    }
-
-    .upload-preview-name {
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .upload-preview-size {
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.7rem;
-      color: rgba(255, 255, 255, 0.45);
-    }
-
-    .upload-preview-remove {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #f87171;
-      border-radius: 6px;
-      padding: 0.3rem 0.6rem;
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .upload-preview-remove:hover {
-      background: rgba(239, 68, 68, 0.25);
-    }
-
-    .verification-notice {
-      background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      border-radius: 10px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 1.5rem;
-      display: flex;
-      gap: 0.75rem;
-      align-items: flex-start;
-    }
-
-    .verification-notice p {
-      margin: 0;
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.82rem;
-      color: rgba(255, 255, 255, 0.8);
-      line-height: 1.5;
-    }
-
-    .affirmation-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      margin: 1.5rem 0;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 10px;
-      padding: 1rem;
-    }
-
-    .affirmation-row input[type="checkbox"] {
-      margin-top: 0.2rem;
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-      accent-color: var(--accent, #f5a623);
-    }
-
-    .affirmation-row label {
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.82rem;
-      color: rgba(255, 255, 255, 0.75);
-      line-height: 1.5;
-      cursor: pointer;
-    }
-
-    .btn-submit-app {
-      width: 100%;
-      background: linear-gradient(135deg, #f5a623, #d98210);
-      color: #12121e;
-      border: none;
-      border-radius: 10px;
-      padding: 0.95rem 1.5rem;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 15px rgba(245, 166, 35, 0.25);
-    }
-
-    .btn-submit-app:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(245, 166, 35, 0.35);
-    }
-
-    .btn-submit-app:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Status Banner Cards */
-    .status-panel {
-      display: none;
-      background: linear-gradient(160deg, #1b1b33, #141427);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 18px;
-      padding: 2.5rem 2rem;
-      text-align: center;
-      margin-bottom: 2rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .status-panel.active {
-      display: block;
-    }
-
-    .status-pill {
-      display: inline-block;
-      padding: 0.35rem 1rem;
-      border-radius: 999px;
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 800;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 1rem;
-    }
-
-    .status-pill.pending {
-      background: rgba(245, 166, 35, 0.15);
-      color: #f5a623;
-      border: 1px solid rgba(245, 166, 35, 0.3);
-    }
-
-    .status-pill.approved {
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
-      border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-
-    .status-pill.denied {
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .status-title {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 1.15rem;
-      color: #fff;
-      margin-bottom: 0.75rem;
-    }
-
-    .status-desc {
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.95rem;
-      color: rgba(255, 255, 255, 0.65);
-      line-height: 1.6;
-      max-width: 600px;
-      margin: 0 auto 1.5rem;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 0.75rem;
-      text-align: left;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .summary-item strong {
-      display: block;
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.4);
-      margin-bottom: 0.2rem;
-    }
-
-    .summary-item span {
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.85rem;
-      color: #fff;
-      font-weight: 700;
-    }
-  </style>
+  <link rel="stylesheet" href="../css/apply-instructor.css?v=20261027-5" />
   <link rel="manifest" href="../../manifest.json" />
   <meta name="theme-color" content="#1a1a2e" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -432,15 +47,6 @@
   </nav>
 
   <main class="instructor-apply-shell">
-
-    <!-- Hero Header -->
-    <header class="apply-hero">
-      <div class="apply-kicker">INSTRUCTOR VERIFICATION PROGRAM</div>
-      <h1 class="apply-title">Apply as an Odyssey Instructor</h1>
-      <p class="apply-desc">
-        Empower students with customized classrooms, AI-driven learning personas, interactive simulations, and structured modules. Submit your academic credentials and verified proof of teaching to join our educator network.
-      </p>
-    </header>
 
     <!-- State 1: Checking Authentication / Status -->
     <div id="stateLoading" style="text-align:center;padding:3rem 1rem;">
@@ -505,9 +111,43 @@
 
     <!-- State 6: Application Form (Students / New Applicants) -->
     <form id="instructorForm" style="display:none;">
+      <div class="wizard-progress" id="wizardProgress" aria-live="polite">
+        <div class="wizard-progress-copy">
+          <span id="wizardStepLabel">Application</span>
+          <span id="wizardStepCount">Start</span>
+        </div>
+        <div class="wizard-progress-track" role="progressbar" aria-label="Application progress" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0">
+          <span id="wizardProgressFill"></span>
+        </div>
+      </div>
+
+      <section class="apply-card wizard-step" data-wizard-step="0">
+        <h1 class="apply-section-heading wizard-question">Do you want to be an Odyssey Instructor?</h1>
+        <p class="apply-section-sub">You’ll complete four short sections and provide proof of your teaching role.</p>
+        <fieldset class="instructor-choice-group">
+          <legend class="sr-only">Would you like to apply?</legend>
+          <label class="instructor-choice">
+            <input type="radio" name="wantsInstructorAccess" value="yes" required />
+            <span><strong>Yes, I want to apply</strong><small>Continue to the application</small></span>
+          </label>
+          <label class="instructor-choice">
+            <input type="radio" name="wantsInstructorAccess" value="no" />
+            <span><strong>Not right now</strong><small>Leave the application for later</small></span>
+          </label>
+        </fieldset>
+        <div class="wizard-declined" id="wizardDeclined" hidden>
+          <p>No problem. You can apply whenever you’re ready.</p>
+          <button class="wizard-button wizard-button-secondary" id="wizardChangeChoice" type="button">Change my choice</button>
+          <a class="wizard-button wizard-button-primary" href="dashboard.html">Return to Dashboard</a>
+        </div>
+        <div class="wizard-nav">
+          <a class="wizard-button wizard-button-secondary" href="dashboard.html">Back</a>
+          <button class="wizard-button wizard-button-primary" type="button" data-wizard-next>Next</button>
+        </div>
+      </section>
 
       <!-- Section 1: Personal & Contact Information -->
-      <section class="apply-card">
+      <section class="apply-card wizard-step" data-wizard-step="1" hidden>
         <h2 class="apply-section-heading">1. Personal & Contact Information</h2>
         <p class="apply-section-sub">Please provide your full legal name and official contact channels.</p>
 
@@ -541,10 +181,14 @@
             </select>
           </div>
         </div>
+        <div class="wizard-nav">
+          <button class="wizard-button wizard-button-secondary" type="button" data-wizard-back>Back</button>
+          <button class="wizard-button wizard-button-primary" type="button" data-wizard-next>Next</button>
+        </div>
       </section>
 
       <!-- Section 2: Academic & Institutional Affiliation -->
-      <section class="apply-card">
+      <section class="apply-card wizard-step" data-wizard-step="2" hidden>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.4rem;">
           <div>
             <h2 class="apply-section-heading" style="margin-bottom:0.25rem;">2. Institutional Affiliation & Location</h2>
@@ -613,9 +257,9 @@
           </div>
 
           <!-- Live School Suggestions Dropdown -->
-          <div id="schoolSuggestionsContainer" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:50;background:#18182e;border:1px solid rgba(255,255,255,0.15);border-radius:10px;box-shadow:0 12px 28px rgba(0,0,0,0.5);max-height:260px;overflow-y:auto;padding:0.4rem;">
+          <div id="schoolSuggestionsContainer" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:50;max-height:260px;overflow-y:auto;padding:0.4rem;">
             <div id="schoolSuggestionsList"></div>
-            <div id="schoolCustomOption" style="border-top:1px solid rgba(255,255,255,0.08);padding:0.5rem 0.75rem;font-size:0.78rem;color:#f5a623;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:0.25rem;"></div>
+            <div id="schoolCustomOption"></div>
           </div>
           <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:0.35rem;font-family:'Nunito',sans-serif;">
             Tip: You can select a located school or freely type any custom school, high school, or institute.
@@ -649,10 +293,14 @@
           <label for="subjectsTaught">Subject Areas You Plan to Teach *</label>
           <input type="text" id="subjectsTaught" class="apply-input" required minlength="2" maxlength="300" placeholder="e.g. Operating Systems, Computer Architecture, Art Appreciation" />
         </div>
+        <div class="wizard-nav">
+          <button class="wizard-button wizard-button-secondary" type="button" data-wizard-back>Back</button>
+          <button class="wizard-button wizard-button-primary" type="button" data-wizard-next>Next</button>
+        </div>
       </section>
 
       <!-- Section 3: Verification Credentials & Real Teacher Proof -->
-      <section class="apply-card">
+      <section class="apply-card wizard-step" data-wizard-step="3" hidden>
         <h2 class="apply-section-heading">3. Faculty Identification & Teaching Proof</h2>
         <p class="apply-section-sub">Upload clear photographic proof confirming you are an active educator.</p>
 
@@ -703,10 +351,14 @@
             </div>
           </div>
         </div>
+        <div class="wizard-nav">
+          <button class="wizard-button wizard-button-secondary" type="button" data-wizard-back>Back</button>
+          <button class="wizard-button wizard-button-primary" type="button" data-wizard-next>Next</button>
+        </div>
       </section>
 
       <!-- Section 4: Teaching Philosophy & Statement -->
-      <section class="apply-card">
+      <section class="apply-card wizard-step" data-wizard-step="4" hidden>
         <h2 class="apply-section-heading">4. Statement of Purpose</h2>
         <p class="apply-section-sub">Describe your background and what courses or labs you intend to build on Odyssey.</p>
 
@@ -725,20 +377,37 @@
 
         <div id="formErrorMessage" style="display:none;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:0.75rem 1rem;border-radius:8px;font-family:'Nunito',sans-serif;font-size:0.85rem;margin-bottom:1rem;"></div>
 
-        <button type="submit" class="btn-submit-app" id="submitAppBtn">
-          Submit Instructor Application
-        </button>
+        <div class="wizard-nav">
+          <button class="wizard-button wizard-button-secondary" type="button" data-wizard-back>Back</button>
+          <button type="submit" class="btn-submit-app" id="submitAppBtn">Submit Instructor Application</button>
+        </div>
       </section>
 
     </form>
 
   </main>
 
+  <div class="apply-choice-screen" id="applyChoiceScreen" hidden aria-hidden="true">
+    <section class="apply-choice-panel" role="dialog" aria-modal="true" aria-labelledby="applyChoiceTitle">
+      <header class="apply-choice-header">
+        <button class="apply-choice-back" id="applyChoiceBack" type="button" aria-label="Back to application">←</button>
+        <div>
+          <p class="apply-choice-kicker">APPLICATION DETAILS</p>
+          <h1 id="applyChoiceTitle">Choose an option</h1>
+        </div>
+      </header>
+      <label class="apply-choice-search-label" for="applyChoiceSearch">Find an option</label>
+      <input class="apply-choice-search" id="applyChoiceSearch" type="search" autocomplete="off" placeholder="Type to filter…" />
+      <p class="apply-choice-count" id="applyChoiceCount" aria-live="polite"></p>
+      <div class="apply-choice-options" id="applyChoiceOptions" role="listbox" aria-labelledby="applyChoiceTitle"></div>
+    </section>
+  </div>
+
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase.js"></script>
   <script src="../js/main.js"></script>
-  <script src="../js/apply-instructor.js"></script>
+  <script src="../js/apply-instructor.js?v=20261027-5"></script>
   <script src="../js/pwa-register.js"></script>
 </body>
 

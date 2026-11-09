@@ -111,6 +111,8 @@ Go to **Project Settings → API** in Supabase and note down:
 cd os-odyssey/backend
 ```
 
+> **Windows shortcut:** From this directory (`os-odyssey/backend`), run `.\start-backend.ps1` in PowerShell. It creates the backend `.venv`, installs the requirements when needed, and starts the API. It uses Python 3.11 or 3.12 so the dependencies stay isolated from other Python projects.
+
 ### Step 2 — Create a Virtual Environment
 
 ```bash
@@ -238,6 +240,7 @@ Open **two terminals** and run both services simultaneously:
 ```bash
 cd os-odyssey/backend
 .\.venv\Scripts\Activate.ps1      # Activate venv (Windows)
+python -m pip install -r requirements.txt  # First run, or after requirements change
 python server.py                   # Starts on http://localhost:4000
 ```
 
@@ -316,7 +319,7 @@ The project includes a `vercel.json` for deployment to [Vercel](https://vercel.c
 
 | Problem                                  | Solution                                                                                  |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `ModuleNotFoundError` when running backend | Make sure your virtual environment is activated (`.venv`)                                 |
+| `ModuleNotFoundError` when running backend | Run `.\start-backend.ps1` from `os-odyssey/backend`, or activate `.venv` there and run `python -m pip install -r requirements.txt` |
 | CORS errors in browser console           | Check `CORS_ORIGINS` in `.env` matches your frontend URL exactly (including port)          |
 | `Connection refused` on port 4000        | Ensure the backend is running with `python server.py`                                     |
 | `GEMINI_API_KEY is not configured`       | Add `GEMINI_API_KEY=...` to `os-odyssey/backend/.env` and restart the backend              |

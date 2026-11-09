@@ -204,12 +204,12 @@ a {
   border: var(--pixel-border);
   border-radius: var(--radius);
   color: var(--text);
-  box-shadow: 3px 3px 0 rgba(26, 26, 46, 0.18);
+  box-shadow: 3px 3px 0 rgba(46, 37, 26, 0.18);
 }
 
 .nav-profile:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 rgba(26, 26, 46, 0.28);
+  box-shadow: 4px 4px 0 rgba(46, 37, 26, 0.28);
 }
 
 .nav-profile-avatar {
@@ -2887,7 +2887,7 @@ body.lesson-open .course-shell {
   align-items: center;
   padding: 0 16px;
   border-radius: 6px;
-  background: #8a3ffc;
+  background: var(--orange);
   color: #ffffff;
   font-family: var(--font-pixel);
   font-size: 9px;
@@ -2917,7 +2917,7 @@ body.lesson-open .course-shell {
 
 .leaderboard-sort button:hover,
 .leaderboard-sort button.active {
-  background: #8a3ffc;
+  background: var(--orange);
   color: #ffffff;
 }
 
@@ -2992,7 +2992,7 @@ body.lesson-open .course-shell {
 .leaderboard-row.top-1 .leaderboard-position,
 .leaderboard-row.top-2 .leaderboard-position,
 .leaderboard-row.top-3 .leaderboard-position {
-  background: #8a3ffc;
+  background: var(--orange);
 }
 
 .leaderboard-player {
@@ -3107,7 +3107,7 @@ body.lesson-open .course-shell {
 
 .light-mode .leaderboard-sort button:hover,
 .light-mode .leaderboard-sort button.active {
-  background: #8a3ffc;
+  background: var(--orange);
   color: #ffffff;
 }
 
@@ -5522,7 +5522,7 @@ textarea {
     justify-content: flex-start;
     padding: 16px;
     gap: 0;
-    background: linear-gradient(180deg, #050918 0%, #1a2341 50%, #263550 100%);
+    background: linear-gradient(180deg, #050918 0%, #41301a 50%, #263550 100%);
     border-bottom: none;
     z-index: 1000;
     overflow-y: auto;
@@ -6153,7 +6153,7 @@ textarea {
 #bgmToggle:hover {
   transform: scale(1.12);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
-  background: rgba(40, 40, 60, 0.85);
+  background: rgba(60, 51, 40, 0.85);
 }
 #bgmToggle:active {
   transform: scale(0.95);
@@ -6285,7 +6285,7 @@ textarea {
   right: 0;
   z-index: 10000;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-top: 1px solid rgba(124, 77, 255, 0.3);
+  border-top: 1px solid rgba(255, 178, 77, 0.3);
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
@@ -6309,7 +6309,7 @@ textarea {
   height: 48px;
   border-radius: 12px;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(124, 77, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(255, 178, 77, 0.3);
 }
 .pwa-banner__text {
   display: flex;
@@ -6334,7 +6334,7 @@ textarea {
 .pwa-banner__install {
   flex: 1;
   padding: 10px 0;
-  background: linear-gradient(135deg, #7c4dff, #6200ea);
+  background: linear-gradient(135deg, var(--orange), var(--orange-h));
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -6346,7 +6346,7 @@ textarea {
 }
 .pwa-banner__install:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(124, 77, 255, 0.4);
+  box-shadow: 0 4px 16px rgba(255, 178, 77, 0.4);
 }
 .pwa-banner__install:active {
   transform: translateY(0);

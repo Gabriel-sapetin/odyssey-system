@@ -1120,7 +1120,7 @@
 }
 
 .boot-detail {
-  color: #a78bfa;
+  color: #ffbd4a;
   padding-left: 12px;
 }
 
@@ -1577,7 +1577,7 @@
 
 .pcb-new {
   background: rgba(167, 139, 250, 0.2);
-  color: #a78bfa;
+  color: #ffbd4a;
 }
 
 .pcb-ready {

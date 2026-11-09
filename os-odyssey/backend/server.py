@@ -4,7 +4,17 @@ Odyssey — Uvicorn Entry Point
 Run with:  python server.py
 """
 
-import uvicorn
+try:
+    import uvicorn
+except ModuleNotFoundError as exc:
+    if exc.name == "uvicorn":
+        raise SystemExit(
+            "Backend dependencies are missing. From this folder run "
+            "'.\\start-backend.ps1' (PowerShell), or install them with "
+            "'python -m pip install -r requirements.txt'."
+        ) from exc
+    raise
+
 from app.config import settings
 
 if __name__ == "__main__":

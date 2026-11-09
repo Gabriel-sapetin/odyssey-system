@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
-  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/styles.css?v=21" />
   <link rel="manifest" href="../../manifest.json" />
   <meta name="theme-color" content="#1a1a2e" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -54,12 +54,8 @@
           <h1 id="mobileStudyTitle">What shall we study?</h1>
           <p>Pick a path and make a little progress today.</p>
         </div>
-        <span class="home-mobile-greeting__avatar" data-motion-mascot aria-hidden="true">
-          <img class="home-character-cutout-fallback" src="../../assets/penguin-flower-removebg-preview.png" alt="" />
-          <canvas class="home-character-cutout" width="380" height="340" aria-hidden="true"></canvas>
-          <video class="home-character-motion-source" muted loop playsinline preload="metadata" aria-hidden="true">
-            <source src="../../assets/1023.mp4" type="video/mp4" />
-          </video>
+        <span class="home-mobile-greeting__avatar pengu-3d-avatar" aria-hidden="true">
+          <img class="pengu-3d-img" src="../../assets/pengu-3d-hello.png" alt="" />
         </span>
       </section>
 
@@ -90,14 +86,16 @@
         <div class="home-flashcard-decks" id="flashcardDecks" hidden></div>
       </section>
 
-      <a class="home-mobile-continue" href="course.html">
+      <a class="home-mobile-continue os-continue-card" href="course.html">
         <span class="home-mobile-continue__icon" aria-hidden="true"><img src="../../assets/pixelatedos.png" alt="" /></span>
         <span class="home-mobile-continue__copy">
           <small>JUMP BACK IN</small>
           <strong>Operating Systems</strong>
           <span>Continue your course journey</span>
         </span>
-        <span class="home-mobile-continue__arrow" aria-hidden="true">→</span>
+        <span class="home-mobile-continue__arrow os-arrow-3d" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </span>
       </a>
 
       <header class="odyssey-home-heading">
@@ -113,8 +111,8 @@
           <p>Find lessons, quizzes, and hands-on activities in the Odyssey learning library.</p>
           <a href="explore-lessons.html" class="explore-lessons-promo__action">Start exploring <span aria-hidden="true">→</span></a>
         </div>
-        <div class="explore-lessons-promo__art" aria-hidden="true">
-          <img src="../../assets/penguin-flower-removebg-preview.png" alt="" />
+        <div class="explore-lessons-promo__art pengu-3d-banner-art" aria-hidden="true">
+          <img class="pengu-3d-img" src="../../assets/pengu-3d-hello.png" alt="" />
         </div>
       </section>
 
@@ -199,8 +197,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase.js"></script>
-  <script src="../js/main.js"></script>
-  <script src="../js/dashboard-character.js"></script>
+  <script src="../js/main.js?v=21"></script>
   <script src="../js/flashcards.js"></script>
   <script src="../js/pwa-register.js"></script>
 </body>

@@ -68,7 +68,19 @@ backend/
 ## To Start
 ```bash
 cd backend
-pip install -r requirements.txt
+```
+
+On Windows PowerShell, run the setup and server launcher (it creates `.venv`, installs the pinned requirements when they change, and starts the API):
+```powershell
+.\start-backend.ps1
+```
+
+Or install and run manually:
+```bash
+python -m venv .venv
+# Windows PowerShell: .\.venv\Scripts\Activate.ps1
+# macOS/Linux: source .venv/bin/activate
+python -m pip install -r requirements.txt
 python server.py
 ```
 

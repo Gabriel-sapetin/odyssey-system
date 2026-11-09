@@ -27,6 +27,29 @@
   const instructorForm = document.getElementById('instructorForm');
   const formErrorMessage = document.getElementById('formErrorMessage');
   const submitAppBtn = document.getElementById('submitAppBtn');
+  const wizardSteps = Array.from(document.querySelectorAll('.wizard-step'));
+  const wizardStepLabel = document.getElementById('wizardStepLabel');
+  const wizardStepCount = document.getElementById('wizardStepCount');
+  const wizardProgressFill = document.getElementById('wizardProgressFill');
+  const wizardProgressTrack = document.querySelector('.wizard-progress-track');
+  const wizardDeclined = document.getElementById('wizardDeclined');
+  const instructorChoiceGroup = document.querySelector('.instructor-choice-group');
+  const wizardQuestion = document.querySelector('.wizard-question');
+  const wizardIntroSub = document.querySelector('[data-wizard-step="0"] .apply-section-sub');
+  let currentWizardStep = 0;
+
+  // Long selects use a dedicated full-screen picker so native menus never spill
+  // outside the narrow mobile form. Values still live in the original controls.
+  const choiceScreen = document.getElementById('applyChoiceScreen');
+  const choiceTitle = document.getElementById('applyChoiceTitle');
+  const choiceSearch = document.getElementById('applyChoiceSearch');
+  const choiceCount = document.getElementById('applyChoiceCount');
+  const choiceOptions = document.getElementById('applyChoiceOptions');
+  const choiceBack = document.getElementById('applyChoiceBack');
+  let activeChoiceSelect = null;
+  let activeChoiceTrigger = null;
+  let choicePreviousOverflow = '';
+  const choiceTriggers = new WeakMap();
 
   // Location & Cascading Elements: Country -> Region -> Province -> City
   const btnDetectLocation = document.getElementById('btnDetectLocation');
@@ -277,10 +300,99 @@
     hideAllStates();
     if (el === instructorForm) {
       el.style.display = 'block';
+      setWizardStep(0);
     } else if (el) {
       el.classList.add('active');
     }
   }
+
+  function setWizardStep(stepNumber) {
+    currentWizardStep = Math.max(0, Math.min(4, stepNumber));
+    wizardSteps.forEach((step) => {
+      step.hidden = Number(step.dataset.wizardStep) !== currentWizardStep;
+    });
+
+    if (wizardStepLabel) {
+      wizardStepLabel.textContent = currentWizardStep === 0
+        ? 'Instructor application'
+        : wizardSteps[currentWizardStep]?.querySelector('.apply-section-heading')?.textContent.trim() || 'Instructor application';
+    }
+    if (wizardStepCount) wizardStepCount.textContent = currentWizardStep === 0 ? 'Start' : `Step ${currentWizardStep} of 4`;
+    if (wizardProgressFill) wizardProgressFill.style.width = `${(currentWizardStep / 4) * 100}%`;
+    if (wizardProgressTrack) wizardProgressTrack.setAttribute('aria-valuenow', String(currentWizardStep));
+
+    if (currentWizardStep === 0) resetWizardDecline();
+    if (formErrorMessage) formErrorMessage.style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetWizardDecline() {
+    if (wizardDeclined) wizardDeclined.hidden = true;
+    if (instructorChoiceGroup) instructorChoiceGroup.hidden = false;
+    if (wizardQuestion) wizardQuestion.textContent = 'Do you want to be an Odyssey Instructor?';
+    if (wizardIntroSub) wizardIntroSub.hidden = false;
+    const nextButton = document.querySelector('[data-wizard-step="0"] [data-wizard-next]');
+    if (nextButton) nextButton.hidden = false;
+  }
+
+  function validateWizardStep(step) {
+    const fields = Array.from(step.querySelectorAll('input, select, textarea'))
+      .filter((field) => field.willValidate && !field.disabled && field.type !== 'radio');
+    const invalidField = fields.find((field) => !field.checkValidity());
+    if (!invalidField) return true;
+    const selectTrigger = invalidField instanceof HTMLSelectElement ? choiceTriggers.get(invalidField) : null;
+    if (selectTrigger) {
+      invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      openChoiceScreen(invalidField);
+      return false;
+    }
+    invalidField.reportValidity();
+    invalidField.focus({ preventScroll: true });
+    invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return false;
+  }
+
+  instructorForm?.querySelectorAll('[data-wizard-next]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (currentWizardStep === 0) {
+        const choice = instructorForm.querySelector('input[name="wantsInstructorAccess"]:checked')?.value;
+        if (!choice) {
+          const yesChoice = instructorForm.querySelector('input[name="wantsInstructorAccess"][value="yes"]');
+          yesChoice?.reportValidity();
+          return;
+        }
+        if (choice === 'no') {
+          if (instructorChoiceGroup) instructorChoiceGroup.hidden = true;
+          if (wizardQuestion) wizardQuestion.textContent = 'No problem.';
+          if (wizardIntroSub) {
+            wizardIntroSub.textContent = 'You can come back and apply whenever you’re ready.';
+            wizardIntroSub.hidden = false;
+          }
+          if (wizardDeclined) wizardDeclined.hidden = false;
+          button.hidden = true;
+          return;
+        }
+        setWizardStep(1);
+        return;
+      }
+
+      const activeStep = wizardSteps[currentWizardStep];
+      if (activeStep && validateWizardStep(activeStep)) setWizardStep(currentWizardStep + 1);
+    });
+  });
+
+  instructorForm?.querySelectorAll('[data-wizard-back]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      setWizardStep(currentWizardStep - 1);
+    });
+  });
+
+  document.getElementById('wizardChangeChoice')?.addEventListener('click', (event) => {
+    event.preventDefault();
+    resetWizardDecline();
+  });
 
   function formatBytes(bytes) {
     if (bytes === 0) return '0 Bytes';
@@ -436,18 +548,26 @@
     // Populate Region Select
     institutionRegion.innerHTML = '<option value="">Select Region</option>';
 
+    // Keep canonical region strings as option values for lookups and saved
+    // applications, but use compact labels so native mobile select menus fit.
+    const regionLabel = (region) => ({
+      'NCR (National Capital Region / Metro Manila)': 'NCR (Metro Manila)',
+      'CAR (Cordillera Administrative Region)': 'CAR (Cordillera)',
+      'BARMM (Bangsamoro)': 'BARMM (Bangsamoro)',
+    })[region] || region;
+
     if (selectedCountry === 'Philippines') {
       Object.keys(PH_REGIONS_AND_PROVINCES).forEach(reg => {
         const opt = document.createElement('option');
         opt.value = reg;
-        opt.textContent = reg;
+        opt.textContent = regionLabel(reg);
         institutionRegion.appendChild(opt);
       });
     } else if (selectedCountry === 'United States') {
       Object.keys(US_LOCATIONS).forEach(reg => {
         const opt = document.createElement('option');
         opt.value = reg;
-        opt.textContent = reg;
+        opt.textContent = regionLabel(reg);
         institutionRegion.appendChild(opt);
       });
     }
@@ -455,7 +575,7 @@
     // Custom option
     const otherOpt = document.createElement('option');
     otherOpt.value = 'other';
-    otherOpt.textContent = 'Other / Type custom region...';
+    otherOpt.textContent = 'Other / enter manually';
     institutionRegion.appendChild(otherOpt);
   }
 
@@ -870,7 +990,7 @@
 
     if (!items.length) {
       schoolSuggestionsList.innerHTML = `
-        <div style="padding:0.6rem 0.8rem;font-size:0.8rem;color:rgba(255,255,255,0.45);font-family:'Nunito',sans-serif;">
+        <div class="school-suggest-empty">
           No exact database match. You can type and use any custom institution.
         </div>
       `;
@@ -879,21 +999,17 @@
     }
 
     schoolSuggestionsList.innerHTML = items.map(item => `
-      <div class="school-suggest-row" style="padding:0.6rem 0.75rem;border-radius:6px;cursor:pointer;transition:background 0.15s;font-family:'Nunito',sans-serif;">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;">
-          <strong style="color:#fff;font-size:0.85rem;">${esc(item.name)}</strong>
-          <span style="font-size:0.68rem;padding:0.15rem 0.45rem;border-radius:4px;background:rgba(56,189,248,0.15);color:#38bdf8;white-space:nowrap;">${esc(item.type)}</span>
-        </div>
-        <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);margin-top:0.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-          ${esc(item.fullAddress)}
-        </div>
-      </div>
+      <button type="button" class="school-suggest-row">
+        <span class="school-suggest-copy">
+          <strong>${esc(item.name)}</strong>
+          <span class="school-suggest-address">${esc(item.fullAddress)}</span>
+        </span>
+        <span class="school-suggest-type">${esc(item.type)}</span>
+      </button>
     `).join('');
 
     const rows = schoolSuggestionsList.querySelectorAll('.school-suggest-row');
     rows.forEach((row, idx) => {
-      row.addEventListener('mouseenter', () => { row.style.background = 'rgba(245, 166, 35, 0.12)'; });
-      row.addEventListener('mouseleave', () => { row.style.background = 'transparent'; });
       row.addEventListener('click', () => {
         institutionInput.value = items[idx].name;
         schoolSuggestionsContainer.style.display = 'none';
@@ -902,6 +1018,152 @@
     });
 
     schoolSuggestionsContainer.style.display = 'block';
+  }
+
+  function longSelectOptions(select) {
+    return Array.from(select.options).filter(option => option.value !== '');
+  }
+
+  function shouldUseChoiceScreen(select) {
+    return select instanceof HTMLSelectElement && longSelectOptions(select).length > 4;
+  }
+
+  function renderChoiceOptions() {
+    if (!activeChoiceSelect || !choiceOptions) return;
+    const query = (choiceSearch?.value || '').trim().toLocaleLowerCase();
+    const options = longSelectOptions(activeChoiceSelect).filter(option =>
+      option.textContent.trim().toLocaleLowerCase().includes(query)
+    );
+    choiceOptions.innerHTML = '';
+    options.forEach(option => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'apply-choice-option';
+      button.setAttribute('role', 'option');
+      button.setAttribute('aria-selected', String(activeChoiceSelect.value === option.value));
+      button.textContent = option.textContent.trim();
+      if (activeChoiceSelect.value === option.value) {
+        const check = document.createElement('span');
+        check.className = 'apply-choice-check';
+        check.setAttribute('aria-hidden', 'true');
+        check.textContent = '✓';
+        button.appendChild(check);
+      }
+      button.addEventListener('click', () => {
+        const select = activeChoiceSelect;
+        if (!select) return;
+        select.value = option.value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        closeChoiceScreen(true);
+      });
+      choiceOptions.appendChild(button);
+    });
+    if (choiceCount) choiceCount.textContent = `${options.length} ${options.length === 1 ? 'option' : 'options'}`;
+    if (!options.length) {
+      const empty = document.createElement('p');
+      empty.className = 'apply-choice-empty';
+      empty.textContent = 'No matches. Try another search.';
+      choiceOptions.appendChild(empty);
+    }
+  }
+
+  function openChoiceScreen(select) {
+    const cascadingLocationSelect = ['institutionRegion', 'institutionProvince', 'institutionCity'].includes(select?.id);
+    if (!choiceScreen || (!shouldUseChoiceScreen(select) && !cascadingLocationSelect)) return;
+    if (!choiceScreen.hidden && activeChoiceSelect === select) return;
+    activeChoiceSelect = select;
+    activeChoiceTrigger = choiceTriggers.get(select) || null;
+    const label = document.querySelector(`label[for="${CSS.escape(select.id)}"]`);
+    if (choiceTitle) choiceTitle.textContent = label?.textContent.replace(/\s*\*\s*$/, '').trim() || 'Choose an option';
+    if (choiceSearch) choiceSearch.value = '';
+    renderChoiceOptions();
+    choicePreviousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    choiceScreen.inert = false;
+    choiceScreen.hidden = false;
+    choiceScreen.setAttribute('aria-hidden', 'false');
+    activeChoiceTrigger?.setAttribute('aria-expanded', 'true');
+    // Force a layout before animating so opening is reliable after a select tap
+    // on touch browsers as well as with a mouse or keyboard.
+    choiceScreen.getBoundingClientRect();
+    choiceScreen.classList.add('is-open');
+    choiceSearch?.focus({ preventScroll: true });
+  }
+
+  function closeChoiceScreen(restoreFocus = true) {
+    if (!choiceScreen || choiceScreen.hidden) return;
+    const trigger = activeChoiceTrigger || (activeChoiceSelect && choiceTriggers.get(activeChoiceSelect));
+    // Move focus out before hiding the dialog from assistive technology.
+    if (restoreFocus) trigger?.focus({ preventScroll: true });
+    trigger?.setAttribute('aria-expanded', 'false');
+    choiceScreen.classList.remove('is-open');
+    choiceScreen.setAttribute('aria-hidden', 'true');
+    choiceScreen.inert = true;
+    document.body.style.overflow = choicePreviousOverflow;
+    activeChoiceSelect = null;
+    activeChoiceTrigger = null;
+    window.setTimeout(() => {
+      if (!choiceScreen.classList.contains('is-open')) choiceScreen.hidden = true;
+    }, 190);
+  }
+
+  function setupLongSelectPickers() {
+    document.querySelectorAll('.instructor-apply-page select.apply-select').forEach(select => {
+      const cascadingLocationSelect = ['institutionRegion', 'institutionProvince', 'institutionCity'].includes(select.id);
+      if (!shouldUseChoiceScreen(select) && !cascadingLocationSelect) return;
+      const label = document.querySelector(`label[for="${CSS.escape(select.id)}"]`);
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'apply-select apply-select-trigger';
+      trigger.setAttribute('aria-haspopup', 'dialog');
+      trigger.setAttribute('aria-controls', 'applyChoiceScreen');
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.setAttribute('aria-label', `${label?.textContent.replace(/\s*\*\s*$/, '').trim() || 'Choose an option'}: ${select.selectedOptions[0]?.textContent.trim() || 'Select an option'}`);
+      if (label) {
+        if (!label.id) label.id = `${select.id}Label`;
+        trigger.setAttribute('aria-labelledby', label.id);
+      }
+
+      const syncTrigger = () => {
+        const selected = select.selectedOptions[0];
+        trigger.textContent = selected?.textContent.trim() || 'Select an option';
+        trigger.disabled = select.disabled;
+        trigger.setAttribute('aria-label', `${label?.textContent.replace(/\s*\*\s*$/, '').trim() || 'Choose an option'}: ${selected?.textContent.trim() || 'Select an option'}`);
+      };
+      syncTrigger();
+      select.addEventListener('change', syncTrigger);
+      const optionObserver = new MutationObserver(syncTrigger);
+      optionObserver.observe(select, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] });
+      select.insertAdjacentElement('afterend', trigger);
+      choiceTriggers.set(select, trigger);
+      select.tabIndex = -1;
+      select.setAttribute('aria-hidden', 'true');
+      select.classList.add('apply-select-native-picker');
+      trigger.addEventListener('click', () => openChoiceScreen(select));
+    });
+    choiceBack?.addEventListener('click', () => closeChoiceScreen(true));
+    choiceSearch?.addEventListener('input', renderChoiceOptions);
+    choiceScreen?.addEventListener('keydown', event => {
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(choiceScreen.querySelectorAll('button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])'))
+        .filter(element => !element.hidden && element.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !choiceScreen.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !choiceScreen.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && choiceScreen && !choiceScreen.hidden) {
+        event.preventDefault();
+        closeChoiceScreen(true);
+      }
+    });
   }
 
   // ─── Setup File Upload Handlers ──────────────────────────
@@ -1076,6 +1338,7 @@
   // ─── Main Application Logic ──────────────────────────────
 
   async function initApplyPage() {
+    setupLongSelectPickers();
     initLocationSystem();
 
     // Wait for Supabase client
@@ -1112,6 +1375,34 @@
       showState(stateAlreadyProfessor);
       return;
     }
+
+    // Initialize the form controls before checking prior applications so a denied
+    // applicant who chooses to reapply gets the same working upload flow.
+    setupUploadHandlers(
+      idDropZone,
+      idFileInput,
+      idPreview,
+      idPreviewThumb,
+      idPreviewName,
+      idPreviewSize,
+      idPreviewRemove,
+      (file) => { idSelectedFile = file; },
+      () => { idSelectedFile = null; }
+    );
+
+    setupUploadHandlers(
+      proofDropZone,
+      proofFileInput,
+      proofPreview,
+      proofPreviewThumb,
+      proofPreviewName,
+      proofPreviewSize,
+      proofPreviewRemove,
+      (file) => { proofSelectedFile = file; },
+      () => { proofSelectedFile = null; }
+    );
+
+    instructorForm.addEventListener('submit', handleFormSubmit);
 
     try {
       const { data: apps, error: fetchErr } = await window.supa
@@ -1160,33 +1451,6 @@
 
     showState(instructorForm);
     prefillForm(profile, null);
-
-    // Setup file pickers
-    setupUploadHandlers(
-      idDropZone,
-      idFileInput,
-      idPreview,
-      idPreviewThumb,
-      idPreviewName,
-      idPreviewSize,
-      idPreviewRemove,
-      (file) => { idSelectedFile = file; },
-      () => { idSelectedFile = null; }
-    );
-
-    setupUploadHandlers(
-      proofDropZone,
-      proofFileInput,
-      proofPreview,
-      proofPreviewThumb,
-      proofPreviewName,
-      proofPreviewSize,
-      proofPreviewRemove,
-      (file) => { proofSelectedFile = file; },
-      () => { proofSelectedFile = null; }
-    );
-
-    instructorForm.addEventListener('submit', handleFormSubmit);
   }
 
   function prefillForm(profile, previousApp) {
