@@ -12,7 +12,7 @@
     const mainScriptUrl = document.currentScript && document.currentScript.src;
     if (mainScriptUrl) {
       const mobileCssUrlObject = new URL('../css/mobile.css', mainScriptUrl);
-      mobileCssUrlObject.searchParams.set('v', '29');
+      mobileCssUrlObject.searchParams.set('v', '30');
       const mobileCssUrl = mobileCssUrlObject.href;
       if (!document.querySelector(`link[href="${mobileCssUrl}"]`)) {
         const mobileCss = document.createElement('link');
@@ -2775,6 +2775,9 @@
       elements.primaryAction.disabled = false;
       elements.primaryAction.textContent = state.quizIndex === currentModule().quiz.length - 1 ? 'See Summary' : 'Next Question';
       updateBackAction();
+      setTimeout(() => {
+        elements.feedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 60);
     }
 
     function handlePrimaryAction() {
