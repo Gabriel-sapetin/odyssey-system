@@ -4,33 +4,38 @@
   const body = document.body;
   if (!body || (!body.classList.contains('app-page') && !body.classList.contains('home-page') && !body.classList.contains('instructor-apply-page'))) return;
 
-  const currentFile = window.location.pathname.split('/').pop().toLowerCase();
+  const rawFile = window.location.pathname.split('/').pop().toLowerCase();
+  const currentFile = rawFile.replace(/\.html$/, '');
   const simNames = new Set([
-    'boot-sim.html', 'deadlock-sim.html', 'disk-sim.html', 'filesystem-sim.html',
-    'memory-sim.html', 'process-sim.html', 'scheduling-sim.html', 'syscall-sim.html',
-    'thread-sim.html', 'virtual-memory-sim.html'
+    'boot-sim', 'deadlock-sim', 'disk-sim', 'filesystem-sim',
+    'memory-sim', 'process-sim', 'scheduling-sim', 'syscall-sim',
+    'thread-sim', 'virtual-memory-sim'
   ]);
   const isSimulation = simNames.has(currentFile);
 
-  const home = { key: 'home', label: 'Home', icon: 'pixelatedhome.png', href: 'dashboard.html', files: ['dashboard.html'] };
-  const learn = { key: 'learn', label: 'My Learning', icon: 'pixelatedlearning.png', href: 'course.html', files: ['course.html'] };
-  const explore = { key: 'explore', label: 'Explore Lessons', icon: 'pixelatedlessons.png', href: 'explore-lessons.html', files: ['explore-lessons.html'] };
-  const classes = { key: 'classes', label: 'Classes', icon: 'pixelatedclasses1.png', href: 'classroom.html', files: ['classroom.html'] };
-  const profile = { key: 'profile', label: 'Profile', href: 'profile.html', files: ['profile.html', 'leaderboard.html', 'character-select.html'] };
-  const management = { key: 'management', label: 'Management', href: 'admin.html', files: ['admin.html'] };
+  const isCleanUrl = !window.location.pathname.endsWith('.html');
+  const ext = isCleanUrl ? '' : '.html';
+  const prefix = isCleanUrl ? '/' : '';
+
+  const home = { key: 'home', label: 'Home', icon: 'pixelatedhome.png', href: prefix + 'dashboard' + ext, files: ['dashboard', 'dashboard.html'] };
+  const learn = { key: 'learn', label: 'My Learning', icon: 'pixelatedlearning.png', href: prefix + 'course' + ext, files: ['course', 'course.html'] };
+  const explore = { key: 'explore', label: 'Explore Lessons', icon: 'pixelatedlessons.png', href: prefix + 'explore-lessons' + ext, files: ['explore-lessons', 'explore-lessons.html'] };
+  const classes = { key: 'classes', label: 'Classes', icon: 'pixelatedclasses1.png', href: prefix + 'classroom' + ext, files: ['classroom', 'classroom.html'] };
+  const profile = { key: 'profile', label: 'Profile', href: prefix + 'profile' + ext, files: ['profile', 'profile.html', 'leaderboard', 'leaderboard.html', 'character-select', 'character-select.html'] };
+  const management = { key: 'management', label: 'Management', href: prefix + 'admin' + ext, files: ['admin', 'admin.html'] };
 
   function tabsForRole(role) {
     if (role === 'admin') {
       return [home, learn, explore, management, profile];
     }
     if (role === 'professor' || role === 'instructor') {
-      return [home, { ...classes, label: 'My Classes', href: 'professor.html', files: ['professor.html', 'classroom.html'] }, learn, explore, profile];
+      return [home, { ...classes, label: 'My Classes', href: prefix + 'professor' + ext, files: ['professor', 'professor.html', 'classroom', 'classroom.html'] }, learn, explore, profile];
     }
     return [home, learn, explore, classes, profile];
   }
 
   function activeKey(tabs) {
-    const matchingTab = tabs.find(tab => tab.files.includes(currentFile));
+    const matchingTab = tabs.find(tab => tab.files.includes(currentFile) || tab.files.includes(rawFile));
     if (matchingTab) return matchingTab.key;
     if (isSimulation) return 'learn';
     return '';

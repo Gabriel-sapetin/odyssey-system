@@ -702,8 +702,8 @@
     const avatar = user.avatar || DEFAULT_AVATAR;
     const character = user.character || DEFAULT_CHARACTER;
 
-    // Desktop nav links: <a href="profile.html">...</a>
-    document.querySelectorAll('.app-nav-links a[href="profile.html"]').forEach(link => {
+    // Desktop nav links: <a href="profile.html"> or <a href="/profile">
+    document.querySelectorAll('.app-nav-links a[href="profile.html"], .app-nav-links a[href="/profile"], .app-nav-links a[href$="profile"]').forEach(link => {
       let icon = link.querySelector('.nav-profile-avatar, .nav-computer-icon, .dashboard-nav-icon');
       if (avatar === 'computer') {
         if (!icon || !icon.classList.contains('nav-computer-icon')) {
@@ -730,8 +730,8 @@
       }
     });
 
-    // Mobile bottom nav item: <a class="mobile-bottom-nav__item..." href="profile.html">...</a>
-    const mobileLink = document.querySelector('.mobile-bottom-nav a[href="profile.html"]');
+    // Mobile bottom nav item: <a class="mobile-bottom-nav__item..." href="profile.html"> or href="/profile"
+    const mobileLink = document.querySelector('.mobile-bottom-nav a[href="profile.html"], .mobile-bottom-nav a[href="/profile"], .mobile-bottom-nav a[href$="profile"]');
     if (mobileLink) {
       let mIcon = mobileLink.querySelector('.mobile-bottom-nav__icon');
       if (avatar === 'computer') {

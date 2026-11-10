@@ -8,32 +8,32 @@
  * API calls always go to the network (no caching of dynamic data).
  */
 
-const CACHE_NAME = 'odyssey-v25';
+const CACHE_NAME = 'odyssey-v26';
 
 // Core app shell files to pre-cache on install
 const APP_SHELL = [
-  '/os-odyssey/frontend/html/index.html',
-  '/os-odyssey/frontend/html/login.html',
-  '/os-odyssey/frontend/html/signup.html',
-  '/os-odyssey/frontend/html/dashboard.html',
-  '/os-odyssey/frontend/html/pdf-study.html',
-  '/os-odyssey/frontend/html/explore-lessons.html',
-  '/os-odyssey/frontend/html/course.html',
-  '/os-odyssey/frontend/css/styles.css',
-  '/os-odyssey/frontend/css/mobile.css',
-  '/os-odyssey/frontend/js/main.js',
-  '/os-odyssey/frontend/js/flashcards.js',
-  '/os-odyssey/frontend/js/pdf-study.js',
-  '/os-odyssey/frontend/js/mobile-nav.js',
-  '/os-odyssey/frontend/js/supabase.js',
-  '/os-odyssey/assets/favicon.png',
-  '/os-odyssey/assets/pixelatedfile.png',
-  '/os-odyssey/assets/pixelatedchallenge.png',
-  '/os-odyssey/assets/pixelatedfile-icon.png',
-  '/os-odyssey/assets/pixelatedchallenge-icon.png',
-  '/os-odyssey/assets/penguin-flower-removebg-preview.png',
-  '/os-odyssey/assets/pwa-icon-512.jpg',
-  '/os-odyssey/manifest.json'
+  '/',
+  '/login',
+  '/signup',
+  '/dashboard',
+  '/pdf-study',
+  '/explore-lessons',
+  '/course',
+  '/css/styles.css',
+  '/css/mobile.css',
+  '/js/main.js',
+  '/js/flashcards.js',
+  '/js/pdf-study.js',
+  '/js/mobile-nav.js',
+  '/js/supabase.js',
+  '/assets/favicon.png',
+  '/assets/pixelatedfile.png',
+  '/assets/pixelatedchallenge.png',
+  '/assets/pixelatedfile-icon.png',
+  '/assets/pixelatedchallenge-icon.png',
+  '/assets/penguin-flower-removebg-preview.png',
+  '/assets/pwa-icon-512.jpg',
+  '/manifest.json'
 ];
 
 // ── Install ─────────────────────────────────────────────────
@@ -129,6 +129,10 @@ self.addEventListener('fetch', (event) => {
     caches.match(request).then((cached) => {
       const fetchPromise = fetch(request)
         .then((response) => {
+          // If response was redirected (e.g. *.html -> clean URL), return Response.redirect to prevent ERR_FAILED
+          if (response.redirected) {
+            return Response.redirect(response.url, 302);
+          }
           if (response.status === 200 && response.type !== 'opaque') {
             const clone = response.clone();
             caches.open(CACHE_NAME)

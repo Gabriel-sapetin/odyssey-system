@@ -6,8 +6,8 @@
  *    - HTML files move to dist/ root
  *    - css/, js/, assets/ move to dist/ root
  *    - sw.js, manifest.json move to dist/ root
- * 3. Rewrites all relative paths in HTML files
- * 4. Rewrites absolute paths in JS files (SW, PWA, OAuth)
+ * 3. Rewrites all relative paths & internal links in HTML files to clean URLs
+ * 4. Rewrites absolute paths & navigations in JS files to clean URLs
  * 5. Obfuscates all JS files in-place within dist/
  * 
  * Source files remain untouched — only dist/ is modified.
@@ -23,34 +23,21 @@ const TEMP_DIR = path.join(DIST_DIR, 'os-odyssey');
 
 // Obfuscation settings — strong protection while keeping code functional
 const OBFUSCATOR_OPTIONS = {
-  // Compacts the output into a single line
   compact: true,
-  // Control flow flattening makes logic very hard to follow
   controlFlowFlattening: true,
   controlFlowFlatteningThreshold: 0.75,
-  // Dead code injection adds fake code blocks
   deadCodeInjection: true,
   deadCodeInjectionThreshold: 0.4,
-  // Prevents debugging via DevTools
   debugProtection: false,
-  // Disables console output (set to false to keep console.log working)
   disableConsoleOutput: false,
-  // Mangles variable/function names
   identifierNamesGenerator: 'hexadecimal',
-  // Logs obfuscation (false = silent)
   log: false,
-  // Moves number literals into an array
   numbersToExpressions: true,
-  // Renames global variables
   renameGlobals: false,
-  // Self-defending makes the code break if reformatted
   selfDefending: true,
-  // Simplify expressions
   simplify: true,
-  // Splits strings into chunks
   splitStrings: true,
   splitStringsChunkLength: 10,
-  // Encodes all string literals
   stringArray: true,
   stringArrayCallsTransform: true,
   stringArrayCallsTransformThreshold: 0.75,
@@ -63,9 +50,7 @@ const OBFUSCATOR_OPTIONS = {
   stringArrayWrappersParametersMaxCount: 4,
   stringArrayWrappersType: 'function',
   stringArrayThreshold: 0.75,
-  // Transform object keys
   transformObjectKeys: true,
-  // Unicode escape sequences
   unicodeEscapeSequence: false
 };
 
@@ -180,13 +165,14 @@ console.log('  📄 manifest.json → dist/manifest.json');
 fs.rmSync(TEMP_DIR, { recursive: true, force: true });
 console.log('\n  🗑️  Removed temporary dist/os-odyssey/');
 
-// Step 4: Fix relative paths in HTML files
-console.log('\n🔗 Fixing paths in HTML files...\n');
+// Step 4: Fix relative paths and internal links in HTML files
+console.log('\n🔗 Fixing paths and links in HTML files...\n');
 
 for (const file of htmlFiles) {
   const filePath = path.join(DIST_DIR, file);
   let content = fs.readFileSync(filePath, 'utf8');
 
+  // Relative asset/style/script paths
   // ../../assets/ → /assets/  (was 2 levels up from html/)
   content = content.replace(/\.\.\/\.\.\/assets\//g, '/assets/');
   // ../css/ → /css/  (was 1 level up from html/)
@@ -197,6 +183,23 @@ for (const file of htmlFiles) {
   content = content.replace(/\.\.\/\.\.\/manifest\.json/g, '/manifest.json');
   // ../../sw.js → /sw.js (if referenced)
   content = content.replace(/\.\.\/\.\.\/sw\.js/g, '/sw.js');
+
+  // Convert internal .html links to clean URLs
+  // href="index.html" -> href="/"
+  content = content.replace(/href="index\.html"/g, 'href="/"');
+  content = content.replace(/href="index\.html#/g, 'href="/#');
+  // href="page.html" -> href="/page"
+  // href="page.html#section" -> href="/page#section"
+  content = content.replace(/href="([a-zA-Z0-9_-]+)\.html(#?)/g, 'href="/$1$2');
+  content = content.replace(/href="([a-zA-Z0-9_-]+)\.html"/g, 'href="/$1"');
+
+  // Convert data-redirect="xxx.html" -> data-redirect="/xxx"
+  content = content.replace(/data-redirect="index\.html"/g, 'data-redirect="/"');
+  content = content.replace(/data-redirect="([a-zA-Z0-9_-]+)\.html"/g, 'data-redirect="/$1"');
+
+  // Convert action="xxx.html" -> action="/xxx"
+  content = content.replace(/action="index\.html"/g, 'action="/"');
+  content = content.replace(/action="([a-zA-Z0-9_-]+)\.html"/g, 'action="/$1"');
 
   fs.writeFileSync(filePath, content);
   console.log(`  ✅ ${file}`);
@@ -222,25 +225,18 @@ for (const cssFile of cssFiles) {
   }
 }
 
-// Step 5: Fix absolute paths in JS files (before obfuscation)
+// Step 5: Fix absolute paths and clean URL navigations in JS files (before obfuscation)
 console.log('\n🔗 Fixing paths in JS files...\n');
 
 // 5a: Fix sw.js — update APP_SHELL paths
 const swPath = path.join(DIST_DIR, 'sw.js');
 let swContent = fs.readFileSync(swPath, 'utf8');
-// /os-odyssey/frontend/html/xxx.html → /xxx.html
 swContent = swContent.replace(/\/os-odyssey\/frontend\/html\//g, '/');
-// /os-odyssey/frontend/css/ → /css/
 swContent = swContent.replace(/\/os-odyssey\/frontend\/css\//g, '/css/');
-// /os-odyssey/frontend/js/ → /js/
 swContent = swContent.replace(/\/os-odyssey\/frontend\/js\//g, '/js/');
-// /os-odyssey/assets/ → /assets/
 swContent = swContent.replace(/\/os-odyssey\/assets\//g, '/assets/');
-// /os-odyssey/manifest.json → /manifest.json
 swContent = swContent.replace(/\/os-odyssey\/manifest\.json/g, '/manifest.json');
-// /os-odyssey/sw.js → /sw.js
 swContent = swContent.replace(/\/os-odyssey\/sw\.js/g, '/sw.js');
-// /os-odyssey/ → / (scope references)
 swContent = swContent.replace(/\/os-odyssey\//g, '/');
 fs.writeFileSync(swPath, swContent);
 console.log('  ✅ sw.js — APP_SHELL paths updated');
@@ -257,10 +253,8 @@ console.log('  ✅ manifest.json — paths updated');
 // 5c: Fix pwa-register.js — SW registration path and scope
 const pwaPath = path.join(DIST_DIR, 'js', 'pwa-register.js');
 let pwaContent = fs.readFileSync(pwaPath, 'utf8');
-// /os-odyssey/sw.js → /sw.js and scope: /os-odyssey/ → /
 pwaContent = pwaContent.replace(/\/os-odyssey\/sw\.js/g, '/sw.js');
 pwaContent = pwaContent.replace(/scope:\s*'\/os-odyssey\/'/g, "scope: '/'");
-// /os-odyssey/assets/ → /assets/
 pwaContent = pwaContent.replace(/\/os-odyssey\/assets\//g, '/assets/');
 fs.writeFileSync(pwaPath, pwaContent);
 console.log('  ✅ pwa-register.js — SW scope & paths updated');
@@ -268,21 +262,16 @@ console.log('  ✅ pwa-register.js — SW scope & paths updated');
 // 5d: Fix main.js — OAuth redirectTo path
 const mainJsPath = path.join(DIST_DIR, 'js', 'main.js');
 let mainJsContent = fs.readFileSync(mainJsPath, 'utf8');
-// /os-odyssey/frontend/html/character-select.html → /character-select
 mainJsContent = mainJsContent.replace(
   /\/os-odyssey\/frontend\/html\/character-select\.html/g,
   '/character-select'
 );
-// Any other /os-odyssey/frontend/html/ references → /
 mainJsContent = mainJsContent.replace(/\/os-odyssey\/frontend\/html\//g, '/');
-// /os-odyssey/assets/ → /assets/
 mainJsContent = mainJsContent.replace(/\/os-odyssey\/assets\//g, '/assets/');
 fs.writeFileSync(mainJsPath, mainJsContent);
 console.log('  ✅ main.js — OAuth redirect & paths updated');
 
-// 5e: Fix ALL JS files — both absolute /os-odyssey/ paths AND relative ../../ paths
-//     JS files use ../../assets/ etc. because the browser resolves them relative to
-//     the HTML page URL. Since pages are now at root, ../../ would break.
+// 5e: Fix ALL JS files — paths and page navigations
 const allJsFiles = findJsFiles(path.join(DIST_DIR, 'js'));
 for (const jsFile of allJsFiles) {
   const relPath = path.relative(DIST_DIR, jsFile);
@@ -290,27 +279,36 @@ for (const jsFile of allJsFiles) {
   let content = fs.readFileSync(jsFile, 'utf8');
   const original = content;
   
-  // Fix absolute /os-odyssey/ paths (skip main.js and pwa-register.js already handled above,
-  // but re-running on them is harmless since the patterns won't match anymore)
+  // Fix absolute /os-odyssey/ paths
   content = content.replace(/\/os-odyssey\/frontend\/html\//g, '/');
   content = content.replace(/\/os-odyssey\/frontend\/css\//g, '/css/');
   content = content.replace(/\/os-odyssey\/frontend\/js\//g, '/js/');
   content = content.replace(/\/os-odyssey\/assets\//g, '/assets/');
   content = content.replace(/\/os-odyssey\//g, '/');
   
-  // Fix relative paths used in JS (browser resolves relative to HTML page URL)
-  // ../../assets/ → /assets/
+  // Fix relative paths used in JS
   content = content.replace(/\.\.\/\.\.\/assets\//g, '/assets/');
-  // ../css/ → /css/
   content = content.replace(/\.\.\/css\//g, '/css/');
-  // ../js/ → /js/
   content = content.replace(/\.\.\/js\//g, '/js/');
-  // ../../manifest.json → /manifest.json
   content = content.replace(/\.\.\/\.\.\/manifest\.json/g, '/manifest.json');
+  
+  // Clean URL page navigations in JS:
+  // window.location.href = 'index.html' -> window.location.href = '/'
+  content = content.replace(/window\.location\.href\s*=\s*['"]index\.html['"]/g, "window.location.href = '/'");
+  // window.location.href = 'xxx.html' -> window.location.href = '/xxx'
+  content = content.replace(/window\.location\.href\s*=\s*['"]([a-zA-Z0-9_-]+)\.html['"]/g, "window.location.href = '/$1'");
+  // window.location.replace('index.html') -> window.location.replace('/')
+  content = content.replace(/window\.location\.replace\(['"]index\.html['"]\)/g, "window.location.replace('/')");
+  // window.location.replace('xxx.html') -> window.location.replace('/xxx')
+  content = content.replace(/window\.location\.replace\(['"]([a-zA-Z0-9_-]+)\.html['"]\)/g, "window.location.replace('/$1')");
+  // link.href = 'index.html' -> link.href = '/'
+  content = content.replace(/(\w+Link|\w+Button)\.href\s*=\s*['"]index\.html['"]/g, "$1.href = '/'");
+  // link.href = 'xxx.html' -> link.href = '/xxx'
+  content = content.replace(/(\w+Link|\w+Button)\.href\s*=\s*['"]([a-zA-Z0-9_-]+)\.html['"]/g, "$1.href = '/$2'");
   
   if (content !== original) {
     fs.writeFileSync(jsFile, content);
-    console.log(`  ✅ ${relPath} — paths updated`);
+    console.log(`  ✅ ${relPath} — paths & navigations updated`);
   }
 }
 
