@@ -57,6 +57,14 @@ body {
   transition: background var(--ease), color var(--ease);
 }
 
+/* Hide app pages until mobile.css loads to prevent flash of dark/desktop styles */
+body.app-page,
+body.home-page,
+body.auth-page,
+body.instructor-apply-page {
+  visibility: hidden;
+}
+
 img {
   max-width: 100%;
   display: block;

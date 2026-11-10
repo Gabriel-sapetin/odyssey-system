@@ -19,7 +19,10 @@
         mobileCss.rel = 'stylesheet';
         mobileCss.href = mobileCssUrl;
         mobileCss.onload = function () { document.body.style.visibility = 'visible'; };
+        mobileCss.onerror = function () { document.body.style.visibility = 'visible'; };
         document.head.appendChild(mobileCss);
+        // Safety fallback: show page after 2s even if CSS hasn't loaded
+        setTimeout(function () { document.body.style.visibility = 'visible'; }, 2000);
       } else {
         document.body.style.visibility = 'visible';
       }
