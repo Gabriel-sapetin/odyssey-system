@@ -15,7 +15,12 @@
 
 const fs = require('fs');
 const path = require('path');
-const JavaScriptObfuscator = require('javascript-obfuscator');
+let JavaScriptObfuscator;
+try {
+  JavaScriptObfuscator = require('javascript-obfuscator');
+} catch (e) {
+  JavaScriptObfuscator = null;
+}
 
 const SRC_DIR = path.join(__dirname, 'os-odyssey');
 const DIST_DIR = path.join(__dirname, 'dist');
@@ -244,9 +249,13 @@ console.log('  ✅ sw.js — APP_SHELL paths updated');
 // 5b: Fix manifest.json — update all absolute paths
 const manifestPath = path.join(DIST_DIR, 'manifest.json');
 let manifestContent = fs.readFileSync(manifestPath, 'utf8');
+manifestContent = manifestContent.replace(/\/os-odyssey\/frontend\/html\/index\.html/g, '/');
+manifestContent = manifestContent.replace(/\/os-odyssey\/frontend\/html\/([a-zA-Z0-9_-]+)\.html/g, '/$1');
 manifestContent = manifestContent.replace(/\/os-odyssey\/frontend\/html\//g, '/');
 manifestContent = manifestContent.replace(/\/os-odyssey\/assets\//g, '/assets/');
 manifestContent = manifestContent.replace(/"scope":\s*"\/os-odyssey\/"/g, '"scope": "/"');
+manifestContent = manifestContent.replace(/"start_url":\s*"\/index\.html"/g, '"start_url": "/"');
+manifestContent = manifestContent.replace(/"url":\s*"\/([a-zA-Z0-9_-]+)\.html"/g, '"url": "/$1"');
 fs.writeFileSync(manifestPath, manifestContent);
 console.log('  ✅ manifest.json — paths updated');
 
@@ -314,29 +323,34 @@ for (const jsFile of allJsFiles) {
 
 // Step 6: Find and obfuscate all JS files in dist/js/
 const jsFiles = findJsFiles(path.join(DIST_DIR, 'js'));
-console.log(`\n🔒 Obfuscating ${jsFiles.length} JavaScript files...\n`);
 
-let successCount = 0;
-let errorCount = 0;
+if (JavaScriptObfuscator) {
+  console.log(`\n🔒 Obfuscating ${jsFiles.length} JavaScript files...\n`);
 
-for (const filePath of jsFiles) {
-  const relativePath = path.relative(DIST_DIR, filePath);
-  try {
-    const code = fs.readFileSync(filePath, 'utf8');
-    const obfuscated = JavaScriptObfuscator.obfuscate(code, OBFUSCATOR_OPTIONS);
-    fs.writeFileSync(filePath, obfuscated.getObfuscatedCode());
-    console.log(`  ✅ ${relativePath}`);
-    successCount++;
-  } catch (err) {
-    console.error(`  ❌ ${relativePath}: ${err.message}`);
-    errorCount++;
+  let successCount = 0;
+  let errorCount = 0;
+
+  for (const filePath of jsFiles) {
+    const relativePath = path.relative(DIST_DIR, filePath);
+    try {
+      const code = fs.readFileSync(filePath, 'utf8');
+      const obfuscated = JavaScriptObfuscator.obfuscate(code, OBFUSCATOR_OPTIONS);
+      fs.writeFileSync(filePath, obfuscated.getObfuscatedCode());
+      console.log(`  ✅ ${relativePath}`);
+      successCount++;
+    } catch (err) {
+      console.error(`  ❌ ${relativePath}: ${err.message}`);
+      errorCount++;
+    }
   }
-}
 
-console.log(`\n==========================================================`);
-console.log(`✅ Obfuscated: ${successCount} files`);
-if (errorCount > 0) {
-  console.log(`❌ Errors: ${errorCount} files`);
+  console.log(`\n==========================================================`);
+  console.log(`✅ Obfuscated: ${successCount} files`);
+  if (errorCount > 0) {
+    console.log(`❌ Errors: ${errorCount} files`);
+  }
+} else {
+  console.log(`\n⚠️  javascript-obfuscator not found, skipping obfuscation for local build.`);
 }
 
 // Final verification: list dist/ root

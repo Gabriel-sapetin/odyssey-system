@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
 <head>
@@ -13,7 +13,7 @@
     href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
     rel="stylesheet" />
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
-  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/styles.css?v=31" />
   <link rel="stylesheet" href="../css/sim.css" />
   <link rel="manifest" href="../../manifest.json" />
   <meta name="theme-color" content="#1a1a2e" />
@@ -35,11 +35,11 @@
       <span></span>
     </button>
     <div class="app-nav-links">
-      <a href="dashboard.html">← Dashboard</a>
+      <a href="dashboard.html">â† Dashboard</a>
       <a href="scheduling-sim.html">Scheduling Lab</a>
       <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
-        <span class="toggle-icon sun-icon">☀️</span>
-        <span class="toggle-icon moon-icon">🌙</span>
+        <span class="toggle-icon sun-icon">â˜€ï¸</span>
+        <span class="toggle-icon moon-icon">ðŸŒ™</span>
       </button>
       <button class="app-link-button" type="button" data-logout>Log out</button>
     </div>
@@ -83,11 +83,11 @@
             <select id="pageAlgo">
               <option value="fifo">FIFO (First In, First Out)</option>
               <option value="lru">LRU (Least Recently Used)</option>
-              <option value="optimal">Optimal (Bélády)</option>
+              <option value="optimal">Optimal (BÃ©lÃ¡dy)</option>
             </select>
           </div>
-          <button class="sim-btn sim-btn-run" type="button" id="runPaging">▶ Run Simulation</button>
-          <button class="sim-btn sim-btn-reset" type="button" id="resetPaging">↺ Reset</button>
+          <button class="sim-btn sim-btn-run" type="button" id="runPaging">â–¶ Run Simulation</button>
+          <button class="sim-btn sim-btn-reset" type="button" id="resetPaging">â†º Reset</button>
           <button class="sim-btn sim-btn-preset" type="button" id="loadPagePreset">Load Example</button>
         </div>
       </section>
@@ -143,7 +143,7 @@
             <input type="number" id="fragProcSize" placeholder="200" min="1" max="4096" value="200" />
           </div>
           <button class="sim-btn sim-btn-add" type="button" id="allocateProc">+ Allocate</button>
-          <button class="sim-btn sim-btn-reset" type="button" id="resetFrag">↺ Reset</button>
+          <button class="sim-btn sim-btn-reset" type="button" id="resetFrag">â†º Reset</button>
           <button class="sim-btn sim-btn-preset" type="button" id="loadFragPreset">Load Example</button>
         </div>
       </section>

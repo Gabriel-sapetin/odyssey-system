@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
 <head>
@@ -13,7 +13,7 @@
     href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
     rel="stylesheet" />
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
-  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/styles.css?v=31" />
   <link rel="stylesheet" href="../css/sim.css" />
   <link rel="manifest" href="../../manifest.json" />
   <meta name="theme-color" content="#1a1a2e" />
@@ -35,12 +35,12 @@
       <span></span>
     </button>
     <div class="app-nav-links">
-      <a href="dashboard.html">← Dashboard</a>
+      <a href="dashboard.html">â† Dashboard</a>
       <a href="scheduling-sim.html">CPU Scheduling</a>
       <a href="memory-sim.html">Memory Labs</a>
       <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
-        <span class="toggle-icon sun-icon">☀️</span>
-        <span class="toggle-icon moon-icon">🌙</span>
+        <span class="toggle-icon sun-icon">â˜€ï¸</span>
+        <span class="toggle-icon moon-icon">ðŸŒ™</span>
       </button>
       <button class="app-link-button" type="button" data-logout>Log out</button>
     </div>
@@ -50,7 +50,7 @@
     <!-- Header -->
     <div class="sim-header">
       <div class="sim-header-text">
-        <p class="section-kicker">INTERACTIVE LAB · MODULE 1</p>
+        <p class="section-kicker">INTERACTIVE LAB Â· MODULE 1</p>
         <h1>Boot Sequence & Interrupt Simulator</h1>
         <p class="sim-subtitle">Watch the computer power up step-by-step, then trigger hardware interrupts and see how the CPU routes them through the interrupt vector table.</p>
       </div>
@@ -70,8 +70,8 @@
             <option value="slow">Slow (detailed)</option>
           </select>
         </div>
-        <button class="sim-btn sim-btn-run" type="button" id="startBoot">⚡ Power On</button>
-        <button class="sim-btn sim-btn-reset" type="button" id="resetBoot">↺ Reset</button>
+        <button class="sim-btn sim-btn-run" type="button" id="startBoot">âš¡ Power On</button>
+        <button class="sim-btn sim-btn-reset" type="button" id="resetBoot">â†º Reset</button>
       </div>
     </section>
 
@@ -79,10 +79,10 @@
     <section class="sim-panel" id="bootTerminal">
       <div class="sim-panel-header">
         <h2>System Console</h2>
-        <span class="sim-speed-label" id="bootStatusLabel">● System OFF</span>
+        <span class="sim-speed-label" id="bootStatusLabel">â— System OFF</span>
       </div>
       <div class="boot-console" id="bootConsole">
-        <div class="boot-line boot-dim">ODYSSEY BIOS v2.1 — Ready to boot</div>
+        <div class="boot-line boot-dim">ODYSSEY BIOS v2.1 â€” Ready to boot</div>
       </div>
     </section>
 
@@ -115,7 +115,7 @@
           <div class="storage-bar"><span class="storage-fill" style="width:0%"></span></div>
           <div class="storage-info">
             <strong>Secondary Storage (SSD)</strong>
-            <span class="storage-speed">~100 μs</span>
+            <span class="storage-speed">~100 Î¼s</span>
           </div>
         </div>
       </div>
@@ -126,10 +126,10 @@
       <h2>Interrupt Handler</h2>
       <p class="sim-subtitle" style="margin-bottom:20px;">Trigger hardware interrupts and watch the CPU switch to the appropriate Interrupt Service Routine (ISR) via the interrupt vector table.</p>
       <div class="sim-control-row" style="margin-bottom:20px;">
-        <button class="sim-btn sim-btn-add" type="button" data-irq="keyboard">⌨️ Keyboard IRQ</button>
-        <button class="sim-btn sim-btn-preset" type="button" data-irq="disk">💾 Disk I/O IRQ</button>
-        <button class="sim-btn sim-btn-run" type="button" data-irq="timer">⏱️ Timer IRQ</button>
-        <button class="sim-btn sim-btn-reset" type="button" data-irq="network">🌐 Network IRQ</button>
+        <button class="sim-btn sim-btn-add" type="button" data-irq="keyboard">âŒ¨ï¸ Keyboard IRQ</button>
+        <button class="sim-btn sim-btn-preset" type="button" data-irq="disk">ðŸ’¾ Disk I/O IRQ</button>
+        <button class="sim-btn sim-btn-run" type="button" data-irq="timer">â±ï¸ Timer IRQ</button>
+        <button class="sim-btn sim-btn-reset" type="button" data-irq="network">ðŸŒ Network IRQ</button>
       </div>
       
       <!-- Interrupt Vector Table -->
@@ -154,10 +154,10 @@
           <span class="cpu-mode-label">CPU MODE</span>
           <span class="cpu-mode-value" id="cpuModeValue">User</span>
         </div>
-        <div class="cpu-mode-arrow">↔</div>
+        <div class="cpu-mode-arrow">â†”</div>
         <div class="cpu-mode-box kernel" id="kernelModeBox">
           <span class="cpu-mode-label">ACTIVE ISR</span>
-          <span class="cpu-mode-value" id="activeISR">—</span>
+          <span class="cpu-mode-value" id="activeISR">â€”</span>
         </div>
       </div>
 

@@ -2,6 +2,7 @@
  * Odyssey – PWA Registration & Install Prompt
  * 
  * - Registers the service worker
+ * - Cleans up legacy service workers with old scopes
  * - Captures the beforeinstallprompt event
  * - Shows a custom in-app install banner on mobile
  */
@@ -9,23 +10,41 @@
 (function () {
   'use strict';
 
-  // ── Service Worker Registration ──────────────────────────
+  // ── Service Worker Registration & Migration ──────────────
   if ('serviceWorker' in navigator) {
+    // 1. Clean up legacy service workers (e.g., from old scope /os-odyssey/)
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      const legacyScopeMarker = '/os' + '-odyssey/';
+      for (const reg of registrations) {
+        if (reg.scope && reg.scope.includes(legacyScopeMarker)) {
+          console.log('[PWA] Unregistering legacy SW with scope:', reg.scope);
+          reg.unregister();
+        }
+      }
+    }).catch((err) => {
+      console.warn('[PWA] Error checking legacy registrations:', err);
+    });
+
+    // 2. Register modern service worker at root scope
     window.addEventListener('load', () => {
       navigator.serviceWorker
-        .register('/os-odyssey/sw.js', { scope: '/os-odyssey/' })
+        .register('/sw.js', { scope: '/' })
         .then((reg) => {
           console.log('[PWA] Service Worker registered, scope:', reg.scope);
 
-          // Listen for updates
+          // If a new worker is already waiting, tell it to take over
+          if (reg.waiting) {
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+
+          // Listen for new workers installing
           reg.addEventListener('updatefound', () => {
             const newWorker = reg.installing;
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'activated') {
-                  console.log('[PWA] New service worker activated — reloading for fresh content.');
-                  // Auto-reload so users see updated CSS/JS/HTML immediately
-                  window.location.reload();
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('[PWA] New worker installed, activating immediately');
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
                 }
               });
             }
@@ -34,6 +53,16 @@
         .catch((err) => {
           console.warn('[PWA] Service Worker registration failed:', err);
         });
+    });
+
+    // 3. Auto-reload when new service worker takes control so users get fresh styles/scripts
+    let isReloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!isReloading) {
+        isReloading = true;
+        console.log('[PWA] New SW controlling page — refreshing for fresh assets');
+        window.location.reload();
+      }
     });
   }
 
@@ -64,14 +93,13 @@
    * Creates and shows a custom install banner at the bottom of the screen
    */
   function showInstallBanner() {
-    // Don't create duplicates
     if (document.getElementById('pwa-install-banner')) return;
 
     const banner = document.createElement('div');
     banner.id = 'pwa-install-banner';
     banner.innerHTML = `
       <div class="pwa-banner__content">
-        <img class="pwa-banner__icon" src="/os-odyssey/assets/pwa-icon-512.jpg" alt="Odyssey" width="48" height="48" />
+        <img class="pwa-banner__icon" src="/assets/pwa-icon-512.jpg" alt="Odyssey" width="48" height="48" />
         <div class="pwa-banner__text">
           <strong>Install Odyssey</strong>
           <span>Add to your home screen for the best experience</span>
@@ -85,14 +113,12 @@
 
     document.body.appendChild(banner);
 
-    // Animate in
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         banner.classList.add('pwa-banner--visible');
       });
     });
 
-    // Install button
     document.getElementById('pwaBannerInstall').addEventListener('click', async () => {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
@@ -102,7 +128,6 @@
       hideInstallBanner();
     });
 
-    // Dismiss button
     document.getElementById('pwaBannerDismiss').addEventListener('click', () => {
       localStorage.setItem('odyssey-pwa-dismissed', 'true');
       hideInstallBanner();

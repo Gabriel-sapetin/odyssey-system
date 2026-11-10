@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
 <head>
@@ -13,7 +13,7 @@
     href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
     rel="stylesheet" />
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
-  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/styles.css?v=31" />
   <link rel="stylesheet" href="../css/sim.css" />
   <link rel="manifest" href="../../manifest.json" />
   <meta name="theme-color" content="#1a1a2e" />
@@ -35,12 +35,12 @@
       <span></span>
     </button>
     <div class="app-nav-links">
-      <a href="dashboard.html">← Dashboard</a>
+      <a href="dashboard.html">â† Dashboard</a>
       <a href="scheduling-sim.html">CPU Scheduling</a>
       <a href="memory-sim.html">Memory Labs</a>
       <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
-        <span class="toggle-icon sun-icon">☀️</span>
-        <span class="toggle-icon moon-icon">🌙</span>
+        <span class="toggle-icon sun-icon">â˜€ï¸</span>
+        <span class="toggle-icon moon-icon">ðŸŒ™</span>
       </button>
       <button class="app-link-button" type="button" data-logout>Log out</button>
     </div>
@@ -50,7 +50,7 @@
     <!-- Header -->
     <div class="sim-header">
       <div class="sim-header-text">
-        <p class="section-kicker">INTERACTIVE LAB · MODULE 3</p>
+        <p class="section-kicker">INTERACTIVE LAB Â· MODULE 3</p>
         <h1>Process State Simulator</h1>
         <p class="sim-subtitle">Create processes and drive them through the 5-state lifecycle. Watch context switches, inspect PCBs, and understand scheduling queues.</p>
       </div>
@@ -77,9 +77,9 @@
         <button class="sim-btn sim-btn-add" type="button" id="psAddProcess">+ Create Process</button>
       </div>
       <div class="sim-control-row">
-        <button class="sim-btn sim-btn-run" type="button" id="psRunSim">▶ Start Scheduler</button>
-        <button class="sim-btn sim-btn-preset" type="button" id="psStepSim">⏭ Step</button>
-        <button class="sim-btn sim-btn-reset" type="button" id="psResetSim">↺ Reset All</button>
+        <button class="sim-btn sim-btn-run" type="button" id="psRunSim">â–¶ Start Scheduler</button>
+        <button class="sim-btn sim-btn-preset" type="button" id="psStepSim">â­ Step</button>
+        <button class="sim-btn sim-btn-reset" type="button" id="psResetSim">â†º Reset All</button>
         <button class="sim-btn sim-btn-preset" type="button" id="psLoadPreset">Load Example</button>
       </div>
     </section>
@@ -92,25 +92,25 @@
           <span class="state-label">New</span>
           <div class="state-queue" id="queueNew"></div>
         </div>
-        <div class="state-arrow" data-from="new" data-to="ready">admitted →</div>
+        <div class="state-arrow" data-from="new" data-to="ready">admitted â†’</div>
         <div class="state-node" data-state="ready" id="stateReady">
           <span class="state-label">Ready</span>
           <div class="state-queue" id="queueReady"></div>
         </div>
-        <div class="state-arrow" data-from="ready" data-to="running">dispatch →</div>
+        <div class="state-arrow" data-from="ready" data-to="running">dispatch â†’</div>
         <div class="state-node active-state" data-state="running" id="stateRunning">
           <span class="state-label">Running</span>
           <div class="state-queue" id="queueRunning"></div>
         </div>
         <div class="state-exits">
-          <div class="state-arrow" data-from="running" data-to="waiting">↓ I/O wait</div>
-          <div class="state-arrow" data-from="running" data-to="terminated">→ exit</div>
+          <div class="state-arrow" data-from="running" data-to="waiting">â†“ I/O wait</div>
+          <div class="state-arrow" data-from="running" data-to="terminated">â†’ exit</div>
         </div>
         <div class="state-node" data-state="waiting" id="stateWaiting">
           <span class="state-label">Waiting</span>
           <div class="state-queue" id="queueWaiting"></div>
         </div>
-        <div class="state-arrow" data-from="waiting" data-to="ready">↑ I/O done</div>
+        <div class="state-arrow" data-from="waiting" data-to="ready">â†‘ I/O done</div>
         <div class="state-node" data-state="terminated" id="stateTerminated">
           <span class="state-label">Terminated</span>
           <div class="state-queue" id="queueTerminated"></div>

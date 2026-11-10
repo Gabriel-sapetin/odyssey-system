@@ -9,31 +9,32 @@
   const hasMobileAuth = document.body && document.body.classList.contains('auth-page');
   const hasMobileInstructorPage = document.body && document.body.classList.contains('instructor-apply-page');
   if (hasMobileAppShell || hasMobileLanding || hasMobileAuth || hasMobileInstructorPage) {
-    const mainScriptUrl = document.currentScript && document.currentScript.src;
-    if (mainScriptUrl) {
-      const mobileCssUrlObject = new URL('../css/mobile.css', mainScriptUrl);
-      mobileCssUrlObject.searchParams.set('v', '30');
-      const mobileCssUrl = mobileCssUrlObject.href;
-      if (!document.querySelector(`link[href="${mobileCssUrl}"]`)) {
-        const mobileCss = document.createElement('link');
-        mobileCss.rel = 'stylesheet';
-        mobileCss.href = mobileCssUrl;
-        mobileCss.onload = function () { document.body.style.visibility = 'visible'; };
-        mobileCss.onerror = function () { document.body.style.visibility = 'visible'; };
-        document.head.appendChild(mobileCss);
-        // Safety fallback: show page after 2s even if CSS hasn't loaded
-        setTimeout(function () { document.body.style.visibility = 'visible'; }, 2000);
-      } else {
-        document.body.style.visibility = 'visible';
-      }
+    const existingMobileCss = document.querySelector('link[href*="mobile.css"]');
+    if (existingMobileCss) {
+      document.body.style.visibility = 'visible';
+    } else {
+      const mainScriptUrl = document.currentScript && document.currentScript.src;
+      const mobileCssHref = mainScriptUrl
+        ? new URL('../css/mobile.css?v=31', mainScriptUrl).href
+        : '/css/mobile.css?v=31';
+      const mobileCss = document.createElement('link');
+      mobileCss.rel = 'stylesheet';
+      mobileCss.href = mobileCssHref;
+      mobileCss.onload = function () { document.body.style.visibility = 'visible'; };
+      mobileCss.onerror = function () { document.body.style.visibility = 'visible'; };
+      document.head.appendChild(mobileCss);
+      setTimeout(function () { document.body.style.visibility = 'visible'; }, 1000);
+    }
 
-      if (hasMobileAppShell || hasMobileLanding || hasMobileInstructorPage) {
-        const mobileNavUrl = new URL('mobile-nav.js', mainScriptUrl).href;
-        if (!document.querySelector(`script[src="${mobileNavUrl}"]`)) {
-          const mobileNavScript = document.createElement('script');
-          mobileNavScript.src = mobileNavUrl;
-          document.body.appendChild(mobileNavScript);
-        }
+    if (hasMobileAppShell || hasMobileLanding || hasMobileInstructorPage) {
+      if (!document.querySelector('script[src*="mobile-nav.js"]')) {
+        const mainScriptUrl = document.currentScript && document.currentScript.src;
+        const mobileNavSrc = mainScriptUrl
+          ? new URL('mobile-nav.js', mainScriptUrl).href
+          : '/js/mobile-nav.js';
+        const mobileNavScript = document.createElement('script');
+        mobileNavScript.src = mobileNavSrc;
+        document.body.appendChild(mobileNavScript);
       }
     }
   }

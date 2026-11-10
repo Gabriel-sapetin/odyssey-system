@@ -8,17 +8,21 @@
  * API calls always go to the network (no caching of dynamic data).
  */
 
-const CACHE_NAME = 'odyssey-v26';
+const CACHE_NAME = 'odyssey-v27';
 
 // Core app shell files to pre-cache on install
 const APP_SHELL = [
   '/',
+  '/index.html',
   '/login',
   '/signup',
   '/dashboard',
   '/pdf-study',
   '/explore-lessons',
   '/course',
+  '/classroom',
+  '/profile',
+  '/leaderboard',
   '/css/styles.css',
   '/css/mobile.css',
   '/js/main.js',
@@ -42,7 +46,9 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[SW] Pre-caching app shell');
-        return cache.addAll(APP_SHELL);
+        return cache.addAll(APP_SHELL).catch((err) => {
+          console.warn('[SW] Pre-cache partial warning:', err);
+        });
       })
       .then(() => self.skipWaiting())
   );
@@ -65,6 +71,13 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// ── Messages ────────────────────────────────────────────────
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // ── Fetch ───────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -74,7 +87,6 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   // Media players use Range requests and receive 206 Partial Content responses.
-  // Let the browser handle those directly; partial responses cannot be cached.
   if (request.headers.has('range')) return;
 
   // Skip API / Supabase / external service requests — always go to network
@@ -124,15 +136,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // HTML pages: stale-while-revalidate
+  // HTML pages: stale-while-revalidate with clean URL fallbacks
   event.respondWith(
-    caches.match(request).then((cached) => {
+    matchPage(request, url).then((cached) => {
       const fetchPromise = fetch(request)
         .then((response) => {
-          // If response was redirected (e.g. *.html -> clean URL), return Response.redirect to prevent ERR_FAILED
-          if (response.redirected) {
-            return Response.redirect(response.url, 302);
-          }
           if (response.status === 200 && response.type !== 'opaque') {
             const clone = response.clone();
             caches.open(CACHE_NAME)
@@ -142,18 +150,43 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // If offline and not in cache, show a basic offline page
           if (cached) return cached;
-          return new Response(
-            '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Odyssey — Offline</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:"Nunito",sans-serif;background:#0f0f1a;color:#e0e0e0;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem}.offline-card{max-width:400px}.offline-card h1{font-size:2rem;margin-bottom:1rem;background:linear-gradient(135deg,#7c4dff,#00bfa5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.offline-card p{font-size:1.1rem;opacity:.8;margin-bottom:2rem}.btn{display:inline-block;padding:.8rem 2rem;background:linear-gradient(135deg,#7c4dff,#6200ea);color:#fff;border:none;border-radius:12px;font-size:1rem;cursor:pointer;text-decoration:none}</style></head><body><div class="offline-card"><h1>You\'re Offline</h1><p>Odyssey needs an internet connection to load new content. Check your connection and try again.</p><button class="btn" onclick="location.reload()">Retry</button></div></body></html>',
-            { headers: { 'Content-Type': 'text/html' } }
-          );
+          return getOfflinePage();
         });
 
       return cached || fetchPromise;
     })
   );
 });
+
+/**
+ * Matches an HTML request in cache with fallback for clean URLs
+ */
+function matchPage(request, url) {
+  return caches.match(request).then((cached) => {
+    if (cached) return cached;
+    if (url.pathname === '/' || url.pathname.endsWith('index.html')) {
+      return caches.match('/');
+    }
+    const cleanPath = url.pathname
+      .replace(/\/os-odyssey\/frontend\/html\//, '/')
+      .replace(/\.html$/, '');
+    if (cleanPath !== url.pathname) {
+      return caches.match(cleanPath);
+    }
+    return undefined;
+  });
+}
+
+/**
+ * Returns offline HTML fallback
+ */
+function getOfflinePage() {
+  return new Response(
+    '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Odyssey — Offline</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:"Nunito",sans-serif;background:#0f0f1a;color:#e0e0e0;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem}.offline-card{max-width:400px}.offline-card h1{font-size:2rem;margin-bottom:1rem;background:linear-gradient(135deg,#7c4dff,#00bfa5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.offline-card p{font-size:1.1rem;opacity:.8;margin-bottom:2rem}.btn{display:inline-block;padding:.8rem 2rem;background:linear-gradient(135deg,#7c4dff,#6200ea);color:#fff;border:none;border-radius:12px;font-size:1rem;cursor:pointer;text-decoration:none}</style></head><body><div class="offline-card"><h1>You\'re Offline</h1><p>Odyssey needs an internet connection to load new content. Check your connection and try again.</p><button class="btn" onclick="location.reload()">Retry</button></div></body></html>',
+    { headers: { 'Content-Type': 'text/html' } }
+  );
+}
 
 /**
  * Checks whether a request path is a mutable asset (CSS/JS) that should use network-first

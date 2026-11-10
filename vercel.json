@@ -5,13 +5,43 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/os-odyssey/frontend/html/:page",
-      "destination": "/:page",
+      "source": "/os-odyssey/frontend/css/:path*",
+      "destination": "/css/:path*",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/frontend/js/:path*",
+      "destination": "/js/:path*",
       "statusCode": 301
     },
     {
       "source": "/os-odyssey/frontend/html/index.html",
       "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/frontend/html/:page",
+      "destination": "/:page",
+      "statusCode": 301
+    },
+    {
+      "source": "/frontend/css/:path*",
+      "destination": "/css/:path*",
+      "statusCode": 301
+    },
+    {
+      "source": "/frontend/js/:path*",
+      "destination": "/js/:path*",
+      "statusCode": 301
+    },
+    {
+      "source": "/frontend/html/index.html",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/frontend/html/:page",
+      "destination": "/:page",
       "statusCode": 301
     },
     {

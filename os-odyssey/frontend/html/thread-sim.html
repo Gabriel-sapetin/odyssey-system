@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
 <head>
@@ -13,7 +13,7 @@
     href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
     rel="stylesheet" />
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
-  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/styles.css?v=31" />
   <link rel="stylesheet" href="../css/sim.css" />
   <link rel="manifest" href="../../manifest.json" />
   <meta name="theme-color" content="#1a1a2e" />
@@ -35,12 +35,12 @@
       <span></span>
     </button>
     <div class="app-nav-links">
-      <a href="dashboard.html">← Dashboard</a>
+      <a href="dashboard.html">â† Dashboard</a>
       <a href="scheduling-sim.html">CPU Scheduling</a>
       <a href="memory-sim.html">Memory Labs</a>
       <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
-        <span class="toggle-icon sun-icon">☀️</span>
-        <span class="toggle-icon moon-icon">🌙</span>
+        <span class="toggle-icon sun-icon">â˜€ï¸</span>
+        <span class="toggle-icon moon-icon">ðŸŒ™</span>
       </button>
       <button class="app-link-button" type="button" data-logout>Log out</button>
     </div>
@@ -50,7 +50,7 @@
     <!-- Header -->
     <div class="sim-header">
       <div class="sim-header-text">
-        <p class="section-kicker">INTERACTIVE LAB · MODULE 4</p>
+        <p class="section-kicker">INTERACTIVE LAB Â· MODULE 4</p>
         <h1>Thread Concurrency Visualizer</h1>
         <p class="sim-subtitle">Visualize parallelism vs. concurrency, explore threading models (Many-to-One, One-to-One, Many-to-Many), and watch thread pools execute tasks in real time.</p>
       </div>
@@ -82,8 +82,8 @@
             <label>Tasks</label>
             <input type="number" id="taskCount" min="2" max="8" value="4" />
           </div>
-          <button class="sim-btn sim-btn-run" type="button" id="runParallel">▶ Simulate</button>
-          <button class="sim-btn sim-btn-reset" type="button" id="resetParallel">↺ Reset</button>
+          <button class="sim-btn sim-btn-run" type="button" id="runParallel">â–¶ Simulate</button>
+          <button class="sim-btn sim-btn-reset" type="button" id="resetParallel">â†º Reset</button>
         </div>
       </section>
 
@@ -111,7 +111,7 @@
             <label>User Threads</label>
             <input type="number" id="userThreadCount" min="2" max="6" value="4" />
           </div>
-          <button class="sim-btn sim-btn-run" type="button" id="runModel">▶ Visualize</button>
+          <button class="sim-btn sim-btn-run" type="button" id="runModel">â–¶ Visualize</button>
         </div>
       </section>
 
@@ -142,8 +142,8 @@
             <label>Task Queue</label>
             <input type="number" id="taskQueueSize" min="3" max="12" value="8" />
           </div>
-          <button class="sim-btn sim-btn-run" type="button" id="runPool">▶ Execute Tasks</button>
-          <button class="sim-btn sim-btn-reset" type="button" id="resetPool">↺ Reset</button>
+          <button class="sim-btn sim-btn-run" type="button" id="runPool">â–¶ Execute Tasks</button>
+          <button class="sim-btn sim-btn-reset" type="button" id="resetPool">â†º Reset</button>
         </div>
       </section>
 
@@ -155,7 +155,7 @@
             <div class="pool-queue" id="poolQueue"></div>
           </div>
           <div class="pool-arrow-section">
-            <div class="rq-arrow" style="font-size:28px;">▶</div>
+            <div class="rq-arrow" style="font-size:28px;">â–¶</div>
           </div>
           <div class="pool-threads-section">
             <h3 class="pool-section-title">Worker Threads</h3>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
 <head>
@@ -13,7 +13,7 @@
     href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
     rel="stylesheet" />
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
-  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/styles.css?v=31" />
   <link rel="stylesheet" href="../css/sim.css" />
   <link rel="manifest" href="../../manifest.json" />
   <meta name="theme-color" content="#1a1a2e" />
@@ -35,12 +35,12 @@
       <span></span>
     </button>
     <div class="app-nav-links">
-      <a href="dashboard.html">← Dashboard</a>
+      <a href="dashboard.html">â† Dashboard</a>
       <a href="scheduling-sim.html">CPU Scheduling</a>
       <a href="memory-sim.html">Memory Labs</a>
       <button class="app-theme-toggle" type="button" id="dashThemeToggle" aria-label="Toggle dark/light mode">
-        <span class="toggle-icon sun-icon">☀️</span>
-        <span class="toggle-icon moon-icon">🌙</span>
+        <span class="toggle-icon sun-icon">â˜€ï¸</span>
+        <span class="toggle-icon moon-icon">ðŸŒ™</span>
       </button>
       <button class="app-link-button" type="button" data-logout>Log out</button>
     </div>
@@ -50,9 +50,9 @@
     <!-- Header -->
     <div class="sim-header">
       <div class="sim-header-text">
-        <p class="section-kicker">INTERACTIVE LAB · MODULE 2</p>
+        <p class="section-kicker">INTERACTIVE LAB Â· MODULE 2</p>
         <h1>System Call Tracer</h1>
-        <p class="sim-subtitle">Execute programs and watch every system call as it transitions from user mode → kernel mode → back. Trace file I/O, process creation, and more.</p>
+        <p class="sim-subtitle">Execute programs and watch every system call as it transitions from user mode â†’ kernel mode â†’ back. Trace file I/O, process creation, and more.</p>
       </div>
       <div class="sim-header-icon">
         <span class="sim-icon-cpu" style="background:#0891b2;border-color:#67e8f9;box-shadow:6px 6px 0 #164e63, inset 0 0 20px rgba(103,232,249,0.15);">SYS</span>
@@ -65,15 +65,15 @@
         <div class="sim-field sim-field-wide">
           <label>Select Program</label>
           <select id="programSelect">
-            <option value="fileRead"> File Read (open → read → close)</option>
-            <option value="fileWrite"> File Write (open → write → close)</option>
-            <option value="processCreate"> Fork Process (fork → exec → wait)</option>
-            <option value="networkIO"> Network Socket (socket → connect → send → recv)</option>
-            <option value="memAlloc"> Memory Alloc (mmap → access → munmap)</option>
+            <option value="fileRead"> File Read (open â†’ read â†’ close)</option>
+            <option value="fileWrite"> File Write (open â†’ write â†’ close)</option>
+            <option value="processCreate"> Fork Process (fork â†’ exec â†’ wait)</option>
+            <option value="networkIO"> Network Socket (socket â†’ connect â†’ send â†’ recv)</option>
+            <option value="memAlloc"> Memory Alloc (mmap â†’ access â†’ munmap)</option>
           </select>
         </div>
-        <button class="sim-btn sim-btn-run" type="button" id="runSyscall">▶ Execute Program</button>
-        <button class="sim-btn sim-btn-reset" type="button" id="resetSyscall">↺ Clear</button>
+        <button class="sim-btn sim-btn-run" type="button" id="runSyscall">â–¶ Execute Program</button>
+        <button class="sim-btn sim-btn-reset" type="button" id="resetSyscall">â†º Clear</button>
       </div>
     </section>
 
