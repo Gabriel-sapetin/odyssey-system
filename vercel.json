@@ -1,8 +1,24 @@
 {
   "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "redirects": [
-    { "source": "/", "destination": "/os-odyssey/frontend/html/index.html", "statusCode": 302 }
+    {
+      "source": "/os-odyssey/frontend/html/:page",
+      "destination": "/:page",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/frontend/html/index.html",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/(.*)",
+      "destination": "/$1",
+      "statusCode": 301
+    }
   ],
   "headers": [
     {
