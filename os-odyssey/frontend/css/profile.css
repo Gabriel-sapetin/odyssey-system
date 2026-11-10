@@ -121,6 +121,39 @@
   gap: 12px;
 }
 
+.prof-character-badge-row {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prof-character-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(232, 135, 25, 0.12);
+  border: 1px solid rgba(232, 135, 25, 0.35);
+  color: var(--orange, #e88719);
+  font-family: var(--font-pixel, monospace);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.prof-character-dot {
+  font-size: 10px;
+  color: #ffad32;
+}
+
+.light-mode .prof-character-pill {
+  background: #fff5ea;
+  border-color: #ffd8a8;
+  color: #d96812;
+}
+
 .prof-rename-btn {
   flex-shrink: 0;
   width: 32px;

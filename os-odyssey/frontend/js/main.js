@@ -12,7 +12,7 @@
     const mainScriptUrl = document.currentScript && document.currentScript.src;
     if (mainScriptUrl) {
       const mobileCssUrlObject = new URL('../css/mobile.css', mainScriptUrl);
-      mobileCssUrlObject.searchParams.set('v', '26');
+      mobileCssUrlObject.searchParams.set('v', '28');
       const mobileCssUrl = mobileCssUrlObject.href;
       if (!document.querySelector(`link[href="${mobileCssUrl}"]`)) {
         const mobileCss = document.createElement('link');
@@ -697,13 +697,88 @@
     target.innerHTML = `<img src="${user.avatar}" alt="${user.character}" />`;
   }
 
+  function updateNavProfileAvatar(user) {
+    if (!user) return;
+    const avatar = user.avatar || DEFAULT_AVATAR;
+    const character = user.character || DEFAULT_CHARACTER;
+
+    // Desktop nav links: <a href="profile.html">...</a>
+    document.querySelectorAll('.app-nav-links a[href="profile.html"]').forEach(link => {
+      let icon = link.querySelector('.nav-profile-avatar, .nav-computer-icon, .dashboard-nav-icon');
+      if (avatar === 'computer') {
+        if (!icon || !icon.classList.contains('nav-computer-icon')) {
+          if (icon) icon.remove();
+          const compIcon = document.createElement('span');
+          compIcon.className = 'dashboard-nav-icon nav-profile-avatar nav-computer-icon';
+          compIcon.setAttribute('aria-hidden', 'true');
+          compIcon.innerHTML = '<span class="screen-face"></span>';
+          link.insertBefore(compIcon, link.firstChild);
+        }
+      } else {
+        if (!icon || icon.tagName !== 'IMG') {
+          if (icon) icon.remove();
+          const img = document.createElement('img');
+          img.className = 'dashboard-nav-icon nav-profile-avatar';
+          img.src = avatar;
+          img.alt = character || 'Profile';
+          img.setAttribute('aria-hidden', 'true');
+          link.insertBefore(img, link.firstChild);
+        } else {
+          icon.src = avatar;
+          icon.alt = character || 'Profile';
+        }
+      }
+    });
+
+    // Mobile bottom nav item: <a class="mobile-bottom-nav__item..." href="profile.html">...</a>
+    const mobileLink = document.querySelector('.mobile-bottom-nav a[href="profile.html"]');
+    if (mobileLink) {
+      let mIcon = mobileLink.querySelector('.mobile-bottom-nav__icon');
+      if (avatar === 'computer') {
+        if (!mIcon || !mIcon.classList.contains('nav-computer-icon')) {
+          if (mIcon) mIcon.remove();
+          const compIcon = document.createElement('span');
+          compIcon.className = 'mobile-bottom-nav__icon mobile-bottom-nav__avatar nav-computer-icon';
+          compIcon.setAttribute('aria-hidden', 'true');
+          compIcon.innerHTML = '<span class="screen-face"></span>';
+          mobileLink.insertBefore(compIcon, mobileLink.firstChild);
+        }
+      } else {
+        if (!mIcon || mIcon.tagName !== 'IMG') {
+          if (mIcon) mIcon.remove();
+          const img = document.createElement('img');
+          img.className = 'mobile-bottom-nav__icon mobile-bottom-nav__avatar nav-profile-avatar';
+          img.src = avatar;
+          img.alt = character || 'Profile';
+          img.setAttribute('aria-hidden', 'true');
+          mobileLink.insertBefore(img, mobileLink.firstChild);
+        } else {
+          mIcon.src = avatar;
+          mIcon.alt = character || 'Profile';
+        }
+      }
+    }
+  }
+
   /* ---- Session UI ---- */
 
   async function renderSessionUI() {
     const user = await getCurrentUser();
     activeProfile = user;
+    window.odysseyCurrentUser = user;
     window.odysseyProfileReady = true;
     window.odysseyUserRole = user && user.role ? user.role : 'guest';
+    if (user) {
+      const avatar = user.avatar || DEFAULT_AVATAR;
+      const character = user.character || DEFAULT_CHARACTER;
+      window.odysseyUserAvatar = avatar;
+      window.odysseyUserCharacter = character;
+      try {
+        localStorage.setItem('odyssey-user-avatar', avatar);
+        localStorage.setItem('odyssey-user-character', character);
+      } catch (e) {}
+    }
+    updateNavProfileAvatar(user);
     window.dispatchEvent(new Event('odyssey:profile-ready'));
 
     document.querySelectorAll('[data-auth-action="guest"]').forEach(el => {
@@ -1800,6 +1875,13 @@
         character: selectedCharacter.name,
         avatar: selectedCharacter.avatar
       });
+
+      try {
+        localStorage.setItem('odyssey-user-avatar', selectedCharacter.avatar);
+        localStorage.setItem('odyssey-user-character', selectedCharacter.name);
+      } catch (err) {}
+      window.odysseyUserAvatar = selectedCharacter.avatar;
+      window.odysseyUserCharacter = selectedCharacter.name;
 
       if (!updated) {
         characterContinue.textContent = 'Enter Dashboard';

@@ -161,6 +161,10 @@
     $id('profUsername').textContent = user.username || 'Kernel Cadet';
     $id('profLevel').textContent = `Level ${level} · ${rank}`;
 
+    if ($id('profCharacterName')) {
+      $id('profCharacterName').textContent = user.character || 'Kernel Penguin';
+    }
+
     // Join date
     if (user.created_at) {
       const d = new Date(user.created_at);
@@ -168,10 +172,19 @@
     }
 
     // Avatar
+    const avatarWrap = $id('profAvatarWrap');
     const avatarImg = $id('profAvatarImg');
-    if (user.avatar && user.avatar !== 'computer') {
-      avatarImg.src = user.avatar;
-      avatarImg.alt = user.character || 'Avatar';
+    if (user.avatar === 'computer') {
+      if (avatarWrap) {
+        avatarWrap.innerHTML = '<span class="computer-avatar"><span class="screen-face"></span></span>';
+      }
+    } else if (user.avatar) {
+      if (avatarImg) {
+        avatarImg.src = user.avatar;
+        avatarImg.alt = user.character || 'Avatar';
+      } else if (avatarWrap) {
+        avatarWrap.innerHTML = `<img src="${user.avatar}" alt="${user.character || 'Avatar'}" id="profAvatarImg" />`;
+      }
     }
 
     // Setup username editor

@@ -82,6 +82,24 @@
     }
   }
 
+  function getUserAvatar() {
+    if (window.odysseyUserAvatar) return window.odysseyUserAvatar;
+    try {
+      const cached = localStorage.getItem('odyssey-user-avatar');
+      if (cached) return cached;
+    } catch (e) {}
+    return '../../assets/penguin-flower-removebg-preview.png';
+  }
+
+  function getUserCharacter() {
+    if (window.odysseyUserCharacter) return window.odysseyUserCharacter;
+    try {
+      const cached = localStorage.getItem('odyssey-user-character');
+      if (cached) return cached;
+    } catch (e) {}
+    return 'Kernel Penguin';
+  }
+
   function mountTabs(role) {
     const previous = document.querySelector('.mobile-bottom-nav');
     if (previous) previous.remove();
@@ -101,9 +119,20 @@
     nav.setAttribute('aria-label', 'Main navigation');
     nav.innerHTML = tabs.map(tab => {
       const isActive = tab.key === active;
-      const icon = tab.icon
-        ? `<img class="mobile-bottom-nav__icon" src="../../assets/${tab.icon}" alt="" aria-hidden="true">`
-        : '';
+      let icon = '';
+      if (tab.key === 'profile') {
+        const avatar = getUserAvatar();
+        const character = getUserCharacter();
+        if (avatar === 'computer') {
+          icon = '<span class="mobile-bottom-nav__icon mobile-bottom-nav__avatar nav-computer-icon" aria-hidden="true"><span class="screen-face"></span></span>';
+        } else {
+          icon = `<img class="mobile-bottom-nav__icon mobile-bottom-nav__avatar nav-profile-avatar" src="${avatar}" alt="${character}" aria-hidden="true">`;
+        }
+      } else if (tab.key === 'management') {
+        icon = '<img class="mobile-bottom-nav__icon" src="../../assets/pixelatedos.png" alt="" aria-hidden="true">';
+      } else if (tab.icon) {
+        icon = `<img class="mobile-bottom-nav__icon" src="../../assets/${tab.icon}" alt="" aria-hidden="true">`;
+      }
       return `<a class="mobile-bottom-nav__item${isActive ? ' is-active' : ''}" href="${tab.href}"${isActive ? ' aria-current="page"' : ''}>${icon}<span class="mobile-bottom-nav__label">${tab.label}</span></a>`;
     }).join('');
     body.appendChild(nav);
