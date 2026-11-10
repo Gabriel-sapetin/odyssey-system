@@ -8,7 +8,7 @@
  * API calls always go to the network (no caching of dynamic data).
  */
 
-const CACHE_NAME = 'odyssey-v27';
+const CACHE_NAME = 'odyssey-v28';
 
 // Core app shell files to pre-cache on install
 const APP_SHELL = [
@@ -165,14 +165,25 @@ self.addEventListener('fetch', (event) => {
 function matchPage(request, url) {
   return caches.match(request).then((cached) => {
     if (cached) return cached;
-    if (url.pathname === '/' || url.pathname.endsWith('index.html')) {
+    if (
+      url.pathname === '/' ||
+      url.pathname.endsWith('index.html') ||
+      url.pathname === '/os-odyssey' ||
+      url.pathname === '/os-odyssey/' ||
+      url.pathname === '/$1'
+    ) {
       return caches.match('/');
     }
     const cleanPath = url.pathname
       .replace(/\/os-odyssey\/frontend\/html\//, '/')
+      .replace(/\/os-odyssey\//, '/')
       .replace(/\.html$/, '');
     if (cleanPath !== url.pathname) {
-      return caches.match(cleanPath);
+      return caches.match(cleanPath).then((cleanMatch) => {
+        if (cleanMatch) return cleanMatch;
+        if (cleanPath === '' || cleanPath === '/') return caches.match('/');
+        return undefined;
+      });
     }
     return undefined;
   });

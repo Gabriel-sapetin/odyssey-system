@@ -5,6 +5,16 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/$1",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/%241",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
       "source": "/os-odyssey/frontend/css/:path*",
       "destination": "/css/:path*",
       "statusCode": 301
@@ -15,13 +25,58 @@
       "statusCode": 301
     },
     {
+      "source": "/os-odyssey/assets/:path*",
+      "destination": "/assets/:path*",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/sw.js",
+      "destination": "/sw.js",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/manifest.json",
+      "destination": "/manifest.json",
+      "statusCode": 301
+    },
+    {
       "source": "/os-odyssey/frontend/html/index.html",
       "destination": "/",
       "statusCode": 301
     },
     {
+      "source": "/os-odyssey/frontend/html/index",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/frontend/html",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/frontend/html/",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/frontend/html/:page.html",
+      "destination": "/:page",
+      "statusCode": 301
+    },
+    {
       "source": "/os-odyssey/frontend/html/:page",
       "destination": "/:page",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/frontend",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/frontend/",
+      "destination": "/",
       "statusCode": 301
     },
     {
@@ -40,17 +95,60 @@
       "statusCode": 301
     },
     {
+      "source": "/frontend/html/index",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/frontend/html",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/frontend/html/",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/frontend/html/:page.html",
+      "destination": "/:page",
+      "statusCode": 301
+    },
+    {
       "source": "/frontend/html/:page",
       "destination": "/:page",
       "statusCode": 301
     },
     {
-      "source": "/os-odyssey/(.*)",
-      "destination": "/$1",
+      "source": "/os-odyssey",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/os-odyssey/:path*",
+      "destination": "/:path*",
       "statusCode": 301
     }
   ],
   "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
