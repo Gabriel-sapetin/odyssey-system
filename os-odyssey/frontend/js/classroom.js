@@ -303,29 +303,41 @@
       const professorLevel = Number(c.professor_level) || 1;
       const professorXp = Number(c.professor_xp) || 0;
       return `
-        <button class="classroom-card" type="button" onclick="window._openStudentClass('${c.id}')" style="--class-accent:${accent}" aria-label="Open ${esc(c.name)} classroom">
-          <span class="classroom-card-content">
-            <span class="classroom-card-subject">${esc(c.subject || 'General')}</span>
-            <strong class="classroom-card-title">${esc(c.name)}</strong>
-            ${c.description ? `<span class="classroom-card-desc">${esc(c.description)}</span>` : ''}
-            <span class="classroom-meta">
-              <span>Prof. ${esc(c.professor_username || 'Unknown')}</span>
-              <span>${Number(c.member_count) || 0} students</span>
+        <div class="classroom-card" role="button" tabindex="0" onclick="window._openStudentClass('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' ')window._openStudentClass('${c.id}')" style="--class-accent:${accent}" aria-label="Open ${esc(c.name)} classroom">
+          <div class="classroom-card-banner" style="background-image:url('${esc(banner.src).replace(/\"/g, '&quot;')}')">
+            <div class="classroom-card-banner-overlay"></div>
+            <div class="classroom-card-banner-tags">
+              <span class="classroom-subject-tag">${esc(c.subject || 'General')}</span>
+              <span class="classroom-students-tag">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                ${Number(c.member_count) || 0} ${Number(c.member_count) === 1 ? 'student' : 'students'}
+              </span>
+            </div>
+          </div>
+          <div class="classroom-instructor-strip">
+            <div class="classroom-instructor-avatar">
+              ${professorFace}
+            </div>
+            <div class="classroom-instructor-meta">
+              <span class="classroom-instructor-role">Instructor</span>
+              <strong class="classroom-instructor-name">Prof. ${esc(c.professor_username || 'Unknown')}</strong>
+            </div>
+            <div class="classroom-instructor-stats">
+              <span class="classroom-stat-badge level" title="Instructor Level">⚡ Lv. ${professorLevel}</span>
+              <span class="classroom-stat-badge xp" title="Instructor XP">✦ ${professorXp.toLocaleString()} XP</span>
+            </div>
+          </div>
+          <div class="classroom-card-body">
+            <h3 class="classroom-card-title">${esc(c.name)}</h3>
+            <p class="classroom-card-desc">${esc(c.description || 'Access class modules, assignments, and test your knowledge with interactive quizzes.')}</p>
+          </div>
+          <div class="classroom-card-footer">
+            <span class="classroom-open-btn">
+              <span>Open Classroom</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </span>
-            <span class="classroom-card-open">Open classroom</span>
-          </span>
-          <span class="classroom-professor-panel" aria-label="Professor ${esc(c.professor_username || 'Unknown')}, level ${professorLevel}, ${professorXp} XP">
-            <span class="classroom-professor-banner" style="background-image:url('${esc(banner.src).replace(/\"/g, '&quot;')}')"></span>
-            <span class="classroom-professor-summary">
-              <span class="classroom-professor-avatar">${professorFace}</span>
-              <span class="classroom-professor-name">${esc(c.professor_username || 'Professor')}</span>
-            </span>
-            <span class="classroom-professor-stats">
-              <span><small>LEVEL</small><strong>${professorLevel}</strong></span>
-              <span><small>XP</small><strong>${professorXp.toLocaleString()}</strong></span>
-            </span>
-          </span>
-        </button>
+          </div>
+        </div>
       `;
     }).join('');
   }

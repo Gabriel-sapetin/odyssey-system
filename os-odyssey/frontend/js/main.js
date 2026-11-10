@@ -2777,7 +2777,7 @@
       elements.primaryAction.textContent = state.quizIndex === currentModule().quiz.length - 1 ? 'See Summary' : 'Next Question';
       updateBackAction();
       setTimeout(() => {
-        elements.feedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        elements.feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 60);
     }
 

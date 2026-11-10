@@ -3553,7 +3553,6 @@ body.odyssey-classroom-page #studentClassDetail > .netacad-course.standalone,
 body.odyssey-classroom-page .netacad-reader-preview,
 body.odyssey-classroom-page #classroomProgressCard,
 body.odyssey-classroom-page .join-code-section,
-body.odyssey-classroom-page .classroom-card,
 body.odyssey-classroom-page .odyssey-assessment-card,
 body.odyssey-classroom-page .assessment-card-header,
 body.odyssey-classroom-page .assessment-card-body,
@@ -3577,21 +3576,18 @@ body.odyssey-course-page .netacad-reader-preview,
 body.odyssey-classroom-page .netacad-reader-preview { padding-inline: 0; }
 body.odyssey-course-page #courseProgressPanel { padding: 0; }
 body.odyssey-course-page .progress-module-row,
-body.odyssey-classroom-page .progress-module-row,
-body.odyssey-classroom-page .classroom-card {
+body.odyssey-classroom-page .progress-module-row {
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
 }
 body.odyssey-course-page .progress-module-row:hover,
-body.odyssey-classroom-page .progress-module-row:hover,
-body.odyssey-classroom-page .classroom-card:hover {
+body.odyssey-classroom-page .progress-module-row:hover {
   transform: none;
   background: transparent !important;
   box-shadow: none !important;
 }
-body.odyssey-classroom-page .classroom-card { border-left: 0 !important; padding-inline: 0; }
 body.odyssey-classroom-page .join-code-section { padding-inline: 0; }
 body.odyssey-classroom-page .netacad-shell-header {
   border: 0 !important;
@@ -4039,74 +4035,487 @@ body.odyssey-classroom-page .quiz-meta-row { display: none; }
   body.odyssey-course-page .progress-module-status { grid-column: 2; }
 }
 
-/* Classrooms are destinations: give each one a visible, subject-colored entry. */
-body.odyssey-classroom-page .classroom-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-  gap: 16px;
+/* ==========================================================================
+   CLASSROOM HUB — MODERN GAMIFIED ODYSSEY DESIGN
+   ========================================================================== */
+
+/* Top bar: title + join card */
+body.odyssey-classroom-page .classroom-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
 }
+
+body.odyssey-classroom-page .classroom-title-lockup {
+  flex: 1 1 320px;
+}
+
+body.odyssey-classroom-page .classroom-page-title {
+  margin: 0 0 6px;
+  font: 900 clamp(26px, 3.8vw, 36px)/1.15 'Nunito', Inter, sans-serif;
+  color: var(--odyssey-ink, #0f172a);
+  letter-spacing: -0.02em;
+}
+
+body.odyssey-classroom-page.light-mode .classroom-page-title,
+body.odyssey-classroom-page[data-theme="light"] .classroom-page-title {
+  color: #0f172a;
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-page-title,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-page-title {
+  color: #ffffff;
+}
+
+body.odyssey-classroom-page .classroom-page-subtitle {
+  margin: 0;
+  font: 600 14px/1.5 'Nunito', Inter, sans-serif;
+  color: var(--odyssey-muted, #64748b);
+  max-width: 540px;
+}
+
+/* Join Classroom Card */
+body.odyssey-classroom-page .classroom-join-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05);
+  flex-wrap: wrap;
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-join-card,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-join-card {
+  background: #18182f;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+body.odyssey-classroom-page .classroom-join-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body.odyssey-classroom-page .classroom-join-icon {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #fef3c7;
+  flex-shrink: 0;
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-join-icon,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-join-icon {
+  background: rgba(245, 158, 11, 0.2);
+}
+
+body.odyssey-classroom-page .classroom-join-title {
+  display: block;
+  font: 800 13px/1.2 'Nunito', Inter, sans-serif;
+  color: var(--odyssey-ink, #0f172a);
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-join-title,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-join-title {
+  color: #ffffff;
+}
+
+body.odyssey-classroom-page .classroom-join-desc {
+  margin: 2px 0 0;
+  font: 600 11px/1.2 'Nunito', Inter, sans-serif;
+  color: var(--odyssey-muted, #64748b);
+}
+
+body.odyssey-classroom-page .classroom-join-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.odyssey-classroom-page .classroom-join-form input {
+  height: 42px;
+  width: 140px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  font: 800 13px/1 'Nunito', monospace, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-join-form input,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-join-form input {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+body.odyssey-classroom-page .classroom-join-form input:focus {
+  outline: none;
+  border-color: #f59e0b;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-join-form input:focus,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-join-form input:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #f59e0b;
+}
+
+body.odyssey-classroom-page .classroom-join-submit {
+  height: 42px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  font: 800 13px/1 'Nunito', Inter, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+  transition: all 0.15s ease;
+}
+
+body.odyssey-classroom-page .classroom-join-submit:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
+}
+
+/* ==========================================================================
+   CLASSROOM GRID & CARDS
+   ========================================================================== */
+body.odyssey-classroom-page .classroom-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)) !important;
+  gap: 24px !important;
+  margin-top: 0 !important;
+  width: 100% !important;
+}
+
+/* Card Root: crisp elevated card, clean borders, NO muddy blue gradient */
 body.odyssey-classroom-page .classroom-card {
   position: relative;
-  display: block;
-  width: 100%;
-  min-height: 184px;
+  display: flex;
+  flex-direction: column;
+  min-height: 290px;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
   overflow: hidden;
-  padding: 22px 22px 18px 26px;
-  border: 0 !important;
-  border-left: 8px solid var(--class-accent) !important;
-  border-radius: 18px !important;
-  background: linear-gradient(115deg, color-mix(in srgb, var(--class-accent) 17%, var(--odyssey-panel)), var(--odyssey-panel) 68%) !important;
-  box-shadow: 0 8px 24px rgba(28, 41, 68, .09) !important;
-  color: var(--odyssey-ink);
-  font: inherit;
-  text-align: left;
+  padding: 0 !important;
+  margin: 0 !important;
   cursor: pointer;
-  transition: transform .16s ease, box-shadow .16s ease;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease !important;
 }
+
 body.odyssey-classroom-page .classroom-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(28, 41, 68, .15) !important;
+  transform: translateY(-4px) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.12), 0 6px 14px -2px rgba(245, 158, 11, 0.1) !important;
 }
-body.odyssey-classroom-page .classroom-card:focus-visible { outline: 3px solid var(--class-accent); outline-offset: 3px; }
-body.odyssey-classroom-page .classroom-card-accent {
+
+body.odyssey-classroom-page .classroom-card:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+
+/* Dark mode card */
+body.odyssey-classroom-page:not(.light-mode) .classroom-card,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-card {
+  background: #18182f !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-card:hover,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-card:hover {
+  border-color: rgba(245, 158, 11, 0.55) !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Scenic Banner */
+body.odyssey-classroom-page .classroom-card-banner {
+  position: relative;
+  height: 108px;
+  background-size: cover;
+  background-position: center;
+  background-color: #2b3a55;
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 14px;
+}
+
+body.odyssey-classroom-page .classroom-card-banner-overlay {
   position: absolute;
-  top: -36px;
-  right: -22px;
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--class-accent) 16%, transparent);
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.1) 50%, rgba(15, 23, 42, 0.65) 100%);
   pointer-events: none;
 }
-body.odyssey-classroom-page .classroom-professor-avatar {
-  position: absolute;
+
+body.odyssey-classroom-page .classroom-card-banner-tags {
+  position: relative;
   z-index: 1;
-  top: 24px;
-  right: 28px;
-  display: grid;
-  width: 76px;
-  height: 76px;
-  place-items: center;
-  overflow: hidden;
-  border: 3px solid rgba(255, 255, 255, .92);
-  border-radius: 50%;
-  background: var(--odyssey-panel);
-  box-shadow: 0 5px 14px rgba(20, 31, 54, .2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
-body.odyssey-classroom-page .classroom-professor-avatar img {
-  display: block;
+
+body.odyssey-classroom-page .classroom-subject-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fef3c7;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font: 800 11px/1 'Nunito', Inter, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+body.odyssey-classroom-page .classroom-students-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font: 700 11px/1 'Nunito', Inter, sans-serif;
+}
+
+/* Instructor Row (Avatar + Name + Badges) */
+body.odyssey-classroom-page .classroom-instructor-strip {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  margin-top: -24px;
+}
+
+body.odyssey-classroom-page .classroom-instructor-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.14);
+  overflow: hidden;
+  background: #f1f5f9;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-instructor-avatar,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-instructor-avatar {
+  border-color: #18182f;
+  background: #252542;
+}
+
+body.odyssey-classroom-page .classroom-instructor-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   image-rendering: pixelated;
 }
-body.odyssey-classroom-page .classroom-professor-avatar .computer-avatar { transform: scale(.58); }
-body.odyssey-classroom-page .classroom-card-content { position: relative; z-index: 2; display: grid; justify-items: start; gap: 8px; padding-right: 82px; }
-body.odyssey-classroom-page .classroom-card-subject { color: var(--class-accent); font: 750 11px/1.3 Inter, Nunito, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
-body.odyssey-classroom-page .classroom-card-title { color: var(--odyssey-ink); font: 800 21px/1.25 Inter, Nunito, system-ui, sans-serif; }
-body.odyssey-classroom-page .classroom-card-desc { color: var(--odyssey-muted); font: 13px/1.5 Inter, Nunito, system-ui, sans-serif; }
-body.odyssey-classroom-page .classroom-card .classroom-meta { display: flex; gap: 8px 18px; margin-top: 4px; color: var(--odyssey-muted); font: 12px/1.4 Inter, Nunito, system-ui, sans-serif; }
-body.odyssey-classroom-page .classroom-card-open { margin-top: 5px; color: var(--odyssey-ink); font: 750 12px/1.4 Inter, Nunito, system-ui, sans-serif; }
+
+body.odyssey-classroom-page .classroom-instructor-avatar .computer-avatar {
+  transform: scale(0.65);
+}
+
+body.odyssey-classroom-page .classroom-instructor-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+body.odyssey-classroom-page .classroom-instructor-role {
+  font: 800 9px/1 'Nunito', Inter, sans-serif;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+body.odyssey-classroom-page .classroom-instructor-name {
+  font: 800 13px/1.3 'Nunito', Inter, sans-serif;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-instructor-name,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-instructor-name {
+  color: #ffffff;
+}
+
+body.odyssey-classroom-page .classroom-instructor-stats {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-top: 20px;
+  flex-shrink: 0;
+}
+
+body.odyssey-classroom-page .classroom-stat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  font: 800 11px/1 'Nunito', Inter, sans-serif;
+}
+
+body.odyssey-classroom-page .classroom-stat-badge.level {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+body.odyssey-classroom-page .classroom-stat-badge.xp {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-stat-badge.level,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-stat-badge.level {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-stat-badge.xp,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-stat-badge.xp {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+}
+
+/* Card Body */
+body.odyssey-classroom-page .classroom-card-body {
+  flex: 1;
+  padding: 14px 18px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+body.odyssey-classroom-page .classroom-card-title {
+  margin: 0;
+  font: 800 18px/1.3 'Nunito', Inter, sans-serif;
+  color: #0f172a;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-card-title,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-card-title {
+  color: #ffffff;
+}
+
+body.odyssey-classroom-page .classroom-card-desc {
+  margin: 0;
+  font: 550 13px/1.5 'Nunito', Inter, sans-serif;
+  color: #64748b;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-card-desc,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-card-desc {
+  color: #94a3b8;
+}
+
+/* Card Footer with Enter Button */
+body.odyssey-classroom-page .classroom-card-footer {
+  padding: 12px 18px 16px;
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+body.odyssey-classroom-page:not(.light-mode) .classroom-card-footer,
+body.odyssey-classroom-page[data-theme="dark"] .classroom-card-footer {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+body.odyssey-classroom-page .classroom-open-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  font: 800 13px/1 'Nunito', Inter, sans-serif;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.22);
+  transition: all 0.18s ease;
+}
+
+body.odyssey-classroom-page .classroom-card:hover .classroom-open-btn {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 768px) {
+  body.odyssey-classroom-page .classroom-top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  body.odyssey-classroom-page .classroom-join-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+  body.odyssey-classroom-page .classroom-join-form {
+    width: 100%;
+  }
+  body.odyssey-classroom-page .classroom-join-form input {
+    flex: 1;
+    width: auto;
+  }
+  body.odyssey-classroom-page .classroom-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+}
 
 /* Keep material and assessment actions distinct on the class roadmap. */
 body.odyssey-classroom-page .progress-module-row {
@@ -5076,67 +5485,6 @@ body.odyssey-home-page .odyssey-account-card .profile-top a {
   body.odyssey-home-page .odyssey-account-card { --dashboard-account-padding: 18px; }
   body.odyssey-home-page .dashboard-profile-banner { height: 150px; }
   body.odyssey-home-page .odyssey-account-card .profile-top { min-height: 108px; }
-}
-
-/* Give each classroom a compact professor profile column with their chosen banner. */
-body.odyssey-classroom-page .classroom-card {
-  padding-right: 0;
-  border-radius: 18px !important;
-  background: linear-gradient(115deg, color-mix(in srgb, var(--class-accent) 17%, var(--odyssey-panel)), var(--odyssey-panel) 68%) !important;
-  box-shadow: 0 8px 24px rgba(28, 41, 68, .09) !important;
-}
-body.odyssey-classroom-page .classroom-grid { grid-template-columns: minmax(0, 1fr); }
-body.odyssey-classroom-page .classroom-card-accent { display: none; }
-body.odyssey-classroom-page .classroom-card-content {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  width: calc(100% - clamp(160px, calc(24% + 20px), 280px));
-  box-sizing: border-box;
-  justify-items: start;
-  gap: 8px;
-  padding-right: 12px;
-}
-body.odyssey-classroom-page .classroom-professor-panel {
-  inset: 10px 10px 10px auto;
-  width: clamp(140px, 24%, 260px);
-  border-radius: 18px;
-  box-shadow: 0 5px 16px rgba(19, 30, 53, .16);
-}
-body.odyssey-classroom-page .classroom-professor-banner { height: 34%; min-height: 72px; }
-body.odyssey-classroom-page .classroom-professor-panel::before {
-  background: linear-gradient(180deg, rgba(11, 18, 34, .04) 0, rgba(17, 27, 48, .52) 20%, #17233d 45%);
-}
-body.odyssey-classroom-page .classroom-professor-summary { grid-template-columns: 48px minmax(0, 1fr); gap: 10px; padding: 0 16px 10px; }
-body.odyssey-classroom-page .classroom-professor-avatar { position: relative; inset: auto; z-index: auto; width: 48px; height: 48px; }
-body.odyssey-classroom-page .classroom-professor-name { font-size: 13px; }
-body.odyssey-classroom-page .classroom-professor-stats { gap: 8px; padding: 0 16px 16px; }
-body.odyssey-classroom-page .classroom-professor-stats > span { padding: 8px; }
-body.odyssey-classroom-page .classroom-professor-stats small { font-size: 9px; }
-body.odyssey-classroom-page .classroom-professor-stats strong { font-size: 14px; }
-
-@media (max-width: 768px) {
-  body.odyssey-classroom-page .classroom-card {
-    min-height: 178px;
-    padding: 16px 0 14px 18px;
-  }
-  body.odyssey-classroom-page .classroom-grid { grid-template-columns: minmax(0, 1fr); }
-  body.odyssey-classroom-page .classroom-card-content {
-    width: calc(100% - 142px);
-    gap: 7px;
-    padding-right: 8px;
-  }
-  body.odyssey-classroom-page .classroom-card-title { font-size: 17px; }
-  body.odyssey-classroom-page .classroom-card-desc { font-size: 12px; }
-  body.odyssey-classroom-page .classroom-card .classroom-meta { flex-wrap: wrap; gap: 4px 10px; font-size: 10px; }
-  body.odyssey-classroom-page .classroom-professor-panel { inset: 8px 8px 8px auto; width: 126px; }
-  body.odyssey-classroom-page .classroom-professor-summary { grid-template-columns: 38px minmax(0, 1fr); gap: 7px; padding-inline: 9px; }
-  body.odyssey-classroom-page .classroom-professor-avatar { width: 38px; height: 38px; }
-  body.odyssey-classroom-page .classroom-professor-name { font-size: 11px; }
-  body.odyssey-classroom-page .classroom-professor-stats { gap: 5px; padding: 0 8px 10px; }
-  body.odyssey-classroom-page .classroom-professor-stats > span { padding: 6px 5px; }
-  body.odyssey-classroom-page .classroom-professor-stats small { font-size: 8px; }
-  body.odyssey-classroom-page .classroom-professor-stats strong { font-size: 12px; }
 }
 
 /* A playful leaderboard invitation in the Explore Lessons learning path. */
@@ -7043,6 +7391,7 @@ body.odyssey-course-page .lesson-fullpage:not([hidden]) {
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: rgba(217, 104, 18, 0.4) transparent;
+  scroll-padding-bottom: 120px;
 }
 
 body.odyssey-course-page:not(.light-mode) .lesson-fullpage:not([hidden]) {

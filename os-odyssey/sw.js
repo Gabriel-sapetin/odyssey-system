@@ -8,7 +8,7 @@
  * API calls always go to the network (no caching of dynamic data).
  */
 
-const CACHE_NAME = 'odyssey-v28';
+const CACHE_NAME = 'odyssey-v33';
 
 // Core app shell files to pre-cache on install
 const APP_SHELL = [
@@ -139,12 +139,25 @@ self.addEventListener('fetch', (event) => {
   // HTML pages: stale-while-revalidate with clean URL fallbacks
   event.respondWith(
     matchPage(request, url).then((cached) => {
-      const fetchPromise = fetch(request)
+      const cleanPath = getCleanPath(url.pathname);
+      const fetchRequest = (cleanPath !== url.pathname)
+        ? new Request(new URL(cleanPath, url.origin).href, {
+            headers: request.headers,
+            credentials: request.credentials
+          })
+        : request;
+
+      const fetchPromise = fetch(fetchRequest)
         .then((response) => {
           if (response.status === 200 && response.type !== 'opaque') {
             const clone = response.clone();
             caches.open(CACHE_NAME)
-              .then((cache) => cache.put(request, clone))
+              .then((cache) => {
+                cache.put(fetchRequest, clone);
+                if (fetchRequest !== request) {
+                  cache.put(request, response.clone());
+                }
+              })
               .catch((error) => console.warn('[SW] Could not cache page:', error));
           }
           return response;
@@ -160,28 +173,34 @@ self.addEventListener('fetch', (event) => {
 });
 
 /**
+ * Returns clean path for a pathname
+ */
+function getCleanPath(pathname) {
+  if (
+    pathname === '/' ||
+    pathname.endsWith('index.html') ||
+    pathname === '/os-odyssey' ||
+    pathname === '/os-odyssey/' ||
+    pathname === '/$1'
+  ) {
+    return '/';
+  }
+  return pathname
+    .replace(/\/os-odyssey\/frontend\/html\//, '/')
+    .replace(/\/os-odyssey\//, '/')
+    .replace(/\.html$/, '') || '/';
+}
+
+/**
  * Matches an HTML request in cache with fallback for clean URLs
  */
 function matchPage(request, url) {
   return caches.match(request).then((cached) => {
     if (cached) return cached;
-    if (
-      url.pathname === '/' ||
-      url.pathname.endsWith('index.html') ||
-      url.pathname === '/os-odyssey' ||
-      url.pathname === '/os-odyssey/' ||
-      url.pathname === '/$1'
-    ) {
-      return caches.match('/');
-    }
-    const cleanPath = url.pathname
-      .replace(/\/os-odyssey\/frontend\/html\//, '/')
-      .replace(/\/os-odyssey\//, '/')
-      .replace(/\.html$/, '');
+    const cleanPath = getCleanPath(url.pathname);
     if (cleanPath !== url.pathname) {
       return caches.match(cleanPath).then((cleanMatch) => {
         if (cleanMatch) return cleanMatch;
-        if (cleanPath === '' || cleanPath === '/') return caches.match('/');
         return undefined;
       });
     }

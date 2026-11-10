@@ -12,8 +12,8 @@
     href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Nunito:wght@400;600;700;800&display=swap"
     rel="stylesheet" />
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
-  <link rel="stylesheet" href="../css/styles.css?v=31" />
-  <link rel="stylesheet" href="../css/mobile.css?v=31" />
+  <link rel="stylesheet" href="../css/styles.css?v=33" />
+  <link rel="stylesheet" href="../css/mobile.css?v=33" />
   <link rel="stylesheet" href="../css/admin.css" />
   <link rel="stylesheet" href="../css/pengu-ai.css" />
   <link rel="manifest" href="../../manifest.json" />
@@ -48,20 +48,27 @@
   <main class="admin-shell" id="classShell">
     <!-- Classroom List View -->
     <div id="studentClassList">
-      <div class="admin-header">
-        <h1>My Classrooms</h1>
-      </div>
-
-      <!-- Join classroom section -->
-      <div class="join-code-section" style="margin-bottom:2rem">
-        <p class="join-code-subtitle">
-          Have a join code from your professor?</p>
-        <div class="join-code-input-group">
-          <input type="text" id="joinCodeInput" placeholder="ENTER CODE" maxlength="10" />
-          <button class="admin-btn primary" id="joinClassBtn">Join</button>
+      <div class="classroom-top-bar">
+        <div class="classroom-title-lockup">
+          <h1 class="classroom-page-title">My Classrooms</h1>
+          <p class="classroom-page-subtitle">Access your enrolled courses, complete module assignments, and climb the class leaderboard.</p>
         </div>
-        <p class="join-feedback" id="joinFeedback"
-          style="font-size:0.78rem;margin-top:0.4rem;font-family:'Nunito',sans-serif"></p>
+
+        <!-- Join classroom card -->
+        <div class="classroom-join-card">
+          <div class="classroom-join-header">
+            <span class="classroom-join-icon" aria-hidden="true">🔑</span>
+            <div class="classroom-join-text">
+              <strong class="classroom-join-title">Have a class code?</strong>
+              <p class="classroom-join-desc">Enter the code from your instructor to enroll.</p>
+            </div>
+          </div>
+          <div class="classroom-join-form">
+            <input type="text" id="joinCodeInput" placeholder="ENTER CODE" maxlength="10" autocomplete="off" spellcheck="false" />
+            <button class="classroom-join-submit" id="joinClassBtn" type="button">Join</button>
+          </div>
+          <p class="join-feedback" id="joinFeedback"></p>
+        </div>
       </div>
 
       <div class="classroom-grid" id="studentClassroomGrid"></div>
