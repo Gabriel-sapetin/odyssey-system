@@ -1,4 +1,4 @@
-# Odyssey chapter 1 to 4 document build record
+# Odyssey chapter 1 to 5 document build record
 
 ## References
 
@@ -23,11 +23,13 @@
 - Chapter 2: literature relevant to interactive simulations, multimedia learning, AI tutoring, gamification, and web/PWA learning access. Sources are cited in numbered reference style.
 - Chapter 3: guided simulation, multimedia learning, iterative development, and an Odyssey-specific IPO model.
 - Chapter 4: development approach, Agile cycle, functional and non-functional requirements, technical/organizational/economic feasibility, system design models, technology stack, and a verification plan.
-- Results and Discussion, conclusion, recommendation, and evaluation findings are excluded pending evidence from the user.
+- Chapter 5: screenshot-based descriptive results and discussion covering learner study/progress, Pengu tools, System Call Tracer, classrooms/instructor application, leaderboard, and administration screens. The final Chapter 5 discussion explicitly limits conclusions to visible interface states; no formal testing, usability, reliability, security, or learning outcomes are claimed.
+- Fourteen distinct Chapter 5 screenshots are included. One exact duplicate administration-users image supplied twice was included once.
 - Diagrams are created specifically for Odyssey: IPO, Agile cycle, use case, learner activity, protected progress sequence, conceptual ERD, architecture, and deployment topology.
 
 ## Fidelity and scope gates
 
 - Do not import MiCasa-specific wording, diagrams, requirements, or findings from the reference PDF.
 - Keep claims about deployment, costs, uptime, accessibility, user acceptance, security certification, and learning outcomes bounded by supplied evidence.
-- The output is a separate DOCX under `D:\odyssey-system\output`; both source files remain unchanged.
+- Output: `D:\odyssey-system\output\Odyssey_SE_Documentation_Chapters_1-5_Final.docx`. Both source documents remain unchanged.
+- The orange triple frame is configured for every page in both document sections, including the cover and preliminary pages. Both section border settings and the embedded image count were verified in the final DOCX. Earlier Word-exported PDF review confirmed Letter pages, chapter-page frame appearance, and well-formatted requirements tables and Chapter 5 screenshots; the final front-matter border change was not re-rendered because LibreOffice is unavailable and the Word window could not be restored for another export.

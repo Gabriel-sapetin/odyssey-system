@@ -11,7 +11,7 @@ from docx.oxml.ns import qn
 ROOT = Path(r"D:\odyssey-system")
 TMP = ROOT / "tmp" / "se-doc"
 FIG = TMP / "odyssey_figures"
-OUT = ROOT / "output" / "Odyssey_SE_Documentation_Chapters_1-4_Final.docx"
+OUT = ROOT / "output" / "Odyssey_SE_Documentation_Chapters_1-5_Final.docx"
 FIG.mkdir(parents=True, exist_ok=True)
 
 ORANGE = "ED7D31"
@@ -221,10 +221,11 @@ def add_caption(doc,text):
 
 def make_doc(figs):
     doc=Document(); setup_styles(doc)
-    doc.core_properties.title='Odyssey Software Engineering Documentation Chapters 1 to 4'
-    doc.core_properties.subject='Introduction, related literature, framework, and methodology for the Odyssey learning platform'
+    doc.core_properties.title='Odyssey Software Engineering Documentation Chapters 1 to 5'
+    doc.core_properties.subject='Introduction, related literature, framework, methodology, and screenshot-based results and discussion for the Odyssey learning platform'
     doc.core_properties.author=''
     front=doc.sections[0]; front.page_width=Inches(8.5); front.page_height=Inches(11); front.top_margin=Inches(.8); front.bottom_margin=Inches(.8); front.left_margin=Inches(1); front.right_margin=Inches(1)
+    set_page_border(front)
     front.different_first_page_header_footer=True
     # Cover page follows the reference convention while using only Odyssey facts already supplied.
     p=doc.add_paragraph(); p.paragraph_format.space_before=Pt(78); p.paragraph_format.first_line_indent=Inches(0); p.alignment=WD_ALIGN_PARAGRAPH.CENTER
@@ -236,7 +237,7 @@ def make_doc(figs):
     p=doc.add_paragraph(); p.paragraph_format.space_before=Pt(28); p.paragraph_format.first_line_indent=Inches(0); p.alignment=WD_ALIGN_PARAGRAPH.CENTER
     r=p.add_run('System Analysis, Requirements, Feasibility, and Design'); r.font.name='Times New Roman'; r.font.size=Pt(13)
     for _ in range(5): doc.add_paragraph()
-    p=doc.add_paragraph('Chapters 1 to 4'); p.paragraph_format.first_line_indent=Inches(0); p.alignment=WD_ALIGN_PARAGRAPH.CENTER
+    p=doc.add_paragraph('Chapters 1 to 5'); p.paragraph_format.first_line_indent=Inches(0); p.alignment=WD_ALIGN_PARAGRAPH.CENTER
     for r in p.runs: r.bold=True; r.font.name='Times New Roman'; r.font.size=Pt(13)
     for _ in range(5): doc.add_paragraph()
     p=doc.add_paragraph('Prepared 25 October 2026'); p.paragraph_format.first_line_indent=Inches(0); p.alignment=WD_ALIGN_PARAGRAPH.CENTER
@@ -245,20 +246,20 @@ def make_doc(figs):
     # Table of contents placeholder with final static page numbers filled after render.
     p=doc.add_paragraph('TABLE OF CONTENTS'); p.alignment=WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.first_line_indent=Inches(0)
     for r in p.runs: r.bold=True; r.font.size=Pt(14); r.font.name='Times New Roman'
-    toc=[('Chapter 1 INTRODUCTION',1),('1.1 Background of the Study',1),('1.2 Statement of the Problem',2),('1.3 Objectives of the Study',2),('1.4 Significance of the Study',3),('1.5 Scope and Limitations',3),('1.6 Definition of Terms',4),('Chapter 2 REVIEW OF RELATED LITERATURE',5),('2.1 Interactive Simulations in Computing Education',5),('2.2 Multimedia Learning and Visual Explanations',5),('2.3 AI-Supported Learning',6),('2.4 Gamification and Learner Engagement',6),('2.5 Web-Based and Mobile Learning Access',6),('2.6 Synthesis and Research Gap',7),('Chapter 3 THEORETICAL AND CONCEPTUAL FRAMEWORK',8),('3.1 Theoretical Framework',8),('3.2 Conceptual Framework',9),('Chapter 4 METHODOLOGY',10),('4.1 Research and Development Approach',10),('4.2 Agile Development Method',10),('4.3 System Requirements',11),('4.4 Feasibility Analysis',13),('4.5 System Modeling and Design',15),('4.6 Development Environment and Tools',18),('4.7 Verification and Evaluation Plan',19),('References',20)]
+    toc=[('Chapter 1 INTRODUCTION',1),('1.1 Background of the Study',1),('1.2 Statement of the Problem',2),('1.3 Objectives of the Study',2),('1.4 Significance of the Study',3),('1.5 Scope and Limitations',3),('1.6 Definition of Terms',4),('Chapter 2 REVIEW OF RELATED LITERATURE',5),('2.1 Interactive Simulations in Computing Education',5),('2.2 Multimedia Learning and Visual Explanations',5),('2.3 AI-Supported Learning',6),('2.4 Gamification and Learner Engagement',6),('2.5 Web-Based and Mobile Learning Access',6),('2.6 Synthesis and Research Gap',7),('Chapter 3 THEORETICAL AND CONCEPTUAL FRAMEWORK',8),('3.1 Theoretical Framework',8),('3.2 Conceptual Framework',8),('Chapter 4 METHODOLOGY',10),('4.1 Research and Development Approach',10),('4.2 Agile Development Method',10),('4.3 System Requirements',11),('4.4 Feasibility Analysis',13),('4.5 System Modeling and Design',14),('4.6 Development Environment and Tools',18),('4.7 Verification and Evaluation Plan',18),('Chapter 5 RESULTS AND DISCUSSION',20),('5.1 Learner Experience and Study Tools',20),('5.2 Pengu Study Aids and Feedback',22),('5.3 Interactive Operating-Systems Practice',26),('5.4 Classroom and Instructor Workflows',27),('5.5 Engagement and Administrative Tools',30),('5.6 Discussion and Evidence Limitations',34),('References',35)]
     for title,page in toc:
         p=doc.add_paragraph(); p.paragraph_format.first_line_indent=Inches(0); p.paragraph_format.left_indent=Inches(.15 if title[0].isdigit() else 0); p.paragraph_format.line_spacing=1.08; p.paragraph_format.space_after=Pt(2); p.paragraph_format.tab_stops.add_tab_stop(Inches(6.35),WD_TAB_ALIGNMENT.RIGHT,WD_TAB_LEADER.DOTS)
         p.add_run(title+'\t'+str(page)).font.name='Times New Roman'
     doc.add_page_break()
     p=doc.add_paragraph('LIST OF FIGURES'); p.alignment=WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.first_line_indent=Inches(0)
     for r in p.runs: r.bold=True; r.font.size=Pt(14)
-    figure_titles=[("Input-Process-Output Model of Odyssey",9),("Agile Software Development Cycle",11),("Main Use Case Diagram for Odyssey",15),("Learner Study Activity Diagram",16),("Lesson Completion Request Sequence Diagram",16),("Conceptual Entity Relationship Diagram",17),("Odyssey System Architecture",18),("Odyssey Deployment Topology",18)]
+    figure_titles=[("Input-Process-Output Model of Odyssey",9),("Agile Software Development Cycle",11),("Main Use Case Diagram for Odyssey",15),("Learner Study Activity Diagram",15),("Lesson Completion Request Sequence Diagram",16),("Conceptual Entity Relationship Diagram",16),("Odyssey System Architecture",17),("Odyssey Deployment Topology",18),("Odyssey home screen and study options",21),("Module route and learning progress",22),("PDF source and Pengu study options",23),("Flashcard question state",24),("Flashcard answer state",25),("Quick Check question and feedback",26),("System Call Tracer interface",27),("My Classrooms and class-joining interface",28),("Classroom modules and displayed progress",29),("Instructor application opening screen",30),("Odyssey learner XP leaderboard",31),("Administrator overview statistics",32),("Administrator user management",33),("Administrator classroom management",34)]
     for i,(t,page) in enumerate(figure_titles,1):
         p=doc.add_paragraph(f'Figure {i}. {t}\t{page}'); p.paragraph_format.first_line_indent=Inches(0); p.paragraph_format.line_spacing=1.1; p.paragraph_format.space_after=Pt(5); p.paragraph_format.tab_stops.add_tab_stop(Inches(6.35),WD_TAB_ALIGNMENT.RIGHT,WD_TAB_LEADER.DOTS)
     doc.add_page_break()
     p=doc.add_paragraph('LIST OF TABLES'); p.alignment=WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.first_line_indent=Inches(0)
     for r in p.runs: r.bold=True; r.font.size=Pt(14)
-    for t,page in [('Table 1. Functional Requirements',11),('Table 2. Non-Functional Requirements',12),('Table 3. Economic Feasibility Assessment',14),('Table 4. Development Technology Stack',18),('Table 5. Planned Verification',19)]:
+    for t,page in [('Table 1. Functional Requirements',11),('Table 2. Non-Functional Requirements',12),('Table 3. Economic Feasibility Assessment',13),('Table 4. Development Technology Stack',18),('Table 5. Planned Verification',19)]:
         p=doc.add_paragraph(f'{t}\t{page}'); p.paragraph_format.first_line_indent=Inches(0); p.paragraph_format.space_after=Pt(5); p.paragraph_format.tab_stops.add_tab_stop(Inches(6.35),WD_TAB_ALIGNMENT.RIGHT,WD_TAB_LEADER.DOTS)
     body=doc.add_section(WD_SECTION.NEW_PAGE); body.page_width=Inches(8.5); body.page_height=Inches(11); body.top_margin=Inches(.8); body.bottom_margin=Inches(.8); body.left_margin=Inches(1); body.right_margin=Inches(1); body.footer_distance=Inches(.35); body.header_distance=Inches(.35)
     set_page_border(body); add_page_num_restart(body)
@@ -390,7 +391,49 @@ def make_doc(figs):
     add_table(doc,['Evaluation area','Planned verification'],checks,widths=[1.65,4.85])
     add_body(doc,"Results, discussion of measured findings, user acceptance results, and conclusions are outside the scope of this document and will be prepared only after the required implementation evidence, evaluation records, and figures are available.")
 
-    # References follow Chapter 4 because no Results and Discussion chapter is included in this draft.
+    # CHAPTER 5
+    chapter(doc,5,'Results and Discussion')
+    section(doc,'5.1 Learner Experience and Study Tools')
+    add_body(doc,"The supplied interface screenshots show an Odyssey home screen with learner currency and streak indicators, a study upload option, and shortcuts to lessons and rankings. The learning-progress screen presents a four-module route, completion status, topic count, and a review action. These are the values and controls visible in the supplied captures; they are not a measurement of overall learner participation or achievement.")
+    imgroot=Path(r'C:\Users\ADMIN\Downloads')
+    screenshots=[
+        ('893164572_4720374971529478_690920164102587946_n.jpg','Figure 9. Odyssey home screen and study options'),
+        ('891892893_29566242113011484_2981868727649773868_n.jpg','Figure 10. Module route and learning progress'),
+    ]
+    for name,caption in screenshots: add_figure(doc,imgroot/name,caption,width=3.0)
+    section(doc,'5.2 Pengu Study Aids and Feedback')
+    add_body(doc,"The screenshots document multiple study modes tied to learner-provided material. The PDF study screen identifies Module 5 as its source and offers memorization, challenge, and question-and-answer options. The flashcard screens show a prompt followed by its revealed explanation. The Quick Check screen shows a multiple-choice question and explanatory feedback. These images illustrate interface states and the displayed example content; they do not establish quiz accuracy across a question bank or improvement in retention.")
+    screenshots=[
+        ('893937455_4260671834230473_7582237102329824428_n.jpg','Figure 11. PDF source and Pengu study options'),
+        ('846908336_2396804114423632_2536424537032601924_n.jpg','Figure 12. Flashcard question state'),
+        ('894687997_994107373752824_7166438679690070924_n.jpg','Figure 13. Flashcard answer state'),
+        ('892724062_1521019000087167_829268459393699876_n.jpg','Figure 14. Quick Check question and feedback'),
+    ]
+    for name,caption in screenshots: add_figure(doc,imgroot/name,caption,width=3.0)
+    section(doc,'5.3 Interactive Operating-Systems Practice')
+    add_body(doc,"The System Call Tracer screenshot presents a program-selection control, execution and clear actions, a step-by-step option, and a next-step control. It documents the lab interface for exploring transitions between user and kernel mode. The supplied image does not show a completed execution trace, so no specific system-call output or runtime result is reported here.")
+    add_figure(doc,imgroot/'896655243_1114549514531947_6299618814024409947_n.jpg','Figure 15. System Call Tracer interface',width=3.0)
+    section(doc,'5.4 Classroom and Instructor Workflows')
+    add_body(doc,"The classroom screenshots show a join-code field and a listed BSCS 3A classroom, followed by a classroom detail page with module and resource navigation, class options, a progress display, and a quiz-review action. A separate instructor-application screen shows the opening decision step. These captures document selected learner and instructor-facing workflows; they do not show a completed application or verify that all classroom actions succeeded.")
+    screenshots=[
+        ('891004360_2082420872435367_1061858712284001231_n.jpg','Figure 16. My Classrooms and class-joining interface'),
+        ('897806037_1286230080362837_5115162308474805406_n.jpg','Figure 17. Classroom modules and displayed progress'),
+        ('892947122_1680167570137318_782324479888283757_n.jpg','Figure 18. Instructor application opening screen'),
+    ]
+    for name,caption in screenshots: add_figure(doc,imgroot/name,caption,width=3.0)
+    section(doc,'5.5 Engagement and Administrative Tools')
+    add_body(doc,"The leaderboard screen ranks learners by XP and includes a badges view. The administrator overview displays account, role, classroom, and average-XP totals, while the users and classrooms screens show management lists. Counts and names shown in these images reflect the captured interface at that moment and should not be treated as current operational totals or independently audited records.")
+    screenshots=[
+        ('898502143_29240216642275866_2505916340822816561_n.jpg','Figure 19. Odyssey learner XP leaderboard'),
+        ('901940049_1824881148723738_3061244640033481772_n.jpg','Figure 20. Administrator overview statistics'),
+        ('899191427_1000942336397698_6775760069325836039_n.jpg','Figure 21. Administrator user management'),
+        ('896655354_1675112450837288_5128266301442765138_n.jpg','Figure 22. Administrator classroom management'),
+    ]
+    for name,caption in screenshots: add_figure(doc,imgroot/name,caption,width=3.0)
+    section(doc,'5.6 Discussion and Evidence Limitations')
+    add_body(doc,"Across the supplied captures, Odyssey presents learner study and progress interfaces, AI-assisted study aids, a system-call lab, classroom tools, a leaderboard, and administration views. This evidence is descriptive and limited to visible screens and example states. It does not verify all controls, security, accessibility, reliability, response time, usability, or learning effectiveness. Those claims require a defined protocol, representative tasks and participants where applicable, collected measures, and documented results, which were not provided.")
+
+    # References follow Chapter 5; measured evaluation data were not supplied.
     doc.add_page_break(); p=doc.add_paragraph('REFERENCES'); p.alignment=WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.first_line_indent=Inches(0); p.paragraph_format.keep_with_next=True
     for r in p.runs: r.bold=True; r.font.name='Times New Roman'; r.font.size=Pt(14)
     refs=[

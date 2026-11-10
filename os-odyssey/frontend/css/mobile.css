@@ -5101,10 +5101,10 @@ body.explore-lessons-page .leaderboard-invite-card {
   border: 1px solid rgba(255, 255, 255, .38);
   border-radius: 28px;
   background:
-    radial-gradient(circle at 83% 15%, rgba(255, 221, 98, .24), transparent 24%),
-    radial-gradient(circle at 72% 100%, rgba(70, 217, 255, .2), transparent 34%),
-    linear-gradient(115deg, #6e4e24 0%, #bf8438 52%, #e0a04d 100%);
-  box-shadow: 0 16px 34px rgba(154, 108, 48, .2);
+    radial-gradient(circle at 83% 15%, rgba(255, 255, 255, .25), transparent 28%),
+    radial-gradient(circle at 72% 100%, rgba(255, 220, 140, .22), transparent 34%),
+    linear-gradient(115deg, #d96812 0%, #f28b1d 56%, #ffad32 100%);
+  box-shadow: 0 16px 34px rgba(217, 104, 18, .25);
   color: #fff;
   text-decoration: none;
   transition: transform .2s ease, box-shadow .2s ease;
@@ -5114,7 +5114,7 @@ body.explore-lessons-page .leaderboard-invite-card::after {
   position: absolute;
   z-index: -1;
   content: '';
-  border: 1px solid rgba(255, 255, 255, .13);
+  border: 1px solid rgba(255, 255, 255, .15);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -5122,9 +5122,9 @@ body.explore-lessons-page .leaderboard-invite-card::before { width: 340px; heigh
 body.explore-lessons-page .leaderboard-invite-card::after { width: 210px; height: 210px; right: 80px; bottom: -155px; }
 body.explore-lessons-page .leaderboard-invite-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 21px 40px rgba(154, 108, 48, .27);
+  box-shadow: 0 21px 40px rgba(217, 104, 18, .35);
 }
-body.explore-lessons-page .leaderboard-invite-card:focus-visible { outline: 4px solid #ffc94c; outline-offset: 4px; }
+body.explore-lessons-page .leaderboard-invite-card:focus-visible { outline: 4px solid #ffad32; outline-offset: 4px; }
 body.explore-lessons-page .leaderboard-invite-copy {
   position: relative;
   z-index: 1;
@@ -5134,7 +5134,7 @@ body.explore-lessons-page .leaderboard-invite-copy {
   max-width: 690px;
 }
 body.explore-lessons-page .leaderboard-invite-kicker {
-  color: #b8eaff;
+  color: #fff0cf;
   font: 900 11px/1.3 Inter, Nunito, system-ui, sans-serif;
   letter-spacing: .15em;
 }
@@ -5145,7 +5145,7 @@ body.explore-lessons-page .leaderboard-invite-title {
 }
 body.explore-lessons-page .leaderboard-invite-description {
   max-width: 580px;
-  color: rgba(255, 255, 255, .83);
+  color: rgba(255, 255, 255, .88);
   font: 500 15px/1.5 Inter, Nunito, system-ui, sans-serif;
 }
 body.explore-lessons-page .leaderboard-invite-action {
@@ -5158,14 +5158,14 @@ body.explore-lessons-page .leaderboard-invite-action {
   border: 1px solid rgba(255, 255, 255, .35);
   border-radius: 999px;
   background: #fff;
-  box-shadow: 0 5px 0 rgba(71, 49, 21, .22);
-  color: #91652b;
+  box-shadow: 0 5px 0 rgba(180, 75, 8, .22);
+  color: #d96812;
   font: 900 13px/1 Inter, Nunito, system-ui, sans-serif;
   transition: transform .18s ease, box-shadow .18s ease;
 }
 body.explore-lessons-page .leaderboard-invite-card:hover .leaderboard-invite-action {
   transform: translateY(-2px);
-  box-shadow: 0 7px 0 rgba(71, 49, 21, .22);
+  box-shadow: 0 7px 0 rgba(180, 75, 8, .25);
 }
 body.explore-lessons-page .leaderboard-invite-action > span { font-size: 20px; line-height: .8; }
 body.explore-lessons-page .leaderboard-invite-art {
@@ -5182,7 +5182,7 @@ body.explore-lessons-page .leaderboard-invite-art img {
   width: min(100%, 250px);
   max-height: 190px;
   object-fit: contain;
-  filter: drop-shadow(0 10px 8px rgba(50, 34, 13, .28));
+  filter: drop-shadow(0 10px 10px rgba(180, 75, 8, .26));
   animation: leaderboard-invite-float 3.2s ease-in-out infinite;
 }
 body.explore-lessons-page .leaderboard-invite-spark {
@@ -5193,7 +5193,7 @@ body.explore-lessons-page .leaderboard-invite-spark {
   animation: leaderboard-invite-twinkle 2s ease-in-out infinite alternate;
 }
 body.explore-lessons-page .leaderboard-invite-spark-one { top: 16px; left: 12px; font-size: 26px; }
-body.explore-lessons-page .leaderboard-invite-spark-two { right: 5px; bottom: 20px; color: #b5eeff; font-size: 32px; animation-delay: .7s; }
+body.explore-lessons-page .leaderboard-invite-spark-two { right: 5px; bottom: 20px; color: #fff0cf; font-size: 32px; animation-delay: .7s; }
 @keyframes leaderboard-invite-float { 0%, 100% { transform: translateY(2px) rotate(-2deg); } 50% { transform: translateY(-6px) rotate(2deg); } }
 @keyframes leaderboard-invite-twinkle { from { opacity: .55; transform: scale(.85); } to { opacity: 1; transform: scale(1.12); } }
 
@@ -5205,9 +5205,13 @@ body.explore-lessons-page .leaderboard-invite-spark-two { right: 5px; bottom: 20
     gap: 4px;
     padding: 20px 15px 20px 19px;
     border-radius: 22px;
+    background:
+      radial-gradient(circle at 85% 15%, rgba(255, 255, 255, .25), transparent 26%),
+      linear-gradient(115deg, #d96812 0%, #f28b1d 56%, #ffad32 100%);
+    box-shadow: 0 13px 26px rgba(217, 104, 18, .22);
   }
   body.explore-lessons-page .leaderboard-invite-copy { gap: 8px; }
-  body.explore-lessons-page .leaderboard-invite-kicker { font-size: 9px; letter-spacing: .1em; }
+  body.explore-lessons-page .leaderboard-invite-kicker { font-size: 9px; letter-spacing: .1em; color: #fff0cf; }
   body.explore-lessons-page .leaderboard-invite-title { font-size: clamp(20px, 6vw, 26px); }
   body.explore-lessons-page .leaderboard-invite-description { font-size: 12px; line-height: 1.4; }
   body.explore-lessons-page .leaderboard-invite-action { min-height: 40px; gap: 6px; padding-inline: 11px; font-size: 11px; }
@@ -6690,7 +6694,7 @@ body.odyssey-course-page .learning-path-intro::after {
 body.odyssey-course-page .learning-path-intro .section-kicker,
 body.odyssey-course-page .learning-path-eyebrow {
   margin: 0;
-  color: #d9a056;
+  color: #e88719;
   font-size: 11px;
   font-weight: 900;
   letter-spacing: .14em;
@@ -6765,7 +6769,7 @@ body.odyssey-course-page .learning-path-map-heading h2 {
 }
 body.odyssey-course-page .learning-path-summary .progress-panel-overall {
   flex: 0 0 auto;
-  color: #d79d52;
+  color: #d96812;
   font-size: 13px;
   font-weight: 850;
 }
@@ -6774,13 +6778,13 @@ body.odyssey-course-page .learning-path-progress-track {
   height: 10px;
   overflow: hidden;
   border-radius: 999px;
-  background: #f8f3ec;
+  background: #fff5ea;
 }
 body.odyssey-course-page .learning-path-progress-track > span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #d79e54, #dfa252);
+  background: linear-gradient(90deg, #d96812, #f28b1d);
   transition: width .45s ease;
 }
 body.odyssey-course-page .learning-path-summary .progress-panel-stats-row {
@@ -6817,13 +6821,18 @@ body.odyssey-course-page .learning-path-summary .odyssey-continue-button {
   padding: 0 19px;
   border: 0;
   border-radius: 17px;
-  background: linear-gradient(110deg, #785527, #dda050);
+  background: linear-gradient(115deg, #d96812 0%, #f28b1d 56%, #ffad32 100%);
   color: #fff;
   font: 800 14px Inter, Nunito, system-ui, sans-serif;
-  box-shadow: 0 9px 18px rgba(169, 119, 54, .18);
+  box-shadow: 0 9px 18px rgba(217, 104, 18, .22);
   cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
 }
-body.odyssey-course-page .learning-path-summary .odyssey-continue-button:hover { background: linear-gradient(110deg, #644721, #cc9143); }
+body.odyssey-course-page .learning-path-summary .odyssey-continue-button:hover {
+  background: linear-gradient(115deg, #bf570a 0%, #e07a12 56%, #f59e0b 100%);
+  box-shadow: 0 12px 24px rgba(217, 104, 18, .3);
+  transform: translateY(-2px);
+}
 body.odyssey-course-page .learning-path-summary .odyssey-continue-button > span:last-child { font-size: 23px; }
 body.odyssey-course-page .learning-path-map-heading {
   display: flex;
@@ -7202,10 +7211,10 @@ body.odyssey-course-page .learning-path-hero {
   min-height: 340px;
   padding: 16px 24px 16px 12px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.86);
+  border: 1px solid rgba(255, 237, 213, .9);
   border-radius: 30px;
-  background: radial-gradient(ellipse at 15% 58%, rgba(235, 179, 105, .18), transparent 34%), linear-gradient(112deg, #fff 0%, #fffbf6 55%, #fff7ed 100%);
-  box-shadow: 0 18px 46px rgba(111, 85, 50, .11);
+  background: radial-gradient(ellipse at 15% 58%, rgba(242, 139, 29, .14), transparent 34%), linear-gradient(112deg, #fff 0%, #fffbf6 55%, #fff7ed 100%);
+  box-shadow: 0 18px 46px rgba(217, 104, 18, .09);
 }
 body.odyssey-course-page .learning-path-hero::after {
   position: absolute;
@@ -7214,9 +7223,9 @@ body.odyssey-course-page .learning-path-hero::after {
   right: -105px;
   width: 400px;
   height: 400px;
-  border: 1px solid rgba(220, 167, 97, .1);
+  border: 1px solid rgba(242, 139, 29, .12);
   border-radius: 50%;
-  box-shadow: 0 0 0 26px rgba(220, 167, 97, .03), 0 0 0 54px rgba(220, 167, 97, .02);
+  box-shadow: 0 0 0 26px rgba(242, 139, 29, .04), 0 0 0 54px rgba(242, 139, 29, .02);
   content: '';
   pointer-events: none;
 }
@@ -7225,7 +7234,7 @@ body.odyssey-course-page .learning-path-mascot {
   min-height: 306px;
   border: 0;
   border-radius: 24px;
-  background: radial-gradient(ellipse at 50% 72%, rgba(235, 181, 111, .17), transparent 63%);
+  background: radial-gradient(ellipse at 50% 72%, rgba(242, 139, 29, .15), transparent 63%);
   overflow: hidden;
 }
 body.odyssey-course-page .learning-path-mascot::before {
@@ -7236,7 +7245,7 @@ body.odyssey-course-page .learning-path-mascot::before {
   width: min(84%, 270px);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(235, 181, 111, .18), rgba(240, 195, 137, .08) 58%, transparent 72%);
+  background: radial-gradient(circle, rgba(242, 139, 29, .18), rgba(242, 139, 29, .06) 58%, transparent 72%);
   content: '';
   transform: translate(-50%, -50%);
 }
@@ -7265,8 +7274,8 @@ body.odyssey-course-page #courseProgressPanel .learning-path-summary {
 }
 body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading { align-items: center; }
 body.odyssey-course-page #courseProgressPanel .learning-path-summary-heading h2 { margin-top: 4px; font-size: clamp(21px, 2.3vw, 28px); }
-body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-panel-overall { padding: 8px 12px; border: 1px solid #ffecd3; border-radius: 999px; background: rgba(255,255,255,.76); font-size: 12px; white-space: nowrap; }
-body.odyssey-course-page #courseProgressPanel .learning-path-progress-track { height: 8px; margin: 0; background: rgba(190, 151, 101, .12); }
+body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-panel-overall { padding: 8px 12px; border: 1px solid #ffd8a8; border-radius: 999px; background: rgba(255, 247, 237, .9); color: #d96812; font-weight: 850; font-size: 12px; white-space: nowrap; }
+body.odyssey-course-page #courseProgressPanel .learning-path-progress-track { height: 8px; margin: 0; background: #fff5ea; }
 body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-panel-stats-row { gap: 10px; padding: 0; border: 0; }
 body.odyssey-course-page #courseProgressPanel .learning-path-summary .progress-stat-mini {
   display: grid;
@@ -7284,8 +7293,15 @@ body.odyssey-course-page #courseProgressPanel .learning-path-summary .odyssey-co
   margin: 0;
   padding: 0 20px;
   border-radius: 18px;
-  box-shadow: 0 11px 23px rgba(183, 129, 58, .2);
+  background: linear-gradient(115deg, #d96812 0%, #f28b1d 56%, #ffad32 100%);
+  box-shadow: 0 11px 23px rgba(217, 104, 18, .25);
   font-size: 14px;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+body.odyssey-course-page #courseProgressPanel .learning-path-summary .odyssey-continue-button:hover {
+  background: linear-gradient(115deg, #bf570a 0%, #e07a12 56%, #f59e0b 100%);
+  box-shadow: 0 14px 28px rgba(217, 104, 18, .32);
+  transform: translateY(-2px);
 }
 body.odyssey-course-page .learning-path-map-heading { margin-top: 44px; }
 body.odyssey-course-page:not(.light-mode) .learning-path-hero { border-color: #38435a; background: radial-gradient(ellipse at 15% 58%, rgba(235, 179, 105, .22), transparent 34%), linear-gradient(112deg, #202b40 0%, #20283e 58%, #423525 100%); box-shadow: 0 18px 46px rgba(0, 0, 0, .2); }

@@ -23,7 +23,9 @@
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'activated') {
-                  console.log('[PWA] New service worker activated — content updated.');
+                  console.log('[PWA] New service worker activated — reloading for fresh content.');
+                  // Auto-reload so users see updated CSS/JS/HTML immediately
+                  window.location.reload();
                 }
               });
             }

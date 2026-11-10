@@ -2,13 +2,13 @@
  * Odyssey – Service Worker
  * 
  * Provides offline caching for the PWA shell and static assets.
- * Uses a "stale-while-revalidate" strategy for pages and
- * "cache-first" for static assets (images, CSS, fonts).
+ * Uses "network-first" for CSS/JS (so updates show immediately),
+ * "cache-first" for images/fonts, and "stale-while-revalidate" for pages.
  * 
  * API calls always go to the network (no caching of dynamic data).
  */
 
-const CACHE_NAME = 'odyssey-v23';
+const CACHE_NAME = 'odyssey-v24';
 
 // Core app shell files to pre-cache on install
 const APP_SHELL = [
@@ -87,7 +87,25 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: cache-first (images, fonts, css, js)
+  // Mutable assets (CSS, JS): network-first so updates show immediately
+  if (isMutableAsset(url.pathname)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.status === 200 && response.type !== 'opaque') {
+            const clone = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => cache.put(request, clone))
+              .catch((error) => console.warn('[SW] Could not cache asset:', error));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))  // Fallback to cache if offline
+    );
+    return;
+  }
+
+  // Immutable assets: cache-first (images, fonts)
   if (isStaticAsset(url.pathname)) {
     event.respondWith(
       caches.match(request).then((cached) => {
@@ -134,8 +152,15 @@ self.addEventListener('fetch', (event) => {
 });
 
 /**
- * Checks whether a request path is a cacheable static asset
+ * Checks whether a request path is a mutable asset (CSS/JS) that should use network-first
+ */
+function isMutableAsset(pathname) {
+  return /\.(css|js)$/i.test(pathname);
+}
+
+/**
+ * Checks whether a request path is an immutable static asset (images, fonts, media)
  */
 function isStaticAsset(pathname) {
-  return /\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|ttf|eot|mp3|mp4|ico)$/i.test(pathname);
+  return /\.(png|jpg|jpeg|gif|svg|webp|woff2?|ttf|eot|mp3|mp4|ico)$/i.test(pathname);
 }

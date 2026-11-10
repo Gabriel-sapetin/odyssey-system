@@ -12,7 +12,7 @@
     const mainScriptUrl = document.currentScript && document.currentScript.src;
     if (mainScriptUrl) {
       const mobileCssUrlObject = new URL('../css/mobile.css', mainScriptUrl);
-      mobileCssUrlObject.searchParams.set('v', '21');
+      mobileCssUrlObject.searchParams.set('v', '24');
       const mobileCssUrl = mobileCssUrlObject.href;
       if (!document.querySelector(`link[href="${mobileCssUrl}"]`)) {
         const mobileCss = document.createElement('link');
@@ -602,11 +602,40 @@
     const session = await getSession();
     if (!session) return null;
 
-    const { data, error } = await supa
+    let { data, error } = await supa
       .from('profiles')
       .select('*')
       .eq('id', session.user.id)
       .single();
+
+    // Auto-create missing profile row for authenticated users.
+    // This can happen when the database trigger (on_auth_user_created) fails
+    // — e.g. due to a duplicate email constraint, a NULL email from certain
+    // OAuth providers, or a transient DB error during signup.  Without a
+    // profile row getCurrentUser() returns null and the dashboard keeps
+    // bouncing the user back to the login page in an infinite redirect loop.
+    if (error && (error.code === 'PGRST116' || error.details?.includes('0 rows'))) {
+      const email = session.user.email || '';
+      const username = email ? email.split('@')[0] : ('user_' + session.user.id.slice(0, 8));
+      const { data: created, error: insertErr } = await supa
+        .from('profiles')
+        .insert({
+          id: session.user.id,
+          email: email,
+          username: username,
+          character: DEFAULT_CHARACTER,
+          avatar: DEFAULT_AVATAR,
+        })
+        .select()
+        .single();
+
+      if (insertErr) {
+        console.error('Error auto-creating profile:', insertErr);
+        return null;
+      }
+      data = created;
+      error = null;
+    }
 
     if (error) {
       console.error('Error fetching profile:', error);
