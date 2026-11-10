@@ -319,12 +319,14 @@
               ${professorFace}
             </div>
             <div class="classroom-instructor-meta">
-              <span class="classroom-instructor-role">Instructor</span>
+              <div class="classroom-instructor-top-row">
+                <span class="classroom-instructor-role">Instructor</span>
+                <div class="classroom-instructor-stats">
+                  <span class="classroom-stat-badge level" title="Instructor Level">⚡ Lv. ${professorLevel}</span>
+                  <span class="classroom-stat-badge xp" title="Instructor XP">✦ ${professorXp.toLocaleString()} XP</span>
+                </div>
+              </div>
               <strong class="classroom-instructor-name">Prof. ${esc(c.professor_username || 'Unknown')}</strong>
-            </div>
-            <div class="classroom-instructor-stats">
-              <span class="classroom-stat-badge level" title="Instructor Level">⚡ Lv. ${professorLevel}</span>
-              <span class="classroom-stat-badge xp" title="Instructor XP">✦ ${professorXp.toLocaleString()} XP</span>
             </div>
           </div>
           <div class="classroom-card-body">
