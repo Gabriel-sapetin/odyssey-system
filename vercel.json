@@ -1,20 +1,8 @@
 {
   "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
-  "cleanUrls": true,
   "redirects": [
-    { "source": "/os-odyssey/frontend/html/index.html", "destination": "/", "statusCode": 302 },
-    { "source": "/os-odyssey/frontend/html/", "destination": "/", "statusCode": 302 }
-  ],
-  "rewrites": [
-    { "source": "/css/:match*", "destination": "/os-odyssey/frontend/css/:match*" },
-    { "source": "/js/:match*", "destination": "/os-odyssey/frontend/js/:match*" },
-    { "source": "/assets/:match*", "destination": "/os-odyssey/assets/:match*" },
-    { "source": "/manifest.json", "destination": "/os-odyssey/manifest.json" },
-    { "source": "/sw.js", "destination": "/os-odyssey/sw.js" },
-    { "source": "/", "destination": "/os-odyssey/frontend/html/index.html" },
-    { "source": "/:page.html", "destination": "/os-odyssey/frontend/html/:page.html" },
-    { "source": "/:page", "destination": "/os-odyssey/frontend/html/:page.html" }
+    { "source": "/", "destination": "/os-odyssey/frontend/html/index.html", "statusCode": 302 }
   ],
   "headers": [
     {
