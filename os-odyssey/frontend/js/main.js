@@ -12,7 +12,7 @@
     const mainScriptUrl = document.currentScript && document.currentScript.src;
     if (mainScriptUrl) {
       const mobileCssUrlObject = new URL('../css/mobile.css', mainScriptUrl);
-      mobileCssUrlObject.searchParams.set('v', '28');
+      mobileCssUrlObject.searchParams.set('v', '29');
       const mobileCssUrl = mobileCssUrlObject.href;
       if (!document.querySelector(`link[href="${mobileCssUrl}"]`)) {
         const mobileCss = document.createElement('link');
@@ -2459,9 +2459,13 @@
     }
 
     function renderLessonCopy(body) {
-      return String(body || '').trim().startsWith('<')
-        ? body
-        : `<p>${body}</p>`;
+      let clean = String(body || '')
+        .replace(/<p>[\s\u2500\u2014â”€\-_]{2,}<\/p>/gi, '')
+        .replace(/â”€+/g, '')
+        .replace(/[\u2500\u2014]{3,}/g, '');
+      return clean.trim().startsWith('<')
+        ? clean
+        : `<p>${clean}</p>`;
     }
 
     function updateBackAction() {
