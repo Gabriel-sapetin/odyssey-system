@@ -5681,11 +5681,12 @@ body.odyssey-home-page .home-mobile-continue { display: none; }
   }
   body.odyssey-home-page .home-mobile-continue {
     position: relative;
+    z-index: 2;
     display: flex;
     min-height: 112px;
     align-items: center;
     gap: 13px;
-    margin: 0 0 25px;
+    margin: 0 0 36px;
     padding: 16px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, .55);
@@ -5980,11 +5981,12 @@ body.odyssey-home-page .home-desktop-stats { display: none; }
 
   body.odyssey-home-page .home-mobile-continue {
     position: relative;
+    z-index: 2;
     min-height: 128px;
     display: flex;
     align-items: center;
     gap: 16px;
-    margin: 0 0 30px;
+    margin: 0 0 36px;
     padding: 22px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, .55);
@@ -6015,10 +6017,10 @@ body.odyssey-home-page .home-desktop-stats { display: none; }
     object-fit: contain;
     transform: scale(1.55);
   }
-  body.odyssey-home-page .home-mobile-continue__copy { position: relative; z-index: 1; display: grid; min-width: 0; gap: 4px; }
-  body.odyssey-home-page .home-mobile-continue__copy small { color: #bdeaff; font-size: 10px; font-weight: 900; letter-spacing: .13em; }
-  body.odyssey-home-page .home-mobile-continue__copy strong { color: #fff; font-size: 20px; font-weight: 950; }
-  body.odyssey-home-page .home-mobile-continue__copy > span { color: rgba(255,255,255,.82); font-size: 13px; }
+  body.odyssey-home-page .home-mobile-continue__copy { position: relative; z-index: 1; display: grid; min-width: 0; gap: 4px; max-width: 60%; }
+  body.odyssey-home-page .home-mobile-continue__copy small { color: #bdeaff; font-size: 10px; font-weight: 900; letter-spacing: .13em; text-shadow: 0 1px 3px rgba(0,0,0,.15); }
+  body.odyssey-home-page .home-mobile-continue__copy strong { color: #fff; font-size: 20px; font-weight: 950; text-shadow: 0 1px 4px rgba(0,0,0,.18); }
+  body.odyssey-home-page .home-mobile-continue__copy > span { color: rgba(255,255,255,.82); font-size: 13px; text-shadow: 0 1px 3px rgba(0,0,0,.12); }
   body.odyssey-home-page .home-mobile-continue__arrow { position: relative; z-index: 1; margin-left: auto; color: #fff; font-size: 30px; }
 
   body.odyssey-home-page:not(.light-mode) .home-desktop-stats .home-mobile-stat {
@@ -7951,7 +7953,7 @@ body.odyssey-home-page .os-continue-card {
 @media (max-width: 768px) {
   body.odyssey-home-page .os-continue-card {
     background:
-      url('../../assets/os-hero-art.jpg') right center / auto 180% no-repeat,
+      url('../../assets/os-hero-art.jpg') calc(100% + 30px) center / auto 160% no-repeat,
       linear-gradient(115deg, #d96812 0%, #f28b1d 56%, #ffad32 100%) !important;
   }
 }
