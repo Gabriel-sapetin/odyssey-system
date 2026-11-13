@@ -24,10 +24,6 @@
 }
 
 @media (max-width: 768px) {
-  /* Hide background video on mobile — saves bandwidth + GPU */
-  .modules-bg-video {
-    display: none !important;
-  }
 
   body.home-page .navbar {
     position: fixed;
@@ -1477,117 +1473,94 @@
   }
 }
 
-/* Landing-page course discovery: OS is one featured course, not the global curriculum. */
+/* Landing-page module grid: responsive & consistent with desktop */
 @media (max-width: 768px) {
-  .mobile-featured-course {
-    display: grid;
-    grid-template-columns: 72px minmax(0, 1fr);
-    gap: 14px;
-    align-items: center;
-    margin: 18px 0 0;
-    padding: 17px;
-    border: 1px solid rgba(226, 232, 240, 0.95);
-    border-radius: 22px;
-    background: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 10px 28px rgba(19, 27, 49, 0.08);
-    color: #182238;
-  }
-
-  .mobile-featured-course__art {
-    width: 72px;
-    height: 82px;
-    display: grid;
-    place-items: center;
-    border-radius: 18px;
-    background: linear-gradient(145deg, #ffeed7, #fff1df);
-  }
-
-  .mobile-featured-course__art img {
-    width: 62px;
-    height: 70px;
-    object-fit: contain;
-  }
-
-  .mobile-featured-course__eyebrow {
-    margin-bottom: 4px;
-    color: #d97706;
-    font-family: var(--font-body);
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .mobile-featured-course h3 {
-    color: #182238;
-    font-family: var(--font-body);
-    font-size: 17px;
-    font-weight: 900;
-    line-height: 1.15;
-  }
-
-  .mobile-featured-course p {
-    margin-top: 5px;
-    color: #667187;
-    font-size: 12px;
-    line-height: 1.4;
-  }
-
-  .mobile-featured-course__action {
-    grid-column: 1 / -1;
-    min-height: 45px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 15px;
-    background: #111a2e;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 900;
-  }
-
-  .modules .modules-grid {
-    display: none;
-  }
-
-  .modules .modules-header {
-    max-width: 560px;
-    margin-inline: auto;
-  }
-
-  .modules .modules-tagline {
-    max-width: 42ch;
-    font-family: var(--font-body);
-    font-size: clamp(17px, 5vw, 23px);
-    font-weight: 900;
-    letter-spacing: -0.025em;
-    line-height: 1.28;
-    text-align: left;
-  }
-
   body.home-page .hero {
-    min-height: min(760px, 100dvh);
-    padding-top: 88px;
+    min-height: min(720px, 100dvh);
+    padding-top: 84px;
   }
 
   body.home-page .hero-subtitle {
-    font-size: clamp(15px, 4.4vw, 18px);
+    font-size: clamp(14px, 4vw, 17px);
     line-height: 1.5;
   }
 
   body.home-page .modules {
-    padding-top: 44px;
-    padding-bottom: 50px;
+    padding: 52px 16px 72px;
   }
 
   body.home-page .modules-header {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 540px;
+    margin-inline: auto;
+    margin-bottom: 32px;
+    gap: 10px;
   }
 
   body.home-page .modules-header .penguin-icon {
     width: 62px;
     height: 62px;
-    margin: 0 0 13px;
+    margin: 0 0 4px;
+  }
+
+  body.home-page .modules-kicker {
+    font-size: 7.5px;
+    padding: 3px 10px;
+  }
+
+  body.home-page .modules-heading {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  body.home-page .modules-tagline {
+    font-size: 13.5px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  body.home-page .modules-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    max-width: 440px !important;
+    margin-inline: auto !important;
+    width: 100% !important;
+  }
+
+  body.home-page .module-card {
+    width: 100% !important;
+    box-shadow: 3.5px 3.5px 0 #1a1a2e;
+  }
+
+  body.home-page .module-thumb {
+    height: 125px;
+  }
+
+  body.home-page .module-body {
+    padding: 14px 16px 16px;
+    gap: 7px;
+  }
+
+  body.home-page .module-chapter {
+    font-size: 7px;
+  }
+
+  body.home-page .module-title {
+    font-size: 8.5px;
+  }
+
+  body.home-page .module-desc {
+    font-size: 12.5px;
+    margin-bottom: 8px;
+  }
+
+  body.home-page .btn-module {
+    min-height: 34px;
+    font-size: 7.5px;
+    padding: 0 16px;
   }
 }
 
