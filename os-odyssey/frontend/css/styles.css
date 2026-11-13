@@ -900,37 +900,17 @@ a {
 }
 
 /* ---- CTA SECTION ----
-   Background: bg-mountains-day.jpg (light) / hero-bg-night.jpg (dark)
-   Overlaid with semi-transparent scrim for legibility
+   Seamlessly integrated at the bottom of the winter landscape.
+   Matches the 3D retro arcade display lettering from Picture 3 & .title-odyssey.
 */
 .cta-section {
   position: relative;
-  padding: 100px 40px;
+  z-index: 2;
+  margin-top: 64px;
+  padding: 48px 24px 20px;
   text-align: center;
-  overflow: hidden;
-  content-visibility: auto;
-  contain-intrinsic-size: auto 300px;
-
-  background-image: url('../../assets/bg-mountains-day.jpg');
-  background-size: cover;
-  background-position: center;
-  border-top: var(--pixel-border);
-}
-
-[data-theme="dark"] .cta-section {
-  background-image: url('../../assets/hero-bg-night.jpg');
-  background-position: top center;
-}
-
-.cta-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.55);
-}
-
-[data-theme="dark"] .cta-section::before {
-  background: rgba(0, 0, 30, 0.65);
+  border-top: none;
+  background: transparent;
 }
 
 .cta-content {
@@ -939,21 +919,53 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.cta-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 2px 2px 0 #152040, 0 2px 6px rgba(0, 0, 0, 0.75);
+  margin-bottom: 2px;
 }
 
 .cta-title {
-  font-family: var(--font-pixel);
-  font-size: clamp(13px, 2.5vw, 20px);
-  color: var(--text);
-  line-height: 1.7;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4.8vw, 52px);
+  line-height: 1.15;
+  color: #ffc45a;
+  background:
+    linear-gradient(180deg, #ffe783 0%, #ffbd4c 46%, #ff8f1f 100%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0 4px, transparent 4px 11px);
+  background-blend-mode: screen;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 2.5px #152040;
+  text-shadow:
+    0 4px 0 #f47c20,
+    4px 7px 0 #152040,
+    7px 10px 0 rgba(0, 0, 0, 0.32);
+  letter-spacing: 0.01em;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.35));
+  margin: 0;
 }
 
 .cta-sub {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: clamp(15px, 2vw, 17px);
   font-weight: 700;
-  color: var(--text-muted);
+  color: #f8fafc;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(15, 23, 42, 0.95);
+  margin: 0 0 8px;
 }
 
 /* ---- Footer ---- */
@@ -966,6 +978,19 @@ a {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+body.home-page .footer {
+  background: #0d1322;
+  border-top: 2px solid #1a233a;
+}
+
+body.home-page .footer-logo {
+  color: #f5a623;
+}
+
+body.home-page .footer-copy {
+  color: #94a3b8;
 }
 
 .footer-logo {
