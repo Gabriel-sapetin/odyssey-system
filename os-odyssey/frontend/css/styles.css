@@ -502,30 +502,36 @@ a {
 }
 
 /* ---- MODULES SECTION ----
-   Atmospheric retro dot-matrix canvas with ambient lighting.
-   Mascot header + responsive gamified quest cards.
+   Pixel-art winter alpine sunset landscape backdrop (Picture 4).
+   Matches the 3D retro arcade display lettering from Picture 3 / .title-odyssey.
 */
 .modules {
   position: relative;
-  padding: 80px 24px 96px;
+  padding: 88px 24px 104px;
   max-width: none;
   margin: 0;
   overflow: hidden;
-  background-color: #f8fafc;
+  background-color: #172236;
   background-image:
-    radial-gradient(ellipse at 50% -8%, rgba(245, 166, 35, 0.12) 0%, transparent 55%),
-    radial-gradient(circle, rgba(148, 163, 184, 0.22) 1.5px, transparent 1.5px);
-  background-size: 100% 100%, 24px 24px;
+    linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.18) 28%, rgba(15, 23, 42, 0.72) 100%),
+    url('../../assets/bg-modules-winter.jpg');
+  background-position: center top;
+  background-size: cover;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
   content-visibility: auto;
   contain-intrinsic-size: auto 800px;
 }
 
 [data-theme="dark"] .modules {
-  background-color: #0b0f19;
+  background-color: #0d121f;
   background-image:
-    radial-gradient(ellipse at 50% -8%, rgba(99, 102, 241, 0.14) 0%, transparent 58%),
-    radial-gradient(circle, rgba(255, 255, 255, 0.1) 1.5px, transparent 1.5px);
-  background-size: 100% 100%, 26px 26px;
+    linear-gradient(180deg, rgba(11, 15, 25, 0.65) 0%, rgba(11, 15, 25, 0.35) 30%, rgba(11, 15, 25, 0.88) 100%),
+    url('../../assets/bg-modules-winter.jpg');
+  background-position: center top;
+  background-size: cover;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
 }
 
 .modules-header {
@@ -534,19 +540,19 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  max-width: 820px;
+  gap: 10px;
+  max-width: 860px;
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 52px;
+  margin-bottom: 48px;
   text-align: center;
 }
 
 /* penguin-flower.png: pixel art penguin mascot holding pink flower */
 .penguin-icon {
-  width: 74px;
-  height: 74px;
-  margin-bottom: 4px;
+  width: 76px;
+  height: 76px;
+  margin-bottom: 2px;
   animation: float 2.5s ease-in-out infinite;
   will-change: transform;
 }
@@ -556,7 +562,7 @@ a {
   height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.14));
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
 }
 
 @keyframes float {
@@ -569,45 +575,73 @@ a {
   }
 }
 
+.modules-eyebrow,
 .modules-kicker {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
   font-family: var(--font-pixel);
-  font-size: 8px;
-  letter-spacing: 0.12em;
+  font-size: 11px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #b45309;
-  background: #fef3c7;
-  border: 1px solid rgba(245, 166, 35, 0.4);
-  padding: 4px 12px;
-  border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(245, 166, 35, 0.12);
+  color: #ffffff;
+  text-shadow: 2px 2px 0 #152040, 0 2px 6px rgba(0, 0, 0, 0.75);
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  margin: 0;
 }
 
+[data-theme="dark"] .modules-eyebrow,
 [data-theme="dark"] .modules-kicker {
-  color: #fbbf24;
-  background: rgba(245, 158, 11, 0.16);
-  border-color: rgba(245, 158, 11, 0.35);
+  color: #ffffff;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  text-shadow: 2px 2px 0 #0f172a, 0 2px 8px rgba(0, 0, 0, 0.85);
 }
 
-.modules-heading {
-  font-family: var(--font-pixel);
-  font-size: clamp(14px, 2.2vw, 20px);
-  color: var(--text);
-  line-height: 1.45;
-  letter-spacing: -0.01em;
-  margin: 2px 0 0;
+/* 3D retro arcade display title matching Picture 3 / .title-odyssey */
+.modules-heading,
+.title-interactive {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5.2vw, 62px);
+  line-height: 1.1;
+  color: #ffc45a;
+  background:
+    linear-gradient(180deg, #ffe783 0%, #ffbd4c 46%, #ff8f1f 100%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0 4px, transparent 4px 11px);
+  background-blend-mode: screen;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 2.5px #152040;
+  text-shadow:
+    0 4px 0 #f47c20,
+    4px 7px 0 #152040,
+    7px 10px 0 rgba(0, 0, 0, 0.32);
+  margin: 2px 0 6px;
+  letter-spacing: 0.01em;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.35));
+}
+
+.title-word-explore,
+.title-word-modules {
+  display: inline-block;
 }
 
 .modules-tagline {
   font-family: var(--font-body);
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--text-muted);
-  max-width: 640px;
+  color: #f8fafc;
+  max-width: 680px;
   line-height: 1.6;
-  margin: 0;
+  margin: 0 auto;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(15, 23, 42, 0.95);
 }
 
 .modules-grid {

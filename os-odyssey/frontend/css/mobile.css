@@ -1506,20 +1506,29 @@
     margin: 0 0 4px;
   }
 
+  body.home-page .modules-eyebrow,
   body.home-page .modules-kicker {
-    font-size: 7.5px;
-    padding: 3px 10px;
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
   }
 
-  body.home-page .modules-heading {
-    font-size: 14px;
-    line-height: 1.45;
+  body.home-page .modules-heading,
+  body.home-page .title-interactive {
+    font-size: clamp(26px, 7.5vw, 36px);
+    line-height: 1.12;
+    -webkit-text-stroke-width: 2px;
+    text-shadow:
+      0 3px 0 #f47c20,
+      3px 5px 0 #152040,
+      5px 7px 0 rgba(0, 0, 0, 0.28);
   }
 
   body.home-page .modules-tagline {
     font-size: 13.5px;
-    line-height: 1.5;
+    line-height: 1.55;
     text-align: center;
+    color: #f8fafc;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
   }
 
   body.home-page .modules-grid {
@@ -4928,39 +4937,31 @@ body.odyssey-classroom-page[data-quiz-focus="true"] #quizMetaRow { margin-top: 0
   body.home-page .navbar .nav-logo .brand-penguin {
     flex: 0 0 auto;
   }
-  body.home-page .modules::before {
-    background: rgba(239, 247, 255, 0.7);
-  }
-  body.home-page .modules .modules-tagline {
-    color: #172033;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
-  }
   body.home-page .modules .modules-header {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
     width: min(100%, 520px);
-    margin: 0 auto 30px;
+    margin: 0 auto 32px;
     text-align: center;
   }
   body.home-page .modules .modules-header .penguin-icon {
-    margin: 0 auto;
+    margin: 0 auto 2px;
   }
   body.home-page .modules .modules-tagline {
     width: 100%;
-    max-width: none;
-    padding: 18px 20px;
-    border: 1px solid rgba(255, 255, 255, 0.88);
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 12px 30px rgba(24, 47, 79, 0.14);
-    color: #172033;
-    font-size: clamp(14px, 4vw, 17px);
-    font-weight: 850;
-    letter-spacing: 0;
-    line-height: 1.5;
+    max-width: 520px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #f8fafc;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.55;
     text-align: center;
-    text-shadow: none;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
   }
 }
 @media (max-width: 768px) {
@@ -4973,14 +4974,12 @@ body.odyssey-classroom-page[data-quiz-focus="true"] #quizMetaRow { margin-top: 0
   html[data-theme="dark"] body.home-page .navbar.mobile-menu-open .nav-logo {
     color: #e2e8f0;
   }
-  html[data-theme="dark"] body.home-page .modules::before {
-    background: rgba(5, 9, 28, 0.58);
-  }
   html[data-theme="dark"] body.home-page .modules .modules-tagline {
-    border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(17, 24, 39, 0.92);
+    background: transparent;
+    border: none;
+    box-shadow: none;
     color: #f8fafc;
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
   }
 }
 

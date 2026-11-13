@@ -8,7 +8,7 @@
  * API calls always go to the network (no caching of dynamic data).
  */
 
-const CACHE_NAME = 'odyssey-v35';
+const CACHE_NAME = 'odyssey-v36';
 
 // Core app shell files to pre-cache on install
 const APP_SHELL = [
@@ -31,6 +31,7 @@ const APP_SHELL = [
   '/js/mobile-nav.js',
   '/js/supabase.js',
   '/assets/favicon.png',
+  '/assets/bg-modules-winter.jpg',
   '/assets/pixelatedfile.png',
   '/assets/pixelatedchallenge.png',
   '/assets/pixelatedfile-icon.png',
