@@ -1525,24 +1525,19 @@
     max-width: 540px;
     margin-inline: auto;
     margin-bottom: 32px;
-    gap: 10px;
+    gap: 12px;
   }
 
-  body.home-page .modules-header .penguin-icon {
-    width: 62px;
-    height: 62px;
-    margin: 0 0 4px;
+  body.home-page .title-word-explore {
+    font-size: clamp(22px, 6.5vw, 32px);
   }
 
-  body.home-page .modules-eyebrow,
-  body.home-page .modules-kicker {
-    font-size: 9.5px;
-    letter-spacing: 0.18em;
+  body.home-page .title-word-modules {
+    font-size: clamp(26px, 7.5vw, 38px);
   }
 
   body.home-page .modules-heading,
   body.home-page .title-interactive {
-    font-size: clamp(26px, 7.5vw, 36px);
     line-height: 1.12;
     -webkit-text-stroke-width: 2px;
     text-shadow:
@@ -4998,9 +4993,6 @@ body.odyssey-classroom-page[data-quiz-focus="true"] #quizMetaRow { margin-top: 0
     width: min(100%, 520px);
     margin: 0 auto 32px;
     text-align: center;
-  }
-  body.home-page .modules .modules-header .penguin-icon {
-    margin: 0 auto 2px;
   }
   body.home-page .modules .modules-tagline {
     width: 100%;

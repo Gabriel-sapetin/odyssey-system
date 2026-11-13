@@ -540,74 +540,22 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
   max-width: 860px;
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 48px;
+  margin-bottom: 54px;
   text-align: center;
-}
-
-/* penguin-flower.png: pixel art penguin mascot holding pink flower */
-.penguin-icon {
-  width: 76px;
-  height: 76px;
-  margin-bottom: 2px;
-  animation: float 2.5s ease-in-out infinite;
-  will-change: transform;
-}
-
-.penguin-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  image-rendering: pixelated;
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-.modules-eyebrow,
-.modules-kicker {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-pixel);
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #ffffff;
-  text-shadow: 2px 2px 0 #152040, 0 2px 6px rgba(0, 0, 0, 0.75);
-  background: transparent;
-  border: none;
-  padding: 0;
-  box-shadow: none;
-  margin: 0;
-}
-
-[data-theme="dark"] .modules-eyebrow,
-[data-theme="dark"] .modules-kicker {
-  color: #ffffff;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  text-shadow: 2px 2px 0 #0f172a, 0 2px 8px rgba(0, 0, 0, 0.85);
 }
 
 /* 3D retro arcade display title matching Picture 3 / .title-odyssey */
 .modules-heading,
 .title-interactive {
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   font-family: var(--font-display);
-  font-size: clamp(34px, 5.2vw, 62px);
   line-height: 1.1;
   color: #ffc45a;
   background:
@@ -622,19 +570,26 @@ a {
     0 4px 0 #f47c20,
     4px 7px 0 #152040,
     7px 10px 0 rgba(0, 0, 0, 0.32);
-  margin: 2px 0 6px;
+  margin: 0;
   letter-spacing: 0.01em;
   filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.35));
 }
 
-.title-word-explore,
+.title-word-explore {
+  display: block;
+  font-size: clamp(28px, 4.4vw, 48px);
+  letter-spacing: 0.06em;
+}
+
 .title-word-modules {
-  display: inline-block;
+  display: block;
+  font-size: clamp(34px, 5.4vw, 62px);
+  letter-spacing: 0.02em;
 }
 
 .modules-tagline {
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: clamp(14.5px, 1.8vw, 16px);
   font-weight: 600;
   color: #f8fafc;
   max-width: 680px;
