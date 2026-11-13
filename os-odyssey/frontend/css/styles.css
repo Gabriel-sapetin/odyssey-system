@@ -1052,6 +1052,15 @@ body.home-page .footer-copy {
   gap: 16px;
 }
 
+[data-theme="dark"] .auth-card {
+  background: rgba(15, 23, 42, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #f8fafc;
+}
+
 .auth-back {
   align-self: flex-start;
   display: inline-flex;

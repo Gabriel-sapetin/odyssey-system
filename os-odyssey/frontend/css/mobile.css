@@ -223,6 +223,34 @@
     font-weight: 900;
   }
 
+  html[data-theme="dark"] body.auth-page .navbar {
+    background: rgba(10, 15, 36, 0.94);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+
+  html[data-theme="dark"] body.auth-page .nav-logo {
+    color: #f8fafc;
+  }
+
+  html[data-theme="dark"] body.auth-page .auth-card {
+    background: rgba(15, 23, 42, 0.94);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.65);
+    color: #f8fafc;
+  }
+
+  html[data-theme="dark"] body.auth-page .auth-input {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(255, 255, 255, 0.16);
+    color: #f8fafc;
+  }
+
+  html[data-theme="dark"] body.auth-page .btn-google {
+    background: rgba(30, 41, 59, 0.85);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+  }
+
   html {
     scroll-padding-top: calc(var(--mobile-shell-header-height) + 12px);
     scroll-padding-bottom: calc(var(--mobile-bottom-nav-height) + var(--mobile-safe-bottom) + 16px);
@@ -5964,10 +5992,11 @@ body.odyssey-home-page:not(.light-mode) .home-quick-card small { color: #aeb9cc;
   body.odyssey-home-page .home-quick-card__arrow { transition: none; }
 }
 
-/* Keep auth copy readable and modern even when the saved app theme is dark. */
+/* ---- Auth Pages (Login & Signup) Theme Styling ---- */
 body.auth-page .navbar {
   background: rgba(255, 255, 255, .97);
   border-bottom: 1px solid #e2e8f0;
+  transition: background var(--ease), border-color var(--ease);
 }
 body.auth-page .nav-logo,
 body.auth-page .navbar .nav-logo {
@@ -5975,12 +6004,14 @@ body.auth-page .navbar .nav-logo {
   font-family: var(--font-body, 'Nunito', system-ui, sans-serif);
   font-weight: 900;
   letter-spacing: .04em;
+  transition: color var(--ease);
 }
 body.auth-page .auth-card {
   color: #172033;
   background: #fff;
-  border-color: #e3e8f0;
+  border: 1px solid #e3e8f0;
   box-shadow: 0 18px 48px rgba(15, 23, 42, .16);
+  transition: background var(--ease), border-color var(--ease), box-shadow var(--ease), color var(--ease);
 }
 body.auth-page .auth-headline {
   color: #172033;
@@ -5989,6 +6020,7 @@ body.auth-page .auth-headline {
   font-weight: 900;
   letter-spacing: -.035em;
   line-height: 1.2;
+  transition: color var(--ease);
 }
 body.auth-page .auth-back {
   color: #52627a;
@@ -5996,6 +6028,7 @@ body.auth-page .auth-back {
   font-size: 14px;
   font-weight: 800;
   text-decoration: none;
+  transition: color var(--ease), background var(--ease);
 }
 body.auth-page .auth-back:hover { color: #24324b; }
 body.auth-page .auth-divider {
@@ -6010,7 +6043,8 @@ body.auth-page .auth-terms {
   font-weight: 600;
 }
 body.auth-page .auth-login a,
-body.auth-page .auth-terms a {
+body.auth-page .auth-terms a,
+body.auth-page .auth-terms-check a {
   color: #a34d00;
   font-weight: 900;
   text-underline-offset: 3px;
@@ -6021,6 +6055,120 @@ body.auth-page .auth-submit {
   font-family: var(--font-body, 'Nunito', system-ui, sans-serif);
   font-weight: 900;
   letter-spacing: 0;
+}
+
+/* ---- Dark Theme Essence for Auth Page ----
+   Sleek translucent dark card and navbar that blend seamlessly into the snowy night landscape.
+*/
+html[data-theme="dark"] body.auth-page {
+  background: #0a0f24;
+  color: #f8fafc;
+}
+
+html[data-theme="dark"] body.auth-page .navbar {
+  background: rgba(10, 15, 36, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+html[data-theme="dark"] body.auth-page .nav-logo,
+html[data-theme="dark"] body.auth-page .navbar .nav-logo {
+  color: #f8fafc;
+}
+
+html[data-theme="dark"] body.auth-page .auth-card {
+  color: #f8fafc;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+html[data-theme="dark"] body.auth-page .auth-headline {
+  color: #f8fafc;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="dark"] body.auth-page .auth-back {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] body.auth-page .auth-back:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] body.auth-page .btn-google {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+html[data-theme="dark"] body.auth-page .btn-google:hover {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+html[data-theme="dark"] body.auth-page .auth-divider {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] body.auth-page .auth-divider::before,
+html[data-theme="dark"] body.auth-page .auth-divider::after {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] body.auth-page .auth-input {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  color: #f8fafc;
+}
+
+html[data-theme="dark"] body.auth-page .auth-input::placeholder {
+  color: #64748b;
+  opacity: 1;
+}
+
+html[data-theme="dark"] body.auth-page .auth-input:focus {
+  border-color: #f5a623;
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.25);
+}
+
+html[data-theme="dark"] body.auth-page .auth-terms-check {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] body.auth-page .auth-terms-check a,
+html[data-theme="dark"] body.auth-page .auth-login a,
+html[data-theme="dark"] body.auth-page .auth-terms a {
+  color: #fbbf24;
+  font-weight: 800;
+}
+
+html[data-theme="dark"] body.auth-page .auth-submit {
+  background: #f5a623;
+  color: #0f172a !important;
+  font-weight: 900;
+  border: none;
+  box-shadow: 0 4px 14px rgba(245, 166, 35, 0.35);
+}
+
+html[data-theme="dark"] body.auth-page .auth-submit:hover {
+  background: #e8941a;
+  box-shadow: 0 6px 18px rgba(245, 166, 35, 0.45);
+}
+
+html[data-theme="dark"] body.auth-page .auth-login {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] body.auth-page .auth-penguin img {
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6));
 }
 
 body.odyssey-home-page .home-mobile-stats,
