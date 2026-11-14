@@ -19,7 +19,7 @@
   try { session = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || 'null'); } catch { session = null; }
   if (!session || !['quiz', 'flashcards'].includes(session.mode)) {
     els.heading.textContent = 'Your study session has ended';
-    els.subheading.textContent = 'Head back to your dashboard and create a new set from a PDF.';
+    els.subheading.textContent = 'Head back to your dashboard to review your saved sets or practice with Pengu.';
     els.content.replaceChildren();
     return;
   }
@@ -28,7 +28,7 @@
   const items = isQuiz ? session.questions : session.cards;
   if (!Array.isArray(items) || !items.length) {
     els.heading.textContent = 'This study set is empty';
-    els.subheading.textContent = 'Try generating a new set from your PDF.';
+    els.subheading.textContent = 'Try generating a new study set with Pengu on your dashboard.';
     return;
   }
 

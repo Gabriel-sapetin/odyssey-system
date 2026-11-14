@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="../../assets/favicon.png" />
-  <link rel="stylesheet" href="../css/styles.css?v=31" />
-  <link rel="stylesheet" href="../css/mobile.css?v=31" />
+  <link rel="stylesheet" href="../css/styles.css?v=32" />
+  <link rel="stylesheet" href="../css/mobile.css?v=32" />
   <link rel="manifest" href="../../manifest.json" />
   <meta name="theme-color" content="#1a1a2e" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -60,22 +60,22 @@
         </span>
       </section>
 
-      <section class="home-flashcard-studio" id="flashcardStudio" aria-label="Create flashcards or a quiz from a PDF">
+      <section class="home-flashcard-studio" id="flashcardStudio" aria-label="Study with Pengu AI">
         <div class="home-flashcard-builder">
           <input id="flashcardPdfInput" type="file" accept="application/pdf,.pdf" hidden />
-          <div class="home-flashcard-dropzone home-flashcard-composer" id="flashcardDropzone" data-has-file="false">
-            <button class="home-flashcard-composer__attach" type="button" id="flashcardUploadBtn" aria-label="Choose a PDF to upload">＋</button>
+          <form class="home-flashcard-dropzone home-flashcard-composer" id="flashcardDropzone" data-has-file="false" autocomplete="off" onsubmit="return false;">
+            <button class="home-flashcard-composer__attach" type="button" id="flashcardUploadBtn" aria-label="Upload PDF (optional)" title="Upload a PDF (optional)">＋</button>
             <label class="home-flashcard-composer__prompt" for="flashcardPrompt">
               <span class="home-flashcard-composer__eyebrow">STUDY WITH PENGU</span>
-              <input id="flashcardPrompt" type="text" readonly placeholder="Upload something to make flashcards or a quiz…" aria-label="Upload something to make flashcards or a quiz" />
+              <input id="flashcardPrompt" type="text" placeholder="Ask Pengu anything, or generate flashcards &amp; quizzes…" aria-label="Ask Pengu anything, or generate flashcards &amp; quizzes" autocomplete="off" />
             </label>
-            <button class="home-flashcard-composer__send" type="button" id="flashcardGenerateBtn" disabled aria-label="Continue to study chat">↑</button>
-          </div>
+            <button class="home-flashcard-composer__send" type="button" id="flashcardGenerateBtn" aria-label="Open Pengu AI Chat">↑</button>
+          </form>
           <div class="home-flashcard-composer__tools" aria-label="Supported study formats">
-            <span><strong aria-hidden="true">↑</strong> PDF</span>
-            <span>Flashcards</span>
-            <span>Quiz</span>
-            <small>PDF up to 10 MB</small>
+            <span class="home-flashcard-tool-tag" id="toolUploadPdf" role="button" tabindex="0" title="Upload a PDF (optional)"><strong aria-hidden="true">↑</strong> PDF</span>
+            <span class="home-flashcard-tool-tag" id="toolFlashcards" role="button" tabindex="0" title="Generate flashcards on any topic">Flashcards</span>
+            <span class="home-flashcard-tool-tag" id="toolQuiz" role="button" tabindex="0" title="Generate a quiz on any topic">Quiz</span>
+            <small id="toolMetaText">PDF optional · up to 10 MB</small>
           </div>
           <div class="home-flashcard-filechip" id="flashcardFileChip" hidden>
             <span class="home-flashcard-filechip__pdf" aria-hidden="true">PDF</span>
@@ -85,6 +85,20 @@
         </div>
         <p class="home-flashcard-status" id="flashcardStatus" role="status" aria-live="polite"></p>
         <div class="home-flashcard-decks" id="flashcardDecks" hidden></div>
+      </section>
+
+      <!-- Persistent Saved Study Materials Section -->
+      <section class="home-saved-sets" id="homeSavedSets" aria-labelledby="savedSetsTitle">
+        <div class="home-saved-sets__header">
+          <div>
+            <p class="section-kicker">MY STUDY MATERIAL</p>
+            <h2 id="savedSetsTitle">Saved Decks &amp; Quizzes</h2>
+          </div>
+          <span class="home-saved-sets__count" id="savedSetsCount" hidden>0 sets</span>
+        </div>
+        <div class="home-saved-sets__grid" id="savedSetsGrid">
+          <!-- Populated by flashcards.js -->
+        </div>
       </section>
 
       <a class="home-mobile-continue os-continue-card" href="course.html">
@@ -170,22 +184,38 @@
       <header class="pdf-chat__header">
         <button class="pdf-chat__back" id="pdfChatBack" type="button" aria-label="Close study chat">←</button>
         <span class="pdf-chat__avatar"><img src="../../assets/favicon.png" alt="Pengu AI" /></span>
-        <div class="pdf-chat__identity"><strong id="pdfChatTitle">Pengu study chat</strong><small><i></i> Your PDF is the source</small></div>
+        <div class="pdf-chat__identity">
+          <strong id="pdfChatTitle">Pengu AI • Odyssey Study Companion</strong>
+          <small id="pdfChatStatus"><i></i> Online • Omnipotent OS Assistant</small>
+        </div>
         <button class="flashcard-study__close" id="pdfChatClose" type="button" aria-label="Close study chat">×</button>
       </header>
-      <div class="pdf-chat__source" id="pdfChatSource"><span aria-hidden="true">📄</span><span><strong></strong><small>PDF · ready to explore</small></span></div>
+      <div class="pdf-chat__source" id="pdfChatSource">
+        <span aria-hidden="true" id="pdfChatSourceIcon">✦</span>
+        <span>
+          <strong id="pdfChatSourceName">Pengu AI Companion</strong>
+          <small id="pdfChatSourceMeta">Ready to explore Operating Systems</small>
+        </span>
+      </div>
       <div class="pdf-chat__messages" id="pdfChatMessages" aria-live="polite" aria-label="Conversation with Pengu"></div>
       <div class="pdf-chat__activity" id="pdfChatActivity">
-        <p>How would you like to study?</p>
-        <div class="pdf-chat__choices">
+        <p id="pdfChatActivityLabel">How would you like to study?</p>
+        <div class="pdf-chat__choices" id="pdfChatChoices">
           <button type="button" class="pdf-chat__choice" id="pdfMakeFlashcards"><span><img src="../../assets/pixelatedfile-icon.png" alt="" /></span><strong>Memorize</strong><small>Make flashcards</small></button>
           <button type="button" class="pdf-chat__choice" id="pdfMakeQuiz"><span><img src="../../assets/pixelatedchallenge-icon.png" alt="" /></span><strong>Challenge</strong><small>Take a quiz</small></button>
+        </div>
+        <div class="pdf-chat__topic-picker" id="pdfChatTopicPicker" hidden>
+          <div class="pdf-chat__topic-picker-head">
+            <span id="pdfChatTopicTitle">Select a topic:</span>
+            <button type="button" class="pdf-chat__topic-back-btn" id="pdfChatTopicBackBtn">← Back to modes</button>
+          </div>
+          <div class="pdf-chat__topic-chips" id="pdfChatTopicChips"></div>
         </div>
       </div>
       <form class="pdf-chat__composer" id="pdfChatForm">
         <span class="pdf-chat__composer-avatar" aria-hidden="true"><img src="../../assets/favicon.png" alt="" /></span>
-        <input id="pdfChatInput" type="text" maxlength="1000" placeholder="Ask Pengu about your PDF…" autocomplete="off" aria-label="Ask Pengu about your PDF" />
-        <button type="submit" aria-label="Send message">↑</button>
+        <input id="pdfChatInput" type="text" maxlength="1000" placeholder="Ask Pengu anything about Operating Systems…" autocomplete="off" aria-label="Ask Pengu anything about Operating Systems" />
+        <button type="submit" id="pdfChatSendBtn" aria-label="Send message">↑</button>
       </form>
       <p class="pdf-chat__notice" id="pdfChatNotice" role="status" aria-live="polite"></p>
     </section>
@@ -193,8 +223,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase.js"></script>
-  <script src="../js/main.js?v=24"></script>
-  <script src="../js/flashcards.js"></script>
+  <script src="../js/main.js?v=25"></script>
+  <script src="../js/flashcards.js?v=25"></script>
   <script src="../js/pwa-register.js"></script>
 </body>
 
