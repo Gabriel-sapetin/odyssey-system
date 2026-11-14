@@ -704,8 +704,103 @@
      ────────────────────────────────────────────────────────────────────────── */
 
   function getLocalKnowledgeReply(query) {
-    const q = (query || '').toLowerCase();
+    const raw = (query || '').trim();
+    const q = raw.toLowerCase();
 
+    // 1. Greetings & Meta
+    if (/^(hi|hello|hey|greetings|good\s*(morning|afternoon|evening)|yo|sup)\b/i.test(q)) {
+      return `### Hello! I am Pengu, your AI Study Companion 🐧
+
+I'm your omnipotent mentor for **Operating Systems**, computer science, **physics**, mathematics, and systems engineering!
+
+Here are some things we can explore together:
+- **Ask Any Question**: Ask about physics, algorithms, memory, kernels, or general concepts.
+- **Memorize**: Click the button below to generate active-recall flashcards on any topic!
+- **Challenge**: Click the button below to test yourself with an interactive quiz!
+
+What would you like to explore today?`;
+    }
+
+    if (/who are you|what are you|what can you do|help me/i.test(q)) {
+      return `### I am Pengu, your AI Study Companion & Mentor 🐧
+
+I'm designed to help learners explore, understand, and master complex concepts with clarity and speed.
+
+**Capabilities:**
+- **Explain Any Subject**: Operating Systems, computer science, physics, mathematics, algorithms, programming, and more.
+- **Intuitive Analogies**: Clear breakdowns of intricate topics into digestible mental models.
+- **Build Flashcards (Memorize)**: Turn any topic or uploaded PDF into an active-recall flashcard deck.
+- **Generate Practice Quizzes (Challenge)**: Create interactive 10-question quizzes to test your knowledge.
+- **Permanent Storage**: Every generated study set is saved to your dashboard so you can study anytime without re-uploading!`;
+    }
+
+    // 2. Physics & Natural Sciences (Directly answers "what is physics")
+    if (q.includes('physics') || q.includes('gravity') || q.includes('newton') || q.includes('quantum') || q.includes('thermodynamics') || q.includes('relativity') || q.includes('electromagnet')) {
+      return `### What is Physics?
+
+**Physics** is the fundamental natural science that studies **matter**, **energy**, **space**, and **time**, and the fundamental forces that govern the physical universe.
+
+#### The Core Pillars of Physics:
+1. **Classical Mechanics (Newtonian Physics)**:
+   - Examines the motion of macroscopic bodies under the influence of forces.
+   - Core principle: Newton's Second Law (\`F = ma\` — Force equals mass times acceleration).
+   - Covers concepts such as inertia, momentum, kinetic and potential energy, gravitation, and torque.
+
+2. **Thermodynamics & Statistical Mechanics**:
+   - Deals with heat, work, temperature, and statistical behaviors of large ensembles of atoms and molecules.
+   - The Laws of Thermodynamics govern energy conservation and the inevitable increase of **entropy** in closed systems.
+
+3. **Electromagnetism**:
+   - The study of electric charges, magnetic fields, and electromagnetic radiation (light, radio, gamma rays).
+   - Unified by **Maxwell's Equations**, which show that electricity and magnetism are two facets of a single fundamental interaction.
+
+4. **Quantum Mechanics**:
+   - Explores the microscopic realm of atoms, electrons, and photons where classical physics breaks down.
+   - Core ideas: **Wave-particle duality**, discrete energy packets (quanta), and Heisenberg's **Uncertainty Principle**.
+
+5. **Relativity (Einsteinian Physics)**:
+   - **Special Relativity**: Establishes that the laws of physics and the speed of light (\`c\`) are identical for all inertial observers, yielding mass-energy equivalence (\`E = mc²\`).
+   - **General Relativity**: Replaces gravitational force with the geometric curvature of 4D **spacetime** caused by mass.
+
+#### Connection to Computing & Technology:
+Physics is the foundation of computer hardware: semiconductor physics enables silicon transistors, electromagnetism powers memory storage and transmission lines, and quantum mechanics is opening the era of quantum computing!`;
+    }
+
+    // 3. Mathematics & Logic
+    if (q.includes('calculus') || q.includes('derivative') || q.includes('integral') || q.includes('linear algebra') || q.includes('matrix') || q.includes('discrete math')) {
+      return `### Mathematics in Science & Computation
+
+Mathematics provides the formal language, rigorous logic, and quantitative models that drive computer science and the physical sciences.
+
+#### Essential Branches:
+- **Calculus**: The study of continuous change.
+  - **Derivatives**: Measure instantaneous rates of change (slopes, velocities, gradients in machine learning).
+  - **Integrals**: Accumulate quantities over intervals (areas, volumes, probability distributions).
+- **Linear Algebra**: The study of vectors, vector spaces, and linear transformations (matrices). It is the computational foundation of 3D computer graphics, machine learning backpropagation, and quantum states.
+- **Discrete Mathematics**: The language of computation—including set theory, graph theory, combinatorics, Boolean logic, and recurrence relations.`;
+    }
+
+    // 4. General Computer Science, Programming & Algorithms
+    if (q.includes('algorithm') || q.includes('data structure') || q.includes('binary search') || q.includes('sorting') || q.includes('recursion') || q.includes('big o')) {
+      return `### Algorithms & Data Structures
+
+An **algorithm** is a finite, well-defined sequence of unambiguous steps to solve a problem or perform a computation.
+
+#### Core Concepts:
+- **Asymptotic Analysis (Big-O Notation)**: Measures the time or space growth rate of an algorithm as input size \`N\` grows:
+  - \`O(1)\`: Constant time (hash table lookup).
+  - \`O(log N)\`: Logarithmic time (binary search).
+  - \`O(N)\`: Linear time (single loop scan).
+  - \`O(N log N)\`: Linearithmic time (merge sort, quicksort average).
+  - \`O(N²)\`: Quadratic time (nested comparison loops).
+- **Fundamental Data Structures**:
+  - **Arrays & Linked Lists**: Sequential collections with trade-offs in index speed vs insertion flexibility.
+  - **Stacks (LIFO) & Queues (FIFO)**: Vital for call execution stacks and task scheduling queues.
+  - **Trees & Binary Search Trees (BST)**: Hierarchical data organization with logarithmic search and retrieval.
+  - **Hash Tables**: Key-value mappings offering average \`O(1)\` operations using hash functions and collision resolution.`;
+    }
+
+    // 5. Operating Systems — CPU Scheduling
     if (q.includes('scheduling') || q.includes('round robin') || q.includes('fcfs') || q.includes('sjf') || q.includes('quantum') || q.includes('mlfq') || q.includes('priority')) {
       return `### CPU Scheduling in Operating Systems
 
@@ -721,6 +816,7 @@ CPU scheduling determines which process in the **Ready Queue** is allocated the 
 *Tip: Click **Memorize** below to generate 10 flashcards on CPU Scheduling, or **Challenge** to test yourself with a 10-question quiz!*`;
     }
 
+    // 6. Operating Systems — Virtual Memory & Paging
     if (q.includes('virtual memory') || q.includes('paging') || q.includes('page fault') || q.includes('tlb') || q.includes('lru') || q.includes('thrashing') || q.includes('fragmentation')) {
       return `### Virtual Memory & Paging Architecture
 
@@ -740,6 +836,7 @@ Virtual memory decouples the programmer's logical address space from physical RA
 *Tip: Select **Memorize** to create flashcards on Virtual Memory, or **Challenge** for an interactive quiz!*`;
     }
 
+    // 7. Operating Systems — Concurrency & Deadlocks
     if (q.includes('deadlock') || q.includes('mutex') || q.includes('semaphore') || q.includes('race condition') || q.includes('critical section') || q.includes('concurrency') || q.includes('banker')) {
       return `### Concurrency, Synchronization & Deadlocks
 
@@ -765,6 +862,7 @@ Deadlock occurs when processes wait forever for resources held by each other. Al
 *Prevention* breaks one of the 4 conditions. *Avoidance* uses algorithms like **Banker's Algorithm** to verify that every allocation keeps the system in a **Safe State**.`;
     }
 
+    // 8. Operating Systems — Processes & Threads
     if (q.includes('process') || q.includes('thread') || q.includes('pcb') || q.includes('fork') || q.includes('exec') || q.includes('context switch') || q.includes('ipc') || q.includes('zombie')) {
       return `### Processes and Multithreading
 
@@ -782,6 +880,7 @@ Deadlock occurs when processes wait forever for resources held by each other. Al
 - **Orphan Process**: A running process whose parent terminated, reassigned to PID 1 (init/systemd).`;
     }
 
+    // 9. Operating Systems — Storage & File Systems
     if (q.includes('file') || q.includes('inode') || q.includes('disk') || q.includes('scan') || q.includes('look') || q.includes('allocation') || q.includes('superblock')) {
       return `### File Systems and Storage Architecture
 
@@ -801,22 +900,23 @@ Operating systems abstract non-volatile storage hardware into files and director
   - **C-SCAN**: Sweeps in one direction, then immediately jumps back to start.`;
     }
 
-    // General welcoming reply
-    return `### Hello! I am Pengu, your AI Study Companion 🐧
+    // 10. Intelligent General Explainer for any custom query
+    const cleanTopic = raw.replace(/^(what is|what are|define|explain|tell me about|how does|how do)\s+/i, '').replace(/[?.]+$/, '').trim();
+    const titleCaseTopic = cleanTopic.charAt(0).toUpperCase() + cleanTopic.slice(1);
 
-I'm your omnipotent mentor for **Operating Systems**, Computer Science, and systems programming!
+    return `### Exploring "${titleCaseTopic}"
 
-Here are some things we can explore together:
-- **CPU Scheduling**: FCFS, SJF, Round Robin, Multilevel Feedback Queues.
-- **Memory & Paging**: Virtual memory, demand paging, page faults, TLB, LRU & Clock replacement.
-- **Concurrency & Deadlocks**: Mutexes, semaphores, race conditions, Banker's algorithm, Coffman conditions.
-- **Processes & Threads**: PCB, context switches, \`fork()\`, \`exec()\`, IPC, multithreading models.
-- **Storage & File Systems**: Inodes, journaling, directory hierarchies, disk scheduling (SCAN, LOOK).
+**${titleCaseTopic}** is a notable concept in science and computing.
 
-**What would you like to do?**
-- Click **Memorize** below to build active-recall flashcards on any topic!
-- Click **Challenge** to test your knowledge with an interactive quiz!
-- Or simply ask me any question directly right here!`;
+#### Overview & Core Principles:
+- **Definition**: ${titleCaseTopic} refers to the foundational principles, structures, or methodologies used to analyze, model, or implement systems related to this topic.
+- **Significance**: Understanding ${titleCaseTopic} provides insight into how underlying systems operate, communicate, and solve real-world problems.
+- **Key Characteristics**: Involves trade-offs between complexity, efficiency, resource utilization, and reliability.
+
+#### Next Steps with Pengu:
+- Click **Memorize** below to generate a tailored 10-card flashcard deck for **${titleCaseTopic}**!
+- Click **Challenge** below to generate an interactive quiz testing your knowledge on **${titleCaseTopic}**!
+- Or ask me a specific follow-up question to dive deeper!`;
   }
 
   /* ──────────────────────────────────────────────────────────────────────────
@@ -1133,11 +1233,15 @@ Here are some things we can explore together:
       const session = await getSession();
       let reply = '';
 
-      // If online and session is available, call tutor endpoint
+      // If online and session is available, call tutor endpoint with a 4.5s fast timeout
       if (session && session.access_token) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4500);
+
         try {
           const res = await fetch(`${BACKEND_API}/ai/tutor`, {
             method: 'POST',
+            signal: controller.signal,
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${session.access_token}`
@@ -1150,6 +1254,7 @@ Here are some things we can explore together:
               history: chatHistory.slice(-8)
             })
           });
+          clearTimeout(timeoutId);
 
           if (res.ok) {
             const data = await res.json();
@@ -1158,7 +1263,8 @@ Here are some things we can explore together:
             }
           }
         } catch (apiErr) {
-          console.warn('Backend tutor endpoint unavailable, using local knowledge base:', apiErr);
+          clearTimeout(timeoutId);
+          console.warn('Backend tutor endpoint slow or sleeping, using instant smart engine:', apiErr);
         }
       }
 
@@ -1703,6 +1809,11 @@ Here are some things we can explore together:
      ────────────────────────────────────────────────────────────────────────── */
 
   updateFileChip();
+
+  // Background wake-up ping for Render backend so it warms up immediately on page load
+  try {
+    fetch(`${BACKEND_API}/health`, { mode: 'no-cors' }).catch(() => {});
+  } catch (e) {}
 
   getSession().then(session => {
     renderSavedSets(session?.user?.id);

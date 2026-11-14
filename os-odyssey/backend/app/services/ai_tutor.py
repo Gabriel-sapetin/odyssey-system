@@ -49,15 +49,21 @@ def build_system_instruction(course_context: Optional[dict] = None) -> str:
 
 
 def _prioritize_tutor_models(models: list[str]) -> list[str]:
-    """Prefer reasoning-capable text models, then retain discovered fallbacks."""
-    preferred = ["gemini-4-argon", "gemini-3.1-pro-preview", "gemini-3.8-flash", "gemini-flash-latest"]
+    """Prefer fast, high-performance flash models for real-time conversational tutor replies."""
+    preferred = [
+        "gemini-1.5-flash",
+        "gemini-2.0-flash",
+        "gemini-flash-latest",
+        "gemini-1.5-flash-8b",
+        "gemini-1.5-pro",
+    ]
     usable = [
         model for model in models
         if not any(token in model.lower() for token in ("-image", "-tts", "-live", "transcribe", "robotics", "embedding"))
     ]
     ordered = [model for model in preferred if model in usable]
     ordered.extend(model for model in usable if model not in ordered)
-    return ordered
+    return ordered or ["gemini-1.5-flash", "gemini-flash-latest"]
 
 
 async def ask_pengu_ai(
@@ -135,7 +141,7 @@ STUDENT'S QUESTION:
 
     last_error = None
 
-    async with httpx.AsyncClient(timeout=45.0) as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
         models_to_try = _prioritize_tutor_models(
             await get_available_models(client, settings.GEMINI_API_KEY)
         )
@@ -146,61 +152,54 @@ STUDENT'S QUESTION:
                 f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
                 f"?key={settings.GEMINI_API_KEY}"
             )
-            max_attempts = 2
 
-            for attempt in range(max_attempts):
-                try:
-                    payload = {
-                        "contents": gemini_contents,
-                        "systemInstruction": {
-                            "parts": [{"text": system_instruction}]
-                        },
-                        "generationConfig": {
-                            "temperature": 0.7,
-                            "maxOutputTokens": 4096,
-                        },
+            try:
+                payload = {
+                    "contents": gemini_contents,
+                    "systemInstruction": {
+                        "parts": [{"text": system_instruction}]
+                    },
+                    "generationConfig": {
+                        "temperature": 0.7,
+                        "maxOutputTokens": 2048,
+                    },
+                }
+
+                response = await client.post(
+                    api_url,
+                    json=payload,
+                    headers={"Content-Type": "application/json"},
+                )
+
+                if response.status_code == 200:
+                    data = response.json()
+                    candidates = data.get("candidates", [])
+                    if not candidates:
+                        raise ValueError("No candidate reply returned by Gemini.")
+
+                    reply_text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                    if not reply_text:
+                        raise ValueError("Empty response text from Gemini.")
+
+                    return {
+                        "reply": reply_text.strip(),
+                        "model": model,
+                        "mode": mode,
                     }
-                    if model.startswith(("gemini-3", "gemini-4")):
-                        payload["generationConfig"]["thinkingConfig"] = {"thinkingLevel": "high"}
 
-                    response = await client.post(
-                        api_url,
-                        json=payload,
-                        headers={"Content-Type": "application/json"},
-                    )
+                if response.status_code in (429, 503):
+                    logger.warning("Gemini model '%s' busy (%d).", model, response.status_code)
+                    last_error = f"Gemini {model} is busy (status {response.status_code})"
+                    continue
 
-                    if response.status_code == 200:
-                        data = response.json()
-                        candidates = data.get("candidates", [])
-                        if not candidates:
-                            raise ValueError("No candidate reply returned by Gemini.")
+                logger.warning("Gemini model '%s' returned status %d: %s", model, response.status_code, response.text[:200])
+                last_error = f"Gemini model {model} returned status {response.status_code}"
 
-                        reply_text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-                        if not reply_text:
-                            raise ValueError("Empty response text from Gemini.")
-
-                        return {
-                            "reply": reply_text.strip(),
-                            "model": model,
-                            "mode": mode,
-                        }
-
-                    if response.status_code in (429, 503):
-                        logger.warning("Gemini model '%s' busy (%d). Retrying...", model, response.status_code)
-                        last_error = f"Gemini {model} is busy (status {response.status_code})"
-                        continue
-
-                    logger.warning("Gemini model '%s' returned status %d: %s", model, response.status_code, response.text[:200])
-                    last_error = f"Gemini model {model} returned status {response.status_code}"
-                    break  # Try next model
-
-                except httpx.TimeoutException:
-                    logger.warning("Timeout calling Gemini model '%s'", model)
-                    last_error = f"Timeout connecting to Gemini ({model})"
-                    break
-                except Exception as exc:
-                    logger.warning("Error calling Gemini model '%s': %s", model, exc)
-                    last_error = str(exc)
-                    break
+            except httpx.TimeoutException:
+                logger.warning("Timeout calling Gemini model '%s'", model)
+                last_error = f"Timeout connecting to Gemini ({model})"
+            except Exception as exc:
+                logger.warning("Error calling Gemini model '%s': %s", model, exc)
+                last_error = str(exc)
 
         raise RuntimeError(f"Pengu AI could not generate a response: {last_error or 'AI service unavailable'}")

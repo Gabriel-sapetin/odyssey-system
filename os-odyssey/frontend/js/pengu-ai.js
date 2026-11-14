@@ -304,11 +304,16 @@
         classroom_persona: window.__odysseyClassroomPersona || null,
       };
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const res = await fetch(`${BACKEND_API}/ai/tutor`, {
         method: 'POST',
+        signal: controller.signal,
         headers,
         body: JSON.stringify(payload),
       });
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
         if (res.status === 401) {

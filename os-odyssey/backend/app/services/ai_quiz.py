@@ -17,24 +17,35 @@ from app.config import settings
 logger = logging.getLogger("odyssey.ai_quiz")
 
 # Default preferred model candidates
+import time
+
+_CACHED_MODELS: list[str] = []
+_LAST_DISCOVERY_TIME: float = 0.0
+
 DEFAULT_MODELS = [
-    "gemini-flash-latest",
     "gemini-1.5-flash",
-    "gemini-1.5-flash-latest",
     "gemini-2.0-flash",
-    "gemini-pro",
+    "gemini-flash-latest",
+    "gemini-1.5-flash-8b",
+    "gemini-1.5-pro",
 ]
 
 
 async def get_available_models(client: httpx.AsyncClient, api_key: str) -> list[str]:
     """
     Query the Gemini API to discover the exact models available for this API key.
-    Returns prioritized list with flash models first.
+    Results are cached in memory for 1 hour to prevent redundant HTTP roundtrips.
     """
+    global _CACHED_MODELS, _LAST_DISCOVERY_TIME
+
+    now = time.time()
+    if _CACHED_MODELS and (now - _LAST_DISCOVERY_TIME < 3600):
+        return _CACHED_MODELS
+
     candidates = list(DEFAULT_MODELS)
     try:
         url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
-        res = await client.get(url, timeout=10.0)
+        res = await client.get(url, timeout=5.0)
         if res.status_code == 200:
             data = res.json()
             api_models = []
@@ -47,17 +58,19 @@ async def get_available_models(client: httpx.AsyncClient, api_key: str) -> list[
 
             if api_models:
                 logger.info("Discovered %d models from Gemini API: %s", len(api_models), api_models[:6])
-                # Prioritize: gemini-flash-latest, then other flash models, then pro models
                 discovered_flash = [m for m in api_models if "flash" in m]
                 discovered_others = [m for m in api_models if "flash" not in m]
 
-                combined = ["gemini-flash-latest"] + discovered_flash + discovered_others + candidates
-                # Deduplicate while preserving order
+                combined = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-flash-latest"] + discovered_flash + discovered_others + candidates
                 seen = set()
-                return [m for m in combined if not (m in seen or seen.add(m))]
+                _CACHED_MODELS = [m for m in combined if not (m in seen or seen.add(m))]
+                _LAST_DISCOVERY_TIME = now
+                return _CACHED_MODELS
     except Exception as exc:
         logger.warning("Could not dynamically query Gemini models: %s", exc)
 
+    _CACHED_MODELS = candidates
+    _LAST_DISCOVERY_TIME = now
     return candidates
 
 
