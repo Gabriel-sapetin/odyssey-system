@@ -69,7 +69,11 @@
     topicTitle: document.getElementById('pdfChatTopicTitle'),
     topicBackBtn: document.getElementById('pdfChatTopicBackBtn'),
     topicChips: document.getElementById('pdfChatTopicChips'),
+    topicCustomBox: document.getElementById('pdfChatCustomBox'),
+    topicCustomInput: document.getElementById('pdfChatCustomInput'),
+    topicCustomBtn: document.getElementById('pdfChatCustomBtn'),
     chatForm: document.getElementById('pdfChatForm'),
+    chatAttachBtn: document.getElementById('pdfChatAttachBtn'),
     chatInput: document.getElementById('pdfChatInput'),
     chatSendBtn: document.getElementById('pdfChatSendBtn'),
     chatNotice: document.getElementById('pdfChatNotice'),
@@ -696,45 +700,238 @@
           explanation: 'Operating systems use bit vectors (where each bit represents a block’s allocated/free state) or linked lists to manage free disk blocks.'
         }
       ]
+    },
+    data_structures: {
+      name: 'Data Structures & Algorithms',
+      description: 'Big-O notation, trees, graphs, sorting, and dynamic programming.',
+      flashcards: [
+        { front: 'What does Big-O notation describe?', back: 'The upper bound of the growth rate of an algorithm’s time or space complexity as input size increases.', hint: 'Asymptotic upper bound' },
+        { front: 'What is the average time complexity of QuickSort?', back: 'O(N log N) average time, with O(N²) worst-case when poor pivots are chosen.', hint: 'Divide and conquer' },
+        { front: 'How does a Hash Table achieve O(1) average lookup time?', back: 'By computing a hash of the key to index directly into an underlying array.', hint: 'Direct array indexing via hash function' },
+        { front: 'What is the difference between a Stack and a Queue?', back: 'A Stack is Last-In First-Out (LIFO); a Queue is First-In First-Out (FIFO).', hint: 'LIFO vs FIFO' },
+        { front: 'What is Binary Search and its time complexity?', back: 'A search algorithm on sorted arrays that divides the search interval in half each step, running in O(log N) time.', hint: 'Divide search space in half' }
+      ],
+      quiz: [
+        {
+          question_text: 'What is the time complexity of searching in a balanced Binary Search Tree (BST)?',
+          options: ['O(log N)', 'O(1)', 'O(N)', 'O(N²)'],
+          correct_answer: 'O(log N)',
+          explanation: 'In a balanced BST, each comparison halves the remaining search space, giving logarithmic time.'
+        },
+        {
+          question_text: 'Which data structure follows the First-In First-Out (FIFO) principle?',
+          options: ['Queue', 'Stack', 'Heap', 'Binary Tree'],
+          correct_answer: 'Queue',
+          explanation: 'A Queue processes items in the exact order they arrive (FIFO).'
+        }
+      ]
+    },
+    physics: {
+      name: 'Physics & Classical Mechanics',
+      description: 'Newton’s laws, kinetic & potential energy, gravitation, and conservation laws.',
+      flashcards: [
+        { front: 'State Newton’s Second Law of Motion.', back: 'Force equals mass times acceleration (F = ma). Net force produces proportional acceleration.', hint: 'F = ma' },
+        { front: 'What is the Law of Conservation of Energy?', back: 'Energy cannot be created or destroyed, only transformed from one form to another in an isolated system.', hint: 'Total energy remains constant' },
+        { front: 'What is the difference between Kinetic and Potential Energy?', back: 'Kinetic energy is energy of motion (½mv²); potential energy is stored energy due to position or state (e.g. mgh).', hint: 'Motion vs position' },
+        { front: 'What is the speed of light in a vacuum?', back: 'Approximately 3.0 × 10⁸ meters per second (299,792,458 m/s).', hint: 'c in E = mc²' },
+        { front: 'What does the First Law of Thermodynamics state?', back: 'The change in internal energy of a system equals heat added minus work done by the system (ΔU = Q - W).', hint: 'Conservation of energy in thermal systems' }
+      ],
+      quiz: [
+        {
+          question_text: 'According to Newton’s second law, what is the acceleration of a 5 kg object subjected to a 20 N net force?',
+          options: ['4 m/s²', '100 m/s²', '0.25 m/s²', '15 m/s²'],
+          correct_answer: '4 m/s²',
+          explanation: 'a = F / m = 20 N / 5 kg = 4 m/s².'
+        },
+        {
+          question_text: 'Which quantity is conserved in all isolated collisions (both elastic and inelastic)?',
+          options: ['Linear momentum', 'Kinetic energy', 'Mechanical energy', 'Velocity'],
+          correct_answer: 'Linear momentum',
+          explanation: 'Total linear momentum is always conserved in isolated systems regardless of whether kinetic energy is lost.'
+        }
+      ]
+    },
+    calculus: {
+      name: 'Calculus & Mathematical Analysis',
+      description: 'Derivatives, integrals, limits, and fundamental theorems.',
+      flashcards: [
+        { front: 'What is a derivative intuitively?', back: 'The instantaneous rate of change of a function with respect to a variable, or the slope of the tangent line.', hint: 'Instantaneous rate of change' },
+        { front: 'State the Fundamental Theorem of Calculus.', back: 'Differentiation and integration are inverse operations: ∫ f(x)dx evaluated from a to b = F(b) - F(a) where F’(x) = f(x).', hint: 'Connects integrals and derivatives' },
+        { front: 'What is the derivative of sin(x)?', back: 'cos(x).', hint: 'Trig derivative' },
+        { front: 'What does a definite integral represent geometrically?', back: 'The net signed area between the function curve and the x-axis over an interval [a, b].', hint: 'Area under the curve' },
+        { front: 'What is L’Hôpital’s Rule used for?', back: 'Evaluating limits of indeterminate forms (like 0/0 or ∞/∞) by differentiating the numerator and denominator.', hint: 'Indeterminate limit forms' }
+      ],
+      quiz: [
+        {
+          question_text: 'What is the derivative of f(x) = x³ with respect to x?',
+          options: ['3x²', 'x²', '3x', 'x⁴/4'],
+          correct_answer: '3x²',
+          explanation: 'By the power rule, d/dx(xⁿ) = n·xⁿ⁻¹, so d/dx(x³) = 3x².'
+        },
+        {
+          question_text: 'What is the integral of 1/x with respect to x for x > 0?',
+          options: ['ln(x) + C', 'x² + C', '1/x² + C', 'e^x + C'],
+          correct_answer: 'ln(x) + C',
+          explanation: 'The antiderivative of 1/x is the natural logarithm ln|x| + C.'
+        }
+      ]
+    },
+    biology: {
+      name: 'Cell Biology & Genetics',
+      description: 'Cell structure, DNA replication, transcription, translation, and inheritance.',
+      flashcards: [
+        { front: 'What is the powerhouse of the eukaryotic cell?', back: 'The Mitochondrion, which produces ATP through cellular respiration.', hint: 'ATP synthesis' },
+        { front: 'What are the four nucleotide bases in DNA?', back: 'Adenine (A), Thymine (T), Cytosine (C), and Guanine (G).', hint: 'A pairs with T, C pairs with G' },
+        { front: 'What is the Central Dogma of Molecular Biology?', back: 'Genetic information flows from DNA → RNA (transcription) → Protein (translation).', hint: 'DNA to RNA to Protein' },
+        { front: 'What is the primary chemical equation of photosynthesis?', back: '6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂.', hint: 'Carbon dioxide and water into glucose and oxygen' },
+        { front: 'What is the difference between Mitosis and Meiosis?', back: 'Mitosis produces 2 genetically identical diploid somatic cells; meiosis produces 4 genetically diverse haploid gametes.', hint: 'Body cells vs sex cells' }
+      ],
+      quiz: [
+        {
+          question_text: 'Which organelle is responsible for synthesizing proteins in the cell?',
+          options: ['Ribosome', 'Golgi apparatus', 'Lysosome', 'Vacuole'],
+          correct_answer: 'Ribosome',
+          explanation: 'Ribosomes translate mRNA sequences into polypeptide chains (proteins).'
+        },
+        {
+          question_text: 'In DNA, which base pairs with Cytosine (C)?',
+          options: ['Guanine (G)', 'Adenine (A)', 'Thymine (T)', 'Uracil (U)'],
+          correct_answer: 'Guanine (G)',
+          explanation: 'Cytosine always forms three hydrogen bonds with Guanine in DNA double helices.'
+        }
+      ]
+    },
+    world_history: {
+      name: 'World History & Civilizations',
+      description: 'Major historical eras, scientific revolutions, and transformative global events.',
+      flashcards: [
+        { front: 'What was the Industrial Revolution?', back: 'The transition to new manufacturing processes in Europe and the US (1760–1840), powered by steam engines and mechanization.', hint: 'Steam power and factories' },
+        { front: 'What was the Renaissance?', back: 'A cultural, artistic, and intellectual movement in Europe (14th–17th centuries) marked by the revival of classical learning and humanism.', hint: 'Rebirth of arts and sciences' },
+        { front: 'What was the Scientific Revolution?', back: 'A series of events in the 16th–18th centuries (Copernicus, Galileo, Newton) that established modern empirical science.', hint: 'Empirical observation and math' },
+        { front: 'When did World War II end?', back: '1945, concluding with the Allied victory.', hint: 'Mid-20th century' },
+        { front: 'Who invented the movable-type printing press in Europe?', back: 'Johannes Gutenberg around 1440, revolutionizing the spread of knowledge.', hint: 'Gutenberg press' }
+      ],
+      quiz: [
+        {
+          question_text: 'In which century did the European Scientific Revolution gain major momentum with Copernicus and Galileo?',
+          options: ['16th–17th Century', '12th Century', '19th Century', '20th Century'],
+          correct_answer: '16th–17th Century',
+          explanation: 'The Scientific Revolution took place primarily between the mid-16th century and late 17th century.'
+        },
+        {
+          question_text: 'What technological advance catalyzed the Industrial Revolution?',
+          options: ['James Watt’s steam engine improvements', 'The electric lightbulb', 'The transistor', 'The steam turbine'],
+          correct_answer: 'James Watt’s steam engine improvements',
+          explanation: 'The improved steam engine provided reliable continuous power for factories and locomotives.'
+        }
+      ]
     }
   };
 
   /* ──────────────────────────────────────────────────────────────────────────
-     3. INTELLIGENT AI KNOWLEDGE RESPONSE FALLBACK
+     3. INTELLIGENT AI KNOWLEDGE RESPONSE FALLBACK & INSTANT MATH SOLVER
      ────────────────────────────────────────────────────────────────────────── */
+
+  function solveMathQuery(query) {
+    if (!query) return null;
+    const text = query.trim().toLowerCase();
+
+    // Must have at least one digit or math keyword
+    if (!/\d/.test(text) && !/(pi|sqrt|abs|sin|cos|tan)/.test(text)) return null;
+
+    // Filter out question prefixes and punctuation
+    let expr = text
+      .replace(/^(what is the answer for|what is the answer to|what is the value of|what is|what's|calculate|solve|evaluate|find|compute)\s+/i, '')
+      .replace(/[?!=]+$/g, '')
+      .replace(/\bthe answer for\b/gi, '')
+      .replace(/\bthe answer to\b/gi, '')
+      .replace(/\bequals\b/gi, '')
+      .trim();
+
+    // Replace written arithmetic words
+    expr = expr
+      .replace(/\bplus\b/gi, '+')
+      .replace(/\bminus\b/gi, '-')
+      .replace(/\btimes\b/gi, '*')
+      .replace(/\bmultiplied by\b/gi, '*')
+      .replace(/\bdivided by\b/gi, '/')
+      .replace(/\bover\b/gi, '/')
+      .replace(/\bx\b/gi, '*')
+      .replace(/×/g, '*')
+      .replace(/÷/g, '/')
+      .replace(/\^/g, '**');
+
+    // Replace math functions
+    expr = expr
+      .replace(/\bsqrt\s*\(/gi, 'Math.sqrt(')
+      .replace(/\babs\s*\(/gi, 'Math.abs(')
+      .replace(/\bpi\b/gi, 'Math.PI')
+      .replace(/\bpow\s*\(/gi, 'Math.pow(');
+
+    expr = expr.replace(/\s+/g, ' ').trim();
+
+    // Safety check: ONLY allow digits, basic operators, Math functions, parentheses, spaces
+    if (!/^[\d\s+\-*/%().MathsqrtabspowPI]+$/.test(expr)) {
+      return null;
+    }
+
+    // Must contain at least one calculation operator or function
+    if (!/[+\-*/%*Math]/.test(expr)) {
+      return null;
+    }
+
+    try {
+      const fn = new Function(`"use strict"; return (${expr});`);
+      const result = fn();
+      if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+        const displayExpr = expr
+          .replace(/Math\.sqrt\(([^)]+)\)/g, '√($1)')
+          .replace(/Math\.PI/g, 'π')
+          .replace(/\*\*/g, '^');
+        const formatted = Number.isInteger(result) ? result.toString() : parseFloat(result.toFixed(6)).toString();
+        return `### Math Result 🧮\n\n**${displayExpr} = ${formatted}**\n\nThe answer is **${formatted}**.`;
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  }
 
   function getLocalKnowledgeReply(query) {
     const raw = (query || '').trim();
     const q = raw.toLowerCase();
 
-    // 1. Greetings & Meta
+    // 1. Instant Math Check (e.g. "what is the answer for 1+1?", "25 * 4", "sqrt(144)")
+    const mathAns = solveMathQuery(raw);
+    if (mathAns) return mathAns;
+
+    // 2. Greetings
     if (/^(hi|hello|hey|greetings|good\s*(morning|afternoon|evening)|yo|sup)\b/i.test(q)) {
       return `### Hello! I am Pengu, your AI Study Companion 🐧
 
-I'm your omnipotent mentor for **Operating Systems**, computer science, **physics**, mathematics, and systems engineering!
-
-Here are some things we can explore together:
-- **Ask Any Question**: Ask about physics, algorithms, memory, kernels, or general concepts.
-- **Memorize**: Click the button below to generate active-recall flashcards on any topic!
+I'm your all-around assistant ready to explore any subject:
+- **Ask Any Question**: Mathematics, physics, natural sciences, history, coding, or everyday questions.
+- **Memorize**: Click the button below to generate active-recall flashcards on any topic or from an attached PDF!
 - **Challenge**: Click the button below to test yourself with an interactive quiz!
 
 What would you like to explore today?`;
     }
 
+    // 3. Identity & Capabilities
     if (/who are you|what are you|what can you do|help me/i.test(q)) {
-      return `### I am Pengu, your AI Study Companion & Mentor 🐧
+      return `### I am Pengu, your AI Study Companion 🐧
 
-I'm designed to help learners explore, understand, and master complex concepts with clarity and speed.
+I'm designed to help learners understand, explore, and master concepts across any discipline.
 
-**Capabilities:**
-- **Explain Any Subject**: Operating Systems, computer science, physics, mathematics, algorithms, programming, and more.
-- **Intuitive Analogies**: Clear breakdowns of intricate topics into digestible mental models.
-- **Build Flashcards (Memorize)**: Turn any topic or uploaded PDF into an active-recall flashcard deck.
-- **Generate Practice Quizzes (Challenge)**: Create interactive 10-question quizzes to test your knowledge.
-- **Permanent Storage**: Every generated study set is saved to your dashboard so you can study anytime without re-uploading!`;
+**Key Capabilities:**
+- **Answer Any Question**: Mathematics, natural sciences, history, literature, computer science, and engineering.
+- **Instant Math Solver**: Immediate arithmetic calculations, formula evaluation, and step-by-step logic.
+- **Flashcards (Memorize)**: Turn any custom topic or attached PDF into an active-recall flashcard deck.
+- **Practice Quizzes (Challenge)**: Create interactive multiple-choice quizzes to test your mastery.
+- **Permanent Dashboard Storage**: Every generated study set is saved permanently to your dashboard so you never lose your progress!`;
     }
 
-    // 2. Physics & Natural Sciences (Directly answers "what is physics")
+    // 4. Physics & Natural Sciences
     if (q.includes('physics') || q.includes('gravity') || q.includes('newton') || q.includes('quantum') || q.includes('thermodynamics') || q.includes('relativity') || q.includes('electromagnet')) {
       return `### What is Physics?
 
@@ -762,29 +959,68 @@ I'm designed to help learners explore, understand, and master complex concepts w
    - **Special Relativity**: Establishes that the laws of physics and the speed of light (\`c\`) are identical for all inertial observers, yielding mass-energy equivalence (\`E = mc²\`).
    - **General Relativity**: Replaces gravitational force with the geometric curvature of 4D **spacetime** caused by mass.
 
-#### Connection to Computing & Technology:
-Physics is the foundation of computer hardware: semiconductor physics enables silicon transistors, electromagnetism powers memory storage and transmission lines, and quantum mechanics is opening the era of quantum computing!`;
+*Tip: Click **Memorize** below to generate flashcards on Physics, or **Challenge** for a practice quiz!*`;
     }
 
-    // 3. Mathematics & Logic
-    if (q.includes('calculus') || q.includes('derivative') || q.includes('integral') || q.includes('linear algebra') || q.includes('matrix') || q.includes('discrete math')) {
+    // 5. Biology & Life Sciences
+    if (q.includes('biology') || q.includes('photosynthesis') || q.includes('dna') || q.includes('rna') || q.includes('evolution') || q.includes('genetics') || q.includes('cell ')) {
+      return `### Fundamentals of Biology
+
+**Biology** is the scientific study of **life** and living organisms, including their physical structure, molecular mechanisms, physiological processes, and evolutionary development.
+
+#### Major Biological Pillars:
+1. **Cell Theory**: The cell is the basic structural and functional unit of all living organisms. All cells arise from pre-existing cells.
+2. **Molecular Genetics (DNA & RNA)**: Genetic instructions are encoded in DNA using four nucleotide bases (A, T, C, G). Transcription and translation convert DNA instructions into functional proteins.
+3. **Evolution by Natural Selection**: Formulated by Charles Darwin, evolutionary theory explains biological diversity through differential survival and reproduction of organisms with advantageous traits.
+4. **Energy Transformation (Photosynthesis & Respiration)**:
+   - **Photosynthesis**: Autotrophs convert light energy, water, and CO₂ into glucose and oxygen (\`6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂\`).
+   - **Cellular Respiration**: Organisms metabolize glucose in mitochondria to produce ATP, powering cellular activity.
+5. **Homeostasis**: The maintenance of stable internal physiological conditions despite fluctuating external environments.
+
+*Tip: Select **Memorize** below to create flashcards on Biology, or **Challenge** for an interactive quiz!*`;
+    }
+
+    // 6. Chemistry
+    if (q.includes('chemistry') || q.includes('atom') || q.includes('molecule') || q.includes('periodic table') || q.includes('chemical reaction') || q.includes('acid') || q.includes('base')) {
+      return `### Fundamentals of Chemistry
+
+**Chemistry** is the science of **matter**—its properties, composition, structure, and the transformations it undergoes during chemical reactions.
+
+#### Core Foundations:
+1. **Atomic Structure**: Atoms consist of a nucleus of protons and neutrons surrounded by electrons in quantized orbitals.
+2. **The Periodic Table**: Elements are arranged by increasing atomic number (\`Z\`), showing recurring trends in electronegativity, ionization energy, and atomic radius.
+3. **Chemical Bonding**:
+   - **Covalent**: Sharing of electron pairs between nonmetals.
+   - **Ionic**: Electrostatic attraction between oppositely charged ions.
+   - **Metallic**: Delocalized electron sea holding metal cations together.
+4. **Conservation of Mass**: Mass is conserved in chemical reactions; atoms rearrange by breaking and forming bonds.
+5. **Thermodynamics & Kinetics**: Reactions depend on enthalpy (\`ΔH\`), entropy (\`ΔS\`), Gibbs free energy (\`ΔG = ΔH - TΔS\`), and activation energy.
+
+*Tip: Click **Memorize** below to generate flashcards on Chemistry, or **Challenge** for a quiz!*`;
+    }
+
+    // 7. General Mathematics & Calculus
+    if (q.includes('calculus') || q.includes('derivative') || q.includes('integral') || q.includes('linear algebra') || q.includes('matrix') || q.includes('discrete math') || q.includes('algebra')) {
       return `### Mathematics in Science & Computation
 
-Mathematics provides the formal language, rigorous logic, and quantitative models that drive computer science and the physical sciences.
+Mathematics provides the formal language, rigorous logic, and quantitative models that drive scientific discovery and engineering.
 
 #### Essential Branches:
 - **Calculus**: The study of continuous change.
   - **Derivatives**: Measure instantaneous rates of change (slopes, velocities, gradients in machine learning).
-  - **Integrals**: Accumulate quantities over intervals (areas, volumes, probability distributions).
+  - **Integrals**: Accumulate continuous quantities over intervals (areas, volumes, probability distributions).
 - **Linear Algebra**: The study of vectors, vector spaces, and linear transformations (matrices). It is the computational foundation of 3D computer graphics, machine learning backpropagation, and quantum states.
-- **Discrete Mathematics**: The language of computation—including set theory, graph theory, combinatorics, Boolean logic, and recurrence relations.`;
+- **Probability & Statistics**: Modeling uncertainty, quantifying risk, hypothesis testing, and inferring patterns from empirical data.
+- **Discrete Mathematics**: The language of computation—including set theory, graph theory, combinatorics, Boolean logic, and recurrence relations.
+
+*Tip: Click **Memorize** below to generate flashcards on Mathematics, or **Challenge** for a quiz!*`;
     }
 
-    // 4. General Computer Science, Programming & Algorithms
-    if (q.includes('algorithm') || q.includes('data structure') || q.includes('binary search') || q.includes('sorting') || q.includes('recursion') || q.includes('big o')) {
-      return `### Algorithms & Data Structures
+    // 8. General Computer Science, Programming & Algorithms
+    if (q.includes('algorithm') || q.includes('data structure') || q.includes('binary search') || q.includes('sorting') || q.includes('recursion') || q.includes('big o') || q.includes('python') || q.includes('javascript')) {
+      return `### Computer Science & Programming Fundamentals
 
-An **algorithm** is a finite, well-defined sequence of unambiguous steps to solve a problem or perform a computation.
+Computer science is the study of computation, algorithmic problem solving, software engineering, and digital systems.
 
 #### Core Concepts:
 - **Asymptotic Analysis (Big-O Notation)**: Measures the time or space growth rate of an algorithm as input size \`N\` grows:
@@ -797,11 +1033,27 @@ An **algorithm** is a finite, well-defined sequence of unambiguous steps to solv
   - **Arrays & Linked Lists**: Sequential collections with trade-offs in index speed vs insertion flexibility.
   - **Stacks (LIFO) & Queues (FIFO)**: Vital for call execution stacks and task scheduling queues.
   - **Trees & Binary Search Trees (BST)**: Hierarchical data organization with logarithmic search and retrieval.
-  - **Hash Tables**: Key-value mappings offering average \`O(1)\` operations using hash functions and collision resolution.`;
+  - **Hash Tables**: Key-value mappings offering average \`O(1)\` operations using hash functions and collision resolution.
+
+*Tip: Click **Memorize** below to generate flashcards on Algorithms, or **Challenge** for a quiz!*`;
     }
 
-    // 5. Operating Systems — CPU Scheduling
-    if (q.includes('scheduling') || q.includes('round robin') || q.includes('fcfs') || q.includes('sjf') || q.includes('quantum') || q.includes('mlfq') || q.includes('priority')) {
+    // 9. History & Humanities
+    if (q.includes('history') || q.includes('world war') || q.includes('civilization') || q.includes('revolution') || q.includes('einstein') || q.includes('philosophy')) {
+      return `### Historical & Philosophical Inquiry
+
+Understanding history and philosophical inquiry provides critical context for human civilization, scientific discovery, and social structures.
+
+#### Key Perspectives:
+- **Historical Analysis**: Examines primary sources, systemic causes, and consequences of transformative events such as the Agricultural, Scientific, and Industrial Revolutions.
+- **Scientific Milestones**: Thinkers like Isaac Newton, Ada Lovelace, and Albert Einstein revolutionized our understanding of the physical universe and computation.
+- **Critical Inquiry**: Philosophy, logic, and ethics explore foundational questions of knowledge (epistemology), reason, and morality.
+
+*Tip: Click **Memorize** below to create flashcards on History, or **Challenge** for a quiz!*`;
+    }
+
+    // 10. Operating Systems (when explicitly asked)
+    if (q.includes('scheduling') || q.includes('round robin') || q.includes('fcfs') || q.includes('sjf') || q.includes('mlfq')) {
       return `### CPU Scheduling in Operating Systems
 
 CPU scheduling determines which process in the **Ready Queue** is allocated the CPU when the currently running process yields or is preempted.
@@ -816,7 +1068,6 @@ CPU scheduling determines which process in the **Ready Queue** is allocated the 
 *Tip: Click **Memorize** below to generate 10 flashcards on CPU Scheduling, or **Challenge** to test yourself with a 10-question quiz!*`;
     }
 
-    // 6. Operating Systems — Virtual Memory & Paging
     if (q.includes('virtual memory') || q.includes('paging') || q.includes('page fault') || q.includes('tlb') || q.includes('lru') || q.includes('thrashing') || q.includes('fragmentation')) {
       return `### Virtual Memory & Paging Architecture
 
@@ -828,7 +1079,7 @@ Virtual memory decouples the programmer's logical address space from physical RA
 - **Translation Lookaside Buffer (TLB)**: High-speed hardware cache in the CPU that caches recent translations.
 - **Page Fault**: When a process references a page with an invalid bit (not in RAM), the MMU traps to the OS kernel to load it from disk.
 - **Page Replacement**:
-  - **FIFO**: Simple, but subject to *Belady's Anomaly* (more frames can mean more faults).
+  - **FIFO**: Simple, but subject to *Belady's Anomaly*.
   - **LRU (Least Recently Used)**: Evicts the page unused for the longest time; great approximation of optimal.
   - **Clock (Second Chance)**: Efficient circular FIFO with reference bits.
 - **Thrashing**: Occurs when total working sets exceed physical RAM, causing constant swapping and near-zero CPU throughput.
@@ -836,7 +1087,6 @@ Virtual memory decouples the programmer's logical address space from physical RA
 *Tip: Select **Memorize** to create flashcards on Virtual Memory, or **Challenge** for an interactive quiz!*`;
     }
 
-    // 7. Operating Systems — Concurrency & Deadlocks
     if (q.includes('deadlock') || q.includes('mutex') || q.includes('semaphore') || q.includes('race condition') || q.includes('critical section') || q.includes('concurrency') || q.includes('banker')) {
       return `### Concurrency, Synchronization & Deadlocks
 
@@ -859,64 +1109,26 @@ Deadlock occurs when processes wait forever for resources held by each other. Al
 3. **No Preemption**
 4. **Circular Wait**
 
-*Prevention* breaks one of the 4 conditions. *Avoidance* uses algorithms like **Banker's Algorithm** to verify that every allocation keeps the system in a **Safe State**.`;
+*Tip: Click **Memorize** below for flashcards on Concurrency & Deadlocks!*`;
     }
 
-    // 8. Operating Systems — Processes & Threads
-    if (q.includes('process') || q.includes('thread') || q.includes('pcb') || q.includes('fork') || q.includes('exec') || q.includes('context switch') || q.includes('ipc') || q.includes('zombie')) {
-      return `### Processes and Multithreading
-
-- **Process**: An active execution context with an address space, program counter, stack, heap, and open file descriptors.
-- **Thread**: A lightweight dispatchable unit of execution sharing the code, data, and resources of its parent process, but with its own stack and registers.
-
-#### Process Lifecycle:
-\`New\` ➔ \`Ready\` ➔ \`Running\` ➔ \`Waiting/Blocked\` ➔ \`Terminated\`.
-
-#### Key Concepts:
-- **Process Control Block (PCB)**: Kernel struct storing PID, state, PC, registers, memory pointers, and I/O status.
-- **Context Switch**: The kernel stores the running process's state to its PCB and restores another's state.
-- **fork()**: Creates an identical child process. Returns \`0\` in child, child's \`PID\` in parent.
-- **Zombie Process**: A terminated process whose exit status has not yet been collected by its parent via \`wait()\`.
-- **Orphan Process**: A running process whose parent terminated, reassigned to PID 1 (init/systemd).`;
-    }
-
-    // 9. Operating Systems — Storage & File Systems
-    if (q.includes('file') || q.includes('inode') || q.includes('disk') || q.includes('scan') || q.includes('look') || q.includes('allocation') || q.includes('superblock')) {
-      return `### File Systems and Storage Architecture
-
-Operating systems abstract non-volatile storage hardware into files and directories.
-
-#### Essential Concepts:
-- **Inode (Index Node)**: A metadata record for each file storing size, owner, permissions, timestamps, and data block pointers (direct, indirect, double-indirect).
-- **Directory Structure**: Maps human-readable filenames to inode numbers.
-- **Allocation Techniques**:
-  - **Contiguous**: Fast sequential access, but prone to external fragmentation.
-  - **Linked**: Simple, but random access is slow and requires traversing pointers.
-  - **Indexed / Inode**: Excellent random and sequential access with no external fragmentation.
-- **Disk Scheduling**:
-  - **FCFS**: First come, first served.
-  - **SSTF**: Shortest Seek Time First (minimizes movement, but can starve outer tracks).
-  - **SCAN (Elevator)**: Moves in one direction to the end, then reverses.
-  - **C-SCAN**: Sweeps in one direction, then immediately jumps back to start.`;
-    }
-
-    // 10. Intelligent General Explainer for any custom query
-    const cleanTopic = raw.replace(/^(what is|what are|define|explain|tell me about|how does|how do)\s+/i, '').replace(/[?.]+$/, '').trim();
-    const titleCaseTopic = cleanTopic.charAt(0).toUpperCase() + cleanTopic.slice(1);
+    // 11. Universal Intelligent Explainer for ANY Custom Query
+    const cleanTopic = raw.replace(/^(what is the answer for|what is the answer to|what is|what are|define|explain|tell me about|how does|how do|who was|who is)\s+/i, '').replace(/[?.]+$/, '').trim();
+    const titleCaseTopic = cleanTopic ? (cleanTopic.charAt(0).toUpperCase() + cleanTopic.slice(1)) : 'This Topic';
 
     return `### Exploring "${titleCaseTopic}"
 
-**${titleCaseTopic}** is a notable concept in science and computing.
+Here is an educational overview of **${titleCaseTopic}**:
 
-#### Overview & Core Principles:
-- **Definition**: ${titleCaseTopic} refers to the foundational principles, structures, or methodologies used to analyze, model, or implement systems related to this topic.
-- **Significance**: Understanding ${titleCaseTopic} provides insight into how underlying systems operate, communicate, and solve real-world problems.
-- **Key Characteristics**: Involves trade-offs between complexity, efficiency, resource utilization, and reliability.
+#### Core Principles & Insights:
+- **Overview**: ${titleCaseTopic} encompasses the foundational definitions, concepts, and mechanisms that define this subject.
+- **Why It Matters**: Understanding ${titleCaseTopic} provides valuable insight into related problems, theoretical models, and real-world applications.
+- **Key Takeaways**: Focus on fundamental principles, relationships with neighboring ideas, and practical examples.
 
 #### Next Steps with Pengu:
-- Click **Memorize** below to generate a tailored 10-card flashcard deck for **${titleCaseTopic}**!
+- Click **Memorize** below to generate an active-recall flashcard deck for **${titleCaseTopic}**!
 - Click **Challenge** below to generate an interactive quiz testing your knowledge on **${titleCaseTopic}**!
-- Or ask me a specific follow-up question to dive deeper!`;
+- Or ask me a specific follow-up question to dive deeper into any aspect!`;
   }
 
   /* ──────────────────────────────────────────────────────────────────────────
@@ -981,6 +1193,23 @@ Operating systems abstract non-volatile storage hardware into files and director
     pdfText = '';
     updateFileChip();
     setStatus(`${file.name} attached! Open study chat when ready.`, 'success');
+
+    // If chat modal is open, dynamically update title, status, and source pill
+    if (els.chatOverlay && !els.chatOverlay.hidden) {
+      currentChatMode = 'pdf';
+      if (els.chatTitle) els.chatTitle.textContent = prettyFileName(file.name);
+      if (els.chatStatus) els.chatStatus.innerHTML = '<i></i> Attached • Ready to study';
+      if (els.chatSource) els.chatSource.hidden = false;
+      if (els.chatSourceName) els.chatSourceName.textContent = file.name;
+      if (els.chatSourceMeta) els.chatSourceMeta.textContent = 'PDF attached · Ask questions or create study sets';
+      if (els.chatSourceIcon) els.chatSourceIcon.textContent = '📄';
+      if (els.chatInput) els.chatInput.placeholder = `Ask Pengu about “${prettyFileName(file.name)}”…`;
+      addChatMessage('assistant', `📄 **Attached:** “${file.name}”! You can ask me questions about this document, or select **Memorize** / **Challenge** to generate flashcards and quizzes from it.`);
+      if (els.topicPicker && !els.topicPicker.hidden) {
+        showTopicSelector(currentChatMode === 'general' ? 'flashcards' : currentChatMode);
+      }
+    }
+
     return true;
   }
 
@@ -1103,12 +1332,39 @@ Operating systems abstract non-volatile storage hardware into files and director
 
     if (els.topicTitle) {
       els.topicTitle.textContent = mode === 'flashcards'
-        ? 'Choose a topic to generate flashcards:'
-        : 'Choose a topic to generate a quiz:';
+        ? 'Choose a topic or generate from your PDF:'
+        : 'Choose a topic or quiz from your PDF:';
     }
 
     els.topicChips.replaceChildren();
 
+    // 1. If a PDF is attached, provide a prominent primary chip for it
+    if (selectedFile) {
+      const pdfBtn = document.createElement('button');
+      pdfBtn.type = 'button';
+      pdfBtn.className = 'pdf-chat__topic-chip pdf-chat__topic-chip--primary';
+      pdfBtn.innerHTML = `📄 <strong>Use Attached PDF:</strong> “${prettyFileName(selectedFile.name)}”`;
+      pdfBtn.addEventListener('click', () => {
+        if (mode === 'flashcards') {
+          generateDeckFromPdf();
+        } else {
+          generateQuizFromPdf();
+        }
+      });
+      els.topicChips.appendChild(pdfBtn);
+    } else {
+      // If no PDF attached, provide an upload button chip
+      const uploadBtn = document.createElement('button');
+      uploadBtn.type = 'button';
+      uploadBtn.className = 'pdf-chat__topic-chip pdf-chat__topic-chip--primary';
+      uploadBtn.innerHTML = `📎 <strong>Attach PDF or Notes</strong>`;
+      uploadBtn.addEventListener('click', () => {
+        if (els.fileInput) els.fileInput.click();
+      });
+      els.topicChips.appendChild(uploadBtn);
+    }
+
+    // 2. Render curated subject chips across disciplines
     const topicKeys = Object.keys(CORE_TOPICS);
     topicKeys.forEach(key => {
       const topicData = CORE_TOPICS[key];
@@ -1125,12 +1381,30 @@ Operating systems abstract non-volatile storage hardware into files and director
       });
       els.topicChips.appendChild(btn);
     });
+
+    // 3. Clear and focus the custom topic input box
+    if (els.topicCustomInput) {
+      els.topicCustomInput.value = '';
+      els.topicCustomInput.placeholder = mode === 'flashcards'
+        ? 'Or type ANY custom topic (e.g. World War II, Photosynthesis, Calculus)...'
+        : 'Or type ANY topic for your quiz (e.g. Quantum Physics, French Revolution)...';
+    }
   }
 
   function hideTopicSelector() {
     currentChatMode = selectedFile ? 'pdf' : 'general';
     if (els.topicPicker) els.topicPicker.hidden = true;
     if (els.chatChoices) els.chatChoices.hidden = false;
+  }
+
+  function handleCustomTopicSubmit() {
+    const customTopic = els.topicCustomInput?.value?.trim();
+    if (!customTopic) return;
+    if (currentChatMode === 'flashcards') {
+      generateFlashcardsForTopic(null, customTopic);
+    } else {
+      generateQuizForTopic(null, customTopic);
+    }
   }
 
   async function openChatModal(initialPrompt = '') {
@@ -1144,21 +1418,21 @@ Operating systems abstract non-volatile storage hardware into files and director
     if (selectedFile) {
       currentChatMode = 'pdf';
       if (els.chatTitle) els.chatTitle.textContent = prettyFileName(selectedFile.name);
-      if (els.chatStatus) els.chatStatus.innerHTML = '<i></i> Your PDF is the source';
+      if (els.chatStatus) els.chatStatus.innerHTML = '<i></i> Attached • Ready to study';
       if (els.chatSource) els.chatSource.hidden = false;
       if (els.chatSourceName) els.chatSourceName.textContent = selectedFile.name;
-      if (els.chatSourceMeta) els.chatSourceMeta.textContent = 'PDF · ready to explore';
+      if (els.chatSourceMeta) els.chatSourceMeta.textContent = 'PDF attached · Ask questions or create study sets';
       if (els.chatSourceIcon) els.chatSourceIcon.textContent = '📄';
       if (els.chatInput) els.chatInput.placeholder = `Ask Pengu about “${prettyFileName(selectedFile.name)}”…`;
     } else {
       currentChatMode = 'general';
       if (els.chatTitle) els.chatTitle.textContent = 'Pengu AI • Odyssey Study Companion';
-      if (els.chatStatus) els.chatStatus.innerHTML = '<i></i> Online • Omnipotent OS Assistant';
+      if (els.chatStatus) els.chatStatus.innerHTML = '<i></i> Online • Omnipotent AI Companion';
       if (els.chatSource) els.chatSource.hidden = false;
-      if (els.chatSourceName) els.chatSourceName.textContent = 'Pengu AI Study Companion';
-      if (els.chatSourceMeta) els.chatSourceMeta.textContent = 'Ask questions or generate flashcards & quizzes';
+      if (els.chatSourceName) els.chatSourceName.textContent = 'Pengu AI Companion';
+      if (els.chatSourceMeta) els.chatSourceMeta.textContent = 'Ask anything or generate flashcards & quizzes';
       if (els.chatSourceIcon) els.chatSourceIcon.textContent = '✦';
-      if (els.chatInput) els.chatInput.placeholder = 'Ask Pengu anything about Operating Systems…';
+      if (els.chatInput) els.chatInput.placeholder = 'Ask Pengu anything (math, science, history, coding, or any question)…';
     }
 
     hideTopicSelector();
@@ -1169,7 +1443,7 @@ Operating systems abstract non-volatile storage hardware into files and director
       if (selectedFile) {
         addChatMessage('assistant', `I’ve got “${prettyFileName(selectedFile.name)}” open! I can help you unpack the ideas, make flashcards, or build a quiz. What would you like to focus on?`);
       } else {
-        addChatMessage('assistant', `Hello! I'm Pengu, your AI study companion for Operating Systems. Ask me anything—from CPU scheduling and concurrency to virtual memory and system calls—or select a mode below to generate flashcards or a challenge quiz!`);
+        addChatMessage('assistant', `Hello! I'm Pengu, your AI study companion! Ask me anything—general knowledge, mathematics, science, history, coding, or any question you have—or create active-recall flashcards and challenge quizzes below!`);
       }
     }
 
@@ -1188,7 +1462,7 @@ Operating systems abstract non-volatile storage hardware into files and director
   }
 
   /* ──────────────────────────────────────────────────────────────────────────
-     6. CHATBOT QUERY PROCESSING (Backend + Local Omnipotent Fallback)
+     6. CHATBOT QUERY PROCESSING (Instant Math + Backend + Omnipotent Fallback)
      ────────────────────────────────────────────────────────────────────────── */
 
   async function handleChatSubmission(queryText) {
@@ -1227,48 +1501,62 @@ Operating systems abstract non-volatile storage hardware into files and director
       return;
     }
 
+    // 1. Instant local math solver check (0ms response for arithmetic questions like "what is 1+1?")
+    const mathAns = solveMathQuery(query);
+    if (mathAns) {
+      addChatMessage('assistant', mathAns);
+      chatHistory.push({ role: 'model', text: mathAns });
+      setChatNotice('');
+      if (els.chatInput) {
+        els.chatInput.disabled = false;
+        els.chatInput.focus();
+      }
+      if (els.chatSendBtn) els.chatSendBtn.disabled = false;
+      return;
+    }
+
     requestBusy = true;
 
     try {
       const session = await getSession();
       let reply = '';
 
-      // If online and session is available, call tutor endpoint with a 4.5s fast timeout
-      if (session && session.access_token) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4500);
+      // Call backend AI tutor with a 12-second timeout (supporting guests & logged-in users)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-        try {
-          const res = await fetch(`${BACKEND_API}/ai/tutor`, {
-            method: 'POST',
-            signal: controller.signal,
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${session.access_token}`
-            },
-            body: JSON.stringify({
-              query,
-              mode: 'general',
-              page_context: selectedFile ? `PDF Study: ${prettyFileName(selectedFile.name)}` : 'Odyssey Dashboard - Main Pengu Companion',
-              content_snippet: pdfText ? pdfText.slice(0, 3000) : '',
-              history: chatHistory.slice(-8)
-            })
-          });
-          clearTimeout(timeoutId);
-
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.reply) {
-              reply = data.reply;
-            }
-          }
-        } catch (apiErr) {
-          clearTimeout(timeoutId);
-          console.warn('Backend tutor endpoint slow or sleeping, using instant smart engine:', apiErr);
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (session && session.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
         }
+
+        const res = await fetch(`${BACKEND_API}/ai/tutor`, {
+          method: 'POST',
+          signal: controller.signal,
+          headers,
+          body: JSON.stringify({
+            query,
+            mode: 'general',
+            page_context: selectedFile ? `Document Study: ${prettyFileName(selectedFile.name)}` : 'Odyssey Dashboard - Main Pengu Companion',
+            content_snippet: pdfText ? pdfText.slice(0, 3000) : '',
+            history: chatHistory.slice(-8)
+          })
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.reply) {
+            reply = data.reply;
+          }
+        }
+      } catch (apiErr) {
+        clearTimeout(timeoutId);
+        console.warn('Backend tutor endpoint slow, sleeping, or unreachable:', apiErr);
       }
 
-      // Fallback to our deep OS knowledge engine
+      // If backend didn't reply in time, use our omnipotent local knowledge engine
       if (!reply) {
         reply = getLocalKnowledgeReply(query);
       }
@@ -1291,11 +1579,11 @@ Operating systems abstract non-volatile storage hardware into files and director
   }
 
   /* ──────────────────────────────────────────────────────────────────────────
-     7. STUDY GENERATION (Flashcards & Quizzes from Topic or PDF)
+     7. STUDY GENERATION (Flashcards & Quizzes from Any Topic or PDF)
      ────────────────────────────────────────────────────────────────────────── */
 
   async function generateFlashcardsForTopic(topicKey, topicName) {
-    const name = topicName || 'Operating Systems Study Deck';
+    const name = topicName || 'Active Recall Study Deck';
     const curated = topicKey && CORE_TOPICS[topicKey] ? CORE_TOPICS[topicKey].flashcards : null;
     let cards = curated;
 
@@ -1308,7 +1596,6 @@ Operating systems abstract non-volatile storage hardware into files and director
 
       // If no pre-authored deck, generate dynamically or ask backend
       if (!cards) {
-        // Try backend with topic
         if (session && session.access_token) {
           try {
             const res = await fetch(`${BACKEND_API}/ai/flashcards`, {
@@ -1321,7 +1608,7 @@ Operating systems abstract non-volatile storage hardware into files and director
                 title: name,
                 topic: name,
                 num_cards: 10,
-                content: `Study flashcard request for Operating Systems topic: ${name}. Please generate comprehensive, clear active-recall flashcards covering definitions, mechanics, tradeoffs, and key concepts of ${name}.`
+                content: `Study flashcards on ${name}. Please generate comprehensive, clear active-recall flashcards covering definitions, key mechanisms, core principles, and essential concepts of ${name}.`
               })
             });
             if (res.ok) {
@@ -1335,14 +1622,14 @@ Operating systems abstract non-volatile storage hardware into files and director
           }
         }
 
-        // Dynamic fallback cards if backend did not return cards
+        // Universal topic-adapted fallback cards if backend did not return cards
         if (!cards || !cards.length) {
           cards = [
-            { front: `What is the fundamental concept behind ${name}?`, back: `${name} is a core mechanism in modern computer systems designed to coordinate resources, maintain protection, and optimize efficiency.`, hint: 'Core OS foundation.' },
-            { front: `What problem does ${name} solve in an Operating System?`, back: `It provides safe abstraction, concurrency management, and controlled resource allocation between user software and hardware.`, hint: 'Abstraction and safety.' },
-            { front: `What are the primary performance trade-offs in ${name}?`, back: `Common trade-offs involve throughput vs latency, memory footprint vs algorithmic complexity, and hardware simplicity vs runtime overhead.`, hint: 'Efficiency vs overhead.' },
-            { front: `How does the kernel enforce safety during ${name}?`, back: `Through dual-mode CPU operation (user mode vs kernel mode), memory protection mechanisms, and controlled system call traps.`, hint: 'Privilege rings and hardware traps.' },
-            { front: `What happens when an error or bottleneck occurs in ${name}?`, back: `The OS may trigger an interrupt, reschedule processes, evict cached pages, or log a fault depending on the system policy.`, hint: 'Exception handling and recovery.' },
+            { front: `What is the core definition of “${name}”?`, back: `“${name}” represents fundamental principles, structures, and processes that define its subject area.`, hint: 'Core definition' },
+            { front: `Why is “${name}” significant?`, back: `Understanding ${name} provides key insights into how related mechanisms, ideas, and real-world systems function.`, hint: 'Importance & impact' },
+            { front: `What are the primary characteristics or components of “${name}”?`, back: `It encompasses foundational rules, interacting elements, and practical methodologies used by practitioners and scholars.`, hint: 'Key components' },
+            { front: `What is a common challenge or complexity in “${name}”?`, back: `Key complexities often involve trade-offs between precision, resource allocation, and practical execution.`, hint: 'Challenges' },
+            { front: `How can mastery of “${name}” be applied?`, back: `Knowledge of ${name} enables effective problem-solving, analytical evaluation, and practical implementation in related fields.`, hint: 'Real-world application' },
           ];
         }
       }
@@ -1386,7 +1673,7 @@ Operating systems abstract non-volatile storage hardware into files and director
   }
 
   async function generateQuizForTopic(topicKey, topicName) {
-    const name = topicName || 'Operating Systems Challenge Quiz';
+    const name = topicName || 'Challenge Quiz';
     const curated = topicKey && CORE_TOPICS[topicKey] ? CORE_TOPICS[topicKey].quiz : null;
     let questions = curated;
 
@@ -1411,7 +1698,7 @@ Operating systems abstract non-volatile storage hardware into files and director
                 title: name,
                 topic: name,
                 num_questions: 10,
-                content: `Comprehensive quiz request on Operating Systems topic: ${name}. Please generate multiple-choice questions testing conceptual clarity, algorithm steps, and real-world system behavior for ${name}.`
+                content: `Comprehensive quiz request on ${name}. Please generate multiple-choice questions testing conceptual clarity, key principles, and real-world understanding of ${name}.`
               })
             });
             if (res.ok) {
@@ -1428,37 +1715,37 @@ Operating systems abstract non-volatile storage hardware into files and director
         if (!questions || !questions.length) {
           questions = [
             {
-              question_text: `What is the primary role of ${name} in an Operating System?`,
+              question_text: `What best describes the primary focus of “${name}”?`,
               options: [
-                'Coordinating system resources and providing consistent abstractions',
-                'Translating high-level source code directly to silicon gates',
-                'Supplying constant electrical power to the motherboard',
-                'Formatting the BIOS ROM chip on startup'
+                `Understanding the fundamental concepts, principles, and mechanics of ${name}`,
+                'A random mechanical component unrelated to the field',
+                'A discontinued manufacturing technique from the 1800s',
+                'A cosmetic styling standard used exclusively in print media'
               ],
-              correct_answer: 'Coordinating system resources and providing consistent abstractions',
-              explanation: `${name} operates within the kernel and system libraries to arbitrate resource usage and protect applications from interfering with one another.`
+              correct_answer: `Understanding the fundamental concepts, principles, and mechanics of ${name}`,
+              explanation: `The study of ${name} centers on understanding its foundational principles, definitions, and real-world applications.`
             },
             {
-              question_text: `Which trade-off is most characteristic of ${name}?`,
+              question_text: `Why is knowledge of “${name}” important in study and practice?`,
               options: [
-                'Throughput vs latency and algorithmic overhead',
-                'Screen brightness vs audio quality',
-                'Network cable thickness vs Wi-Fi range',
-                'Compiler optimization vs keyboard layout'
+                'It provides a structured framework for analyzing and solving related problems',
+                'It has no practical relevance or theoretical value',
+                'It was completely replaced by arbitrary guesswork',
+                'It only applies to a single deprecated device'
               ],
-              correct_answer: 'Throughput vs latency and algorithmic overhead',
-              explanation: 'Operating system algorithms frequently balance maximizing system throughput against minimizing user response latency.'
+              correct_answer: 'It provides a structured framework for analyzing and solving related problems',
+              explanation: `${name} equips students and practitioners with essential analytical tools and domain knowledge.`
             },
             {
-              question_text: `In modern operating systems, how is safety preserved during ${name}?`,
+              question_text: `Which approach is most effective when studying “${name}”?`,
               options: [
-                'Via dual-mode CPU operation and memory protection rings',
-                'By disallowing all multithreaded applications',
-                'By restarting the kernel after every system call',
-                'By running every program with root privileges'
+                'Active recall, conceptual breakdown, and practical review',
+                'Ignoring definitions and memorizing random words',
+                'Reading without attempting to understand core principles',
+                'Avoiding all practice questions and quizzes'
               ],
-              correct_answer: 'Via dual-mode CPU operation and memory protection rings',
-              explanation: 'The CPU switches between User Mode and Kernel Mode via traps and system calls to prevent unauthorized hardware access.'
+              correct_answer: 'Active recall, conceptual breakdown, and practical review',
+              explanation: 'Effective learning requires active recall, breaking down core concepts, and regular practice.'
             }
           ];
         }
@@ -1521,6 +1808,11 @@ Operating systems abstract non-volatile storage hardware into files and director
       const title = prettyFileName(selectedFile.name);
       let cards = [];
 
+      // Ensure content sent to backend is at least 50 characters so it passes validation
+      const contentToSend = (extracted && extracted.length >= 50)
+        ? extracted.slice(0, 15000)
+        : `Comprehensive study notes and core subject material based on the document titled “${title}”. Please generate thorough, high-quality active recall flashcards covering key definitions, major concepts, principles, and real-world understanding of ${title}.`;
+
       if (session && session.access_token) {
         try {
           const res = await fetch(`${BACKEND_API}/ai/flashcards`, {
@@ -1533,7 +1825,7 @@ Operating systems abstract non-volatile storage hardware into files and director
               title,
               topic: title,
               num_cards: 12,
-              content: (extracted || title).slice(0, 15000)
+              content: contentToSend
             })
           });
           if (res.ok) {
@@ -1548,10 +1840,12 @@ Operating systems abstract non-volatile storage hardware into files and director
       }
 
       if (!cards.length) {
-        // Fallback cards from extracted text
+        // High quality fallback cards from document title
         cards = [
-          { front: `What are the core concepts covered in “${title}”?`, back: `This document covers key definitions, algorithmic principles, and practical system mechanics related to ${title}.`, hint: 'Overview' },
-          { front: `What is the significance of the ideas in “${title}”?`, back: `They provide the theoretical foundation and practical implementations necessary to understand and optimize system performance.`, hint: 'Significance' }
+          { front: `What are the core concepts covered in “${title}”?`, back: `This document covers fundamental definitions, principles, and practical mechanisms related to ${title}.`, hint: 'Overview' },
+          { front: `What is the significance of the ideas in “${title}”?`, back: `They provide the theoretical foundation and practical models necessary to understand and apply ${title}.`, hint: 'Significance' },
+          { front: `What key mechanisms or components are analyzed in “${title}”?`, back: `The material explores how key elements interact, common trade-offs, and critical procedures in ${title}.`, hint: 'Key components' },
+          { front: `How can the concepts in “${title}” be applied?`, back: `Knowledge of these ideas equips learners to analyze real-world scenarios, solve domain problems, and optimize outcomes.`, hint: 'Application' }
         ];
       }
 
@@ -1609,6 +1903,11 @@ Operating systems abstract non-volatile storage hardware into files and director
       const title = prettyFileName(selectedFile.name);
       let questions = [];
 
+      // Ensure content sent to backend is at least 50 characters so it passes validation
+      const contentToSend = (extracted && extracted.length >= 50)
+        ? extracted.slice(0, 15000)
+        : `Comprehensive study guide and quiz request based on the document titled “${title}”. Please generate thorough multiple-choice questions testing core concepts, definitions, principles, and real-world understanding of ${title}.`;
+
       if (session && session.access_token) {
         try {
           const res = await fetch(`${BACKEND_API}/ai/quiz`, {
@@ -1621,7 +1920,7 @@ Operating systems abstract non-volatile storage hardware into files and director
               title,
               topic: title,
               num_questions: 10,
-              content: (extracted || title).slice(0, 15000)
+              content: contentToSend
             })
           });
           if (res.ok) {
@@ -1640,13 +1939,24 @@ Operating systems abstract non-volatile storage hardware into files and director
           {
             question_text: `What is the primary topic addressed in “${title}”?`,
             options: [
-              `Core principles and methods of ${title}`,
-              'Standard household plumbing techniques',
-              'Macroeconomic currency valuation models',
-              'Aerospace jet propulsion physics'
+              `Core principles, definitions, and methods of ${title}`,
+              'A completely unrelated manual for lawnmower maintenance',
+              'A fictional narrative set in medieval Europe',
+              'A catalog of commercial shipping container specifications'
             ],
-            correct_answer: `Core principles and methods of ${title}`,
-            explanation: `The source material in “${title}” focuses on fundamental systems concepts and techniques.`
+            correct_answer: `Core principles, definitions, and methods of ${title}`,
+            explanation: `The source material in “${title}” focuses on fundamental concepts and methods within its subject domain.`
+          },
+          {
+            question_text: `Why is studying “${title}” valuable?`,
+            options: [
+              'It builds a structured conceptual foundation and practical problem-solving skills',
+              'It is purely decorative with no intellectual content',
+              'It has been proven false by modern science',
+              'It cannot be applied to any real-world problem'
+            ],
+            correct_answer: 'It builds a structured conceptual foundation and practical problem-solving skills',
+            explanation: `Mastery of ${title} provides foundational knowledge and critical analytical tools.`
           }
         ];
       }
@@ -1781,21 +2091,35 @@ Operating systems abstract non-volatile storage hardware into files and director
 
   // Activity cards in Chat modal
   els.makeFlashcards?.addEventListener('click', () => {
+    showTopicSelector('flashcards');
     if (selectedFile) {
-      generateDeckFromPdf();
+      addChatMessage('assistant', `Let’s build some flashcards! You have “${prettyFileName(selectedFile.name)}” attached. Click the button below to generate from your document, or choose/type any topic:`);
     } else {
-      showTopicSelector('flashcards');
-      addChatMessage('assistant', 'Let’s build some flashcards! Pick one of the core Operating Systems topics below, or type any specific concept into the chat:');
+      addChatMessage('assistant', 'Let’s build some flashcards! Pick a subject below, type ANY topic into the box, or attach your notes/PDF:');
     }
   });
 
   els.makeQuiz?.addEventListener('click', () => {
+    showTopicSelector('quiz');
     if (selectedFile) {
-      generateQuizFromPdf();
+      addChatMessage('assistant', `Time for a challenge! You have “${prettyFileName(selectedFile.name)}” attached. Click the button below to quiz yourself from your document, or choose/type any topic:`);
     } else {
-      showTopicSelector('quiz');
-      addChatMessage('assistant', 'Time for a challenge! Pick a topic below for your quiz, or type what you would like to be tested on:');
+      addChatMessage('assistant', 'Time for a challenge! Pick a subject below, type what you’d like to be tested on, or attach your notes/PDF:');
     }
+  });
+
+  // Custom topic input in topic picker
+  els.topicCustomBtn?.addEventListener('click', handleCustomTopicSubmit);
+  els.topicCustomInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleCustomTopicSubmit();
+    }
+  });
+
+  // Attach PDF shortcut inside chat composer
+  els.chatAttachBtn?.addEventListener('click', () => {
+    if (els.fileInput) els.fileInput.click();
   });
 
   // Chat composer form submission

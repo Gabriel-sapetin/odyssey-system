@@ -7188,6 +7188,83 @@ body.odyssey-home-page .pdf-chat__launch-btn:hover {
   box-shadow: 0 6px 18px rgba(234, 88, 12, .32);
 }
 
+body.odyssey-home-page .pdf-chat__topic-chip--primary {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, #fff8ef, #ffedd5);
+  color: #c2410c;
+  font-weight: 850;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, .2);
+}
+
+body.odyssey-home-page .pdf-chat__custom-topic-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+body.odyssey-home-page .pdf-chat__custom-topic-box input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 14px;
+  border: 1.5px solid #e5e8f0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+body.odyssey-home-page .pdf-chat__custom-topic-box input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, .15);
+}
+
+body.odyssey-home-page .pdf-chat__custom-topic-box button {
+  height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+body.odyssey-home-page .pdf-chat__custom-topic-box button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, .28);
+}
+
+body.odyssey-home-page .pdf-chat__attach-btn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border: 1.5px solid #f2d49c;
+  border-radius: 50%;
+  background: #fff8e9;
+  color: #d97706;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+body.odyssey-home-page .pdf-chat__attach-btn:hover {
+  background: #ffedd5;
+  border-color: #f59e0b;
+  transform: scale(1.05);
+}
+
 /* Dark mode for saved sets & chat */
 body.odyssey-home-page:not(.light-mode) .home-saved-sets__header h2 { color: #f1f5f9; }
 body.odyssey-home-page:not(.light-mode) .home-saved-sets__count { background: #1e293b; border-color: #334155; color: #94a3b8; }
@@ -7202,6 +7279,11 @@ body.odyssey-home-page:not(.light-mode) .home-flashcard-tool-tag { background: #
 body.odyssey-home-page:not(.light-mode) .home-flashcard-tool-tag:hover { background: #372a1e; border-color: #f59e0b; color: #fbbf24; }
 body.odyssey-home-page:not(.light-mode) .pdf-chat__topic-chip { background: #263149; border-color: #3b4660; color: #edf1fa; }
 body.odyssey-home-page:not(.light-mode) .pdf-chat__topic-chip:hover { background: #3c2f1f; border-color: #f59e0b; color: #fbbf24; }
+body.odyssey-home-page:not(.light-mode) .pdf-chat__topic-chip--primary { background: #3c2f1f; border-color: #f59e0b; color: #fbbf24; }
+body.odyssey-home-page:not(.light-mode) .pdf-chat__custom-topic-box input { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+body.odyssey-home-page:not(.light-mode) .pdf-chat__custom-topic-box input:focus { border-color: #f59e0b; }
+body.odyssey-home-page:not(.light-mode) .pdf-chat__attach-btn { background: #263149; border-color: #4b3820; color: #f59e0b; }
+body.odyssey-home-page:not(.light-mode) .pdf-chat__attach-btn:hover { background: #3c2f1f; border-color: #fbbf24; color: #fbbf24; }
 
 body.odyssey-home-page:not(.light-mode) .home-flashcard-prompt,
 body.odyssey-home-page:not(.light-mode) .home-flashcard-action {

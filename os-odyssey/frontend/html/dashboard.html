@@ -186,7 +186,7 @@
         <span class="pdf-chat__avatar"><img src="../../assets/favicon.png" alt="Pengu AI" /></span>
         <div class="pdf-chat__identity">
           <strong id="pdfChatTitle">Pengu AI • Odyssey Study Companion</strong>
-          <small id="pdfChatStatus"><i></i> Online • Omnipotent OS Assistant</small>
+          <small id="pdfChatStatus"><i></i> Online • Omnipotent AI Companion</small>
         </div>
         <button class="flashcard-study__close" id="pdfChatClose" type="button" aria-label="Close study chat">×</button>
       </header>
@@ -194,7 +194,7 @@
         <span aria-hidden="true" id="pdfChatSourceIcon">✦</span>
         <span>
           <strong id="pdfChatSourceName">Pengu AI Companion</strong>
-          <small id="pdfChatSourceMeta">Ready to explore Operating Systems</small>
+          <small id="pdfChatSourceMeta">Ask anything or generate flashcards & quizzes</small>
         </span>
       </div>
       <div class="pdf-chat__messages" id="pdfChatMessages" aria-live="polite" aria-label="Conversation with Pengu"></div>
@@ -210,11 +210,16 @@
             <button type="button" class="pdf-chat__topic-back-btn" id="pdfChatTopicBackBtn">← Back to modes</button>
           </div>
           <div class="pdf-chat__topic-chips" id="pdfChatTopicChips"></div>
+          <div class="pdf-chat__custom-topic-box" id="pdfChatCustomBox">
+            <input type="text" id="pdfChatCustomInput" placeholder="Or type ANY custom topic (e.g. World War II, Photosynthesis, Calculus)..." maxlength="150" autocomplete="off" />
+            <button type="button" id="pdfChatCustomBtn">Generate</button>
+          </div>
         </div>
       </div>
       <form class="pdf-chat__composer" id="pdfChatForm">
+        <button class="pdf-chat__attach-btn" type="button" id="pdfChatAttachBtn" aria-label="Attach PDF or notes" title="Attach PDF or notes">📎</button>
         <span class="pdf-chat__composer-avatar" aria-hidden="true"><img src="../../assets/favicon.png" alt="" /></span>
-        <input id="pdfChatInput" type="text" maxlength="1000" placeholder="Ask Pengu anything about Operating Systems…" autocomplete="off" aria-label="Ask Pengu anything about Operating Systems" />
+        <input id="pdfChatInput" type="text" maxlength="1000" placeholder="Ask Pengu anything (math, science, history, coding, or any question)…" autocomplete="off" aria-label="Ask Pengu anything" />
         <button type="submit" id="pdfChatSendBtn" aria-label="Send message">↑</button>
       </form>
       <p class="pdf-chat__notice" id="pdfChatNotice" role="status" aria-live="polite"></p>
@@ -223,8 +228,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/supabase.js"></script>
-  <script src="../js/main.js?v=25"></script>
-  <script src="../js/flashcards.js?v=25"></script>
+  <script src="../js/main.js?v=26"></script>
+  <script src="../js/flashcards.js?v=26"></script>
   <script src="../js/pwa-register.js"></script>
 </body>
 
